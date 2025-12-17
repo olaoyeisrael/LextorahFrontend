@@ -1,0 +1,314 @@
+import React, { useState, useEffect } from 'react';
+
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronRight, CheckCircle2, XCircle, Timer, Award, MoveRight, Loader2 } from 'lucide-react';
+
+const Test = () => {
+  const [step, setStep] = useState('setup'); // setup, taking, result
+  const enrolledCourse = localStorage.getItem('enrolled_course')
+  const enrolledLevel = localStorage.getItem('enrolled_level')
+  const [questions, setQuestions] = useState([]);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [topics, setTopics] = useState([]);
+  const [testMaterial, setTestMaterial] = useState(null);
+
+
+  useEffect(() => {
+
+    const token = localStorage.getItem('token');
+    const getCourses = async () => {
+      const res = await fetch('http://localhost:8000/course_structure', {
+        method: 'GET',  
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await res.json();
+      console.log(data.structure);
+      setTopics(data.structure);
+    }
+    getCourses();
+    
+}, []);
+
+
+  const startTest = async () => {
+    // if (!config.topic) {
+    //     setError('Please enter a topic to start.');
+    //     return;
+    // }
+    // Topic is optional now, defaulting to General Course if empty
+ 
+
+    setLoading(true);
+
+
+
+
+    setError('');
+    console.log("testMaterial: ",testMaterial)
+    try {
+      const response = await fetch('http://localhost:8000/quiz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(testMaterial),
+      });
+
+
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+
+      
+      if (data.Quiz && Array.isArray(data.Quiz) && data.Quiz.length > 0) {
+          setQuestions(data.Quiz);
+          setStep('taking');
+      } else {
+          // Fallback if structure is different or empty
+          console.error("Invalid quiz data:", data);
+          setError('Failed to generate valid questions. Please try again.');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Something went wrong connecting to the server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAnswer = (option) => {
+    setAnswers({ ...answers, [currentQuestion]: option });
+  };
+
+  const nextQuestion = () => {
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    } else {
+      setStep('result');
+    }
+  };
+
+  const calculateScore = () => {
+    let score = 0;
+    questions.forEach((q, idx) => {
+      // Simple string matching, might need normalization
+      if (answers[idx] && answers[idx].includes(q.answer) || q.answer.includes(answers[idx])) { 
+          // The API returns "Option Text" sometimes or just "A", assumes option string matches somewhat
+          // Let's refine this check based on typical OpenAI output. 
+          // Usually options are "A. Answer". Answer key might be "A" or "A. Answer".
+          // We can check if the select option *starts with* the answer letter or matches exactly.
+          if(answers[idx] === q.answer) score++;
+          else if (answers[idx].split('.')[0] === q.answer.split('.')[0]) score++;
+      }
+    });
+    return score;
+  };
+
+  const restart = () => {
+    setStep('setup');
+    setQuestions([]);
+    setCurrentQuestion(0);
+    setAnswers({});
+    setError('');
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto min-h-[500px]">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-900">Take a Test</h1>
+        <p className="text-slate-500">Challenge yourself and test your knowledge.</p>
+      </header>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-green-100 p-6 md:p-10 relative overflow-hidden">
+        {/* Background blobs for aesthetic */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-green-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 -z-0 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 -z-0 pointer-events-none" />
+
+        <div className="relative z-10">
+          <AnimatePresence mode="wait">
+            {step === 'setup' && (
+              <motion.div
+                key="setup"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6 max-w-lg mx-auto"
+              >
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Test Course</label>
+                   {/* {enrolledCourse ? (
+                      <div className="p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
+                          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-700">
+                              {enrolledCourse[0]}
+                          </div>
+                          <div>
+                              <h3 className="font-bold text-slate-900">{enrolledCourse} {enrolledLevel}</h3>
+                              <p className="text-xs text-slate-500">Your currently enrolled course</p>
+                          </div>
+                      </div>
+                   ) : (
+                       <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                           You are not enrolled in any course. Please go to Courses to enroll.
+                       </div>
+                   )} */}
+                   {topics.length > 0 ? (
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           {topics.map((t, idx) => (
+                               <div 
+                                key={idx} 
+                                onClick={() => {
+                                    // Set the Cloudinary URL as the material to be tested
+                                    // Also set topic for metadata/display in quiz
+                                    setTestMaterial({
+                                        material: t.cloud_url
+                                    });
+                                }}
+                                className={`p-4 border rounded-xl flex items-center justify-between cursor-pointer transition-all hover:bg-green-50 hover:border-green-300 ${testMaterial?.material === t.cloud_url ? 'bg-green-50 border-green-500 ring-2 ring-green-200' : 'bg-white border-slate-200'}`}
+                               >
+                                   <div className="flex items-center gap-3">
+                                       <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-700">
+                                           {idx + 1}
+                                       </div>
+                                       <div>
+                                           <h3 className="font-bold text-slate-900">{t.topic}</h3>
+                                           <p className="text-xs text-slate-500">{t.week || `Module ${idx+1}`}</p>
+                                       </div>
+                                   </div>
+                                   {testMaterial?.cloud_url === t.cloud_url && <CheckCircle2 className="w-5 h-5 text-green-600" />}
+                               </div>
+                           ))}
+                       </div>
+                   ) : (
+                       <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                           You are not enrolled in any course. Please go to Courses to enroll.
+                       </div>
+                   )}
+                </div>
+
+                {/* <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Topic (Optional)</label>
+                  <input
+                    type="text"
+                    value={config.topic}
+                    onChange={(e) => setConfig({ ...config, topic: e.target.value })}
+                    placeholder="e.g., Verbs, Greetings (Leave empty for general)"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none transition-all"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">Focus on a specific area or leave blank for a general test.</p>
+                </div> */}
+
+
+                {error && (
+                    <div className="p-4 rounded-lg bg-red-50 text-red-600 text-sm flex items-center gap-2">
+                        <XCircle className="w-4 h-4" /> {error}
+                    </div>
+                )}
+
+                <button
+                  onClick={startTest}
+                  disabled={loading}
+                  className="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-green-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <>Start Test <MoveRight className="w-5 h-5" /></>}
+                </button>
+              </motion.div>
+            )}
+
+            {step === 'taking' && (
+              <motion.div
+                key="taking"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <span className="text-sm font-medium text-slate-400">
+                    Question {currentQuestion + 1} of {questions.length}
+                  </span>
+                  <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-1 rounded-full text-xs font-bold">
+                    <Timer className="w-3 h-3" /> 00:00 (InDev)
+                  </div>
+                </div>
+
+                <div className="mb-8">
+                  <h2 className="text-xl md:text-2xl font-bold text-slate-900 leading-relaxed">
+                    {questions[currentQuestion].question}
+                  </h2>
+                </div>
+
+                <div className="space-y-3 mb-8">
+                  {questions[currentQuestion].options?.map((opt, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleAnswer(opt)}
+                      className={`w-full p-4 rounded-xl text-left border-2 transition-all flex items-center justify-between group ${
+                        answers[currentQuestion] === opt
+                          ? 'border-green-500 bg-green-50 text-green-900'
+                          : 'border-slate-100 bg-white hover:border-green-200 hover:bg-slate-50 text-slate-600'
+                      }`}
+                    >
+                      <span className="font-medium">{opt}</span>
+                      {answers[currentQuestion] === opt && (
+                        <CheckCircle2 className="w-5 h-5 text-green-600" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={nextQuestion}
+                    className="px-8 py-3 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-colors flex items-center gap-2"
+                  >
+                    {currentQuestion === questions.length - 1 ? 'Finish' : 'Next'} <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {step === 'result' && (
+              <motion.div
+                key="result"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-10"
+              >
+                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Award className="w-12 h-12 text-green-600" />
+                </div>
+                <h2 className="text-3xl font-bold text-slate-900 mb-2">Quiz Completed!</h2>
+                <p className="text-slate-500 mb-8">Here is how you performed</p>
+
+                <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto mb-10">
+                    <div className="bg-slate-50 p-4 rounded-2xl">
+                        <span className="block text-xs text-slate-400 uppercase font-bold tracking-wider">Score</span>
+                        <span className="text-3xl font-bold text-slate-900">{calculateScore()}/{questions.length}</span>
+                    </div>
+                    <div className="bg-slate-50 p-4 rounded-2xl">
+                        <span className="block text-xs text-slate-400 uppercase font-bold tracking-wider">Accuracy</span>
+                        <span className="text-3xl font-bold text-slate-900">{Math.round((calculateScore() / questions.length) * 100)}%</span>
+                    </div>
+                </div>
+
+                <button
+                  onClick={restart}
+                  className="px-8 py-3 bg-green-600 text-white rounded-xl font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition-all"
+                >
+                  Take Another Test
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Test;

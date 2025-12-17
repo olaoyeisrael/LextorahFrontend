@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: MadaBlack;
+  src: url('../src/assets/fonts/Mada-Black.ttf');
+}
+@font-face {
+  font-family: MadaBold;
+  src: url('../src/assets/fonts/Mada-Bold.ttf');
+}
+@font-face {
+  font-family: Mada;
+  src: url('../src/assets/fonts/Mada-Regular.ttf');
+}
+
+@font-face {
+  font-family: MadaSemiBold;
+  src: url('../src/assets/fonts/Mada-SemiBold.ttf');
+}
+@font-face {
+  font-family: MadaLight;
+  src: url('../src/assets/fonts/Mada-Light.ttf');
+}
+
+@font-face {
+  font-family: MadaMedium;
+  src: url('../src/assets/fonts/Mada-Medium.ttf');
+}
+
+
+
+@theme{
+  --font-MadaBlack: MadaBlack, 'sans-serif';  
+  --font-Mada: Mada, 'sans-serif';  
+  --font-MadaSemiBold: MadaSemiBold, 'sans-serif'; 
+  --font-MadaBold: MadaBold, 'sans-serif'; 
+  --font-MadaLight: MadaLight, 'sans-serif';
+  --font-MadaMedium: MadaMedium, 'sans-serif'; 
+};
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-green-200 rounded-full hover:bg-green-300;
+}
+
+@layer base {
+  body {
+    @apply bg-green-50 text-slate-900;
+  }
+}
