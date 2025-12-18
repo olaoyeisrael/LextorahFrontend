@@ -35,7 +35,7 @@ const Curriculum = () => {
     const fetchCurriculum = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:8000/curriculum?course=${filters.course}&level=${filters.level}`, {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/curriculum?course=${filters.course}&level=${filters.level}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await res.json();
@@ -100,7 +100,7 @@ const Curriculum = () => {
         console.log("Batch: ",batch);
 
         try {
-            const res = await fetch('http://localhost:8000/curriculum/batch', {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/curriculum/batch`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

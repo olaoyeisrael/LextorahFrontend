@@ -51,7 +51,9 @@ const Upload = () => {
         console.log("formdata: ", formData)
     
         const token = getToken();
-        const res = await fetch('http://localhost:8000/upload',{
+        
+
+        const res = await fetch(`${process.env.BACKEND_URL}/upload`,{
             method: "POST",
             body: formData,
             headers: {

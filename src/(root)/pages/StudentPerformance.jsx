@@ -11,7 +11,7 @@ const StudentPerformance = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetch('http://localhost:8000/student_performance', {
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/student_performance`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (res.ok) {

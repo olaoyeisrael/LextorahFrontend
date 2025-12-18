@@ -39,7 +39,7 @@ const Dashboard = () => {
       if (!token) return;
       setLoading(true);
       try {
-          await   fetch('http://localhost:8000/enroll', 
+          await   fetch(`${import.meta.env.VITE_BACKEND_URL}/enroll`, 
             {
                 method: 'POST',
                 body: JSON.stringify({ course: "German", level: level }),
@@ -55,6 +55,10 @@ const Dashboard = () => {
       }
   };
 
+  useEffect(()=>{
+    console.log(import.meta.env.VITE_BACKEND_URL)
+  }, [])
+
 
   // Admin View
   if (isAdmin()) {
@@ -64,6 +68,7 @@ const Dashboard = () => {
                 <h1 className="text-3xl font-bold text-slate-900">Admin Dashboard</h1>
                 <p className="text-slate-600">Manage content and view student progress.</p>
             </div>
+            
 
             <div className="grid md:grid-cols-2 gap-6 mb-12">
                  <motion.div 
@@ -117,18 +122,32 @@ const Dashboard = () => {
         {/* Live Classes Widget */}
         <div className="mb-12 bg-indigo-900 rounded-2xl p-8 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-800 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                <div>
-                    <h2 className="text-2xl font-bold mb-2">Live Weekend Classes</h2>
-                    <p className="text-indigo-200 mb-4">Join our expert tutors for interactive sessions every Saturday.</p>
-                    <div className="flex gap-4 text-sm font-medium">
-                        <span className="bg-indigo-800 px-3 py-1 rounded-full">First 4 Weeks</span>
-                        <span className="bg-indigo-800 px-3 py-1 rounded-full">Final 2 Weeks</span>
+            <div className="relative z-10">
+                <div className="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 className="text-2xl font-bold mb-2">Live Classes Schedule</h2>
+                        <p className="text-indigo-200">Total of 6 interactive 1-hour sessions for this course.</p>
+                    </div>
+                     <div className="hidden md:block">
+                        <span className="bg-indigo-800 px-4 py-2 rounded-full text-sm font-medium">6 Sessions Total</span>
                     </div>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 min-w-[200px] text-center">
-                    <span className="block text-indigo-300 text-xs uppercase font-bold tracking-wider mb-1">Next Session</span>
-                    <span className="block text-xl font-bold">Saturday, 10:00 AM</span>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    {[
+                        { day: "Monday", time: "10:00 AM" },
+                        { day: "Tuesday", time: "2:00 PM" },
+                        { day: "Wednesday", time: "4:00 PM" },
+                        { day: "Thursday", time: "10:00 AM" },
+                        { day: "Saturday", time: "11:00 AM" },
+                        { day: "Sunday", time: "6:00 PM" }
+                    ].map((session, index) => (
+                        <div key={index} className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 text-center hover:bg-white/20 transition-colors">
+                            <span className="block text-indigo-300 text-xs uppercase font-bold tracking-wider mb-1">{session.day}</span>
+                            <span className="block text-lg font-bold">{session.time}</span>
+                            <span className="block text-xs text-indigo-200 mt-1">1 Hour</span>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>

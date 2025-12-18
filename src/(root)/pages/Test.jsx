@@ -20,7 +20,7 @@ const Test = () => {
 
     const token = localStorage.getItem('token');
     const getCourses = async () => {
-      const res = await fetch('http://localhost:8000/course_structure', {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/course_structure`, {
         method: 'GET',  
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -52,7 +52,7 @@ const Test = () => {
     setError('');
     console.log("testMaterial: ",testMaterial)
     try {
-      const response = await fetch('http://localhost:8000/quiz', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/quiz`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(testMaterial),
@@ -110,6 +110,35 @@ const Test = () => {
     return score;
   };
 
+  // Handle Test Completion
+  useEffect(() => {
+      if (step === 'result' && topics.length > 0) {
+          const score = calculateScore();
+          const percentage = (score / questions.length) * 100;
+          
+          if (percentage >= 50 && testMaterial?.topic) {
+             const token = localStorage.getItem('token');
+             console.log("Passing Score! Marking complete...");
+             
+             fetch(`${import.meta.env.VITE_BACKEND_URL}/complete_topic`, {
+                 method: 'POST',
+                 headers: {
+                     'Authorization': `Bearer ${token}`,
+                     'Content-Type': 'application/json'
+                 },
+                 body: JSON.stringify({
+                     topic: testMaterial.topic,
+                     course: enrolledCourse,
+                     level: enrolledLevel,
+                     material_content: testMaterial.material // Sending URL as content for now
+                 })
+             }).then(res => res.json())
+               .then(data => console.log("Completion saved:", data))
+               .catch(err => console.error("Failed to save completion:", err));
+          }
+      }
+  }, [step]);
+
   const restart = () => {
     setStep('setup');
     setQuestions([]);
@@ -166,7 +195,9 @@ const Test = () => {
                                     // Set the Cloudinary URL as the material to be tested
                                     // Also set topic for metadata/display in quiz
                                     setTestMaterial({
-                                        material: t.cloud_url
+                                        material: t.cloud_url,
+                                        topic: t.topic,
+                                        week: t.week
                                     });
                                 }}
                                 className={`p-4 border rounded-xl flex items-center justify-between cursor-pointer transition-all hover:bg-green-50 hover:border-green-300 ${testMaterial?.material === t.cloud_url ? 'bg-green-50 border-green-500 ring-2 ring-green-200' : 'bg-white border-slate-200'}`}

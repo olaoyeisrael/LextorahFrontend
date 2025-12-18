@@ -5,7 +5,8 @@ import { useSelector } from 'react-redux';
 
 import ReactMarkdown from "react-markdown";
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, MessageCircle, Loader, LoaderCircleIcon, BookOpen, ChevronRight } from 'lucide-react';
+import { X, MessageCircle, Loader, LoaderCircleIcon, BookOpen, ChevronRight, Award } from 'lucide-react';
+
 
 const Learn = () => {
     const [quizData, setQuizData] = useState(null);
@@ -18,11 +19,14 @@ const Learn = () => {
     const [data, setData] = useState(null);
     const user_id = localStorage.getItem('user_id');
     const wsRef = useRef(null);
+    const fullContentRef = useRef(""); // Accumulate transcript content
+    
     
     
 
     const [sections, setSections] = useState([]);
     const [activeSection, setActiveSection] = useState(1); // Use index as ID now
+    const [courseFinished, setCourseFinished] = useState(false);
 
     
     // Missing States
@@ -56,7 +60,8 @@ const Learn = () => {
                 // If "All" access, we might need a level from localStorage or location.
                 let level = localStorage.getItem('last_level');
                 console.log("level:", level);
-                let url = 'http://localhost:8000/course_structure';
+                let url = `${import.meta.env.VITE_BACKEND_URL}/course_structure`;
+                console.log("url:", url);
               
 
                 const res = await fetch(url, {
@@ -78,7 +83,15 @@ const Learn = () => {
 
                 // Use the user's current_topic_index to find the topic
                 const userData = data.user_data || {}; // Assuming user_data is part of the response
-                const currentIdx = userData.current_topic_index || 0
+                const currentIdx = userData.current_topic_index || 0;
+                
+                // Check if course is completed
+                if (structure.length > 0 && currentIdx >= structure.length) {
+                    setCourseFinished(true); // Need to define this state
+                    setLoading(false);
+                    return;
+                }
+
                 const currentTopicObj = structure.find(t => t.index === currentIdx) || structure[0]
                 
                 let resolvedTopic = null;
@@ -86,16 +99,7 @@ const Learn = () => {
                     resolvedTopic = currentTopicObj.topic;
                     setCurrentTopic(resolvedTopic)
                     setCurrentTopicIndex(currentTopicObj.index)
-                    // We don't hardcode filename anymore, we rely on topic
-                    // But we might want to check has_material
                 }
-
-                // 2. Resolve Target Topic automatically from User Data
-                // We ignore location.state as requested.
-                // Priority: Current Active Index from DB.
-                
-                // resolvedTopic and currentTopicIndex are already set above from `currentTopicObj`
-                // which was derived from `currentIdx`.
 
                 if (!resolvedTopic) {
                      alert("No active topic found for your course level.");
@@ -132,7 +136,9 @@ const Learn = () => {
   useEffect(() => {
     if (!currentTopic) return; // Wait for currentTopic to be set
 
-    const ws = new WebSocket(`ws://localhost:8000/ws/teach/${user_id}`);
+    const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+    const WS_URL = BASE_URL.replace('http', 'ws');
+    const ws = new WebSocket(`${WS_URL}/ws/teach/${user_id}`);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -179,11 +185,18 @@ const Learn = () => {
              setData(parsed.explanation);
              setActiveSection(parsed.section_index);
              setLoading(false);
+             // Accumulate full content for transcript
+             if (parsed.explanation) {
+                 fullContentRef.current += `\n\n## Section ${parsed.section_index}\n\n` + parsed.explanation;
+             }
         } else {
              // Fallback/Legacy
              if(parsed.explanation) {
                  setData(parsed.explanation);
                  setLoading(false);
+                  if (parsed.explanation) {
+                     fullContentRef.current += "\n\n" + parsed.explanation;
+                 }
              }
         }
       } catch {
@@ -260,8 +273,9 @@ const Learn = () => {
           setShowResults(true);
           // Mark Completion
           if (learningContext) {
+            console.log("Full Content:", fullContentRef.current);
               try {
-                  await fetch('http://localhost:8000/complete_topic', {
+                  await fetch(`${import.meta.env.VITE_BACKEND_URL}/complete_topic`, {
                       method: 'POST',
                       headers: {
                           'Content-Type': 'application/json',
@@ -270,7 +284,8 @@ const Learn = () => {
                       body: JSON.stringify({
                           course: learningContext.course,
                           level: learningContext.level,
-                          topic_index: learningContext.topic_index
+                          topic: learningContext.topic,
+                          material_content: fullContentRef.current || "No content generated.",
                       })
                   });
               } catch (e) {
@@ -324,8 +339,8 @@ const Learn = () => {
                                       : 'bg-white border-green-100 text-slate-600 hover:border-green-300 hover:bg-green-50'}
                               `}
                           >
-                              <span className={`text-xs uppercase tracking-wider ${activeSection === section.index ? 'text-green-200' : 'text-slate-400'}`}>Part {section.index}</span>
-                              <span className='truncate w-full'>{section.title}</span>
+                              <span className={`text-xs uppercase tracking-wider ${activeSection === section.index ? 'text-green-200' : 'text-slate-400'}`}>Page {section.index}</span>
+                              {/* <span className='truncate w-full'>{section.title}</span> */}
                           </button>
                       ))}
                   </div>
@@ -333,6 +348,33 @@ const Learn = () => {
           )}
       </div>
 
+      {courseFinished ? (
+          <div className='flex-1 max-w-4xl w-full mx-auto p-6 md:p-8 flex items-center justify-center'>
+              <div className='bg-white p-12 rounded-2xl shadow-xl border border-green-100 text-center'>
+                  <div className='w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600'>
+                      <Award size={48} />
+                  </div>
+                  <h2 className='text-3xl font-bold text-green-800 mb-4'>Course Completed! 🎉</h2>
+                  <p className='text-slate-600 text-lg mb-8'>
+                      Congratulations! You have successfully completed all modules in this course.
+                  </p>
+                  <div className='flex gap-4 justify-center'>
+                      <button 
+                          onClick={() => navigate('/dashboard')}
+                          className='bg-slate-900 text-white px-8 py-3 rounded-xl font-semibold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl'
+                      >
+                          Return to Dashboard
+                      </button>
+                      <button 
+                          onClick={() => navigate('/courses')}
+                          className='bg-green-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-green-700 transition-all shadow-lg hover:shadow-xl'
+                      >
+                          View Transcript
+                      </button>
+                  </div>
+              </div>
+          </div>
+      ) : (
       <div className='flex-1 max-w-4xl w-full mx-auto p-6 md:p-8'>
       {
         quizData ? (
@@ -460,6 +502,7 @@ const Learn = () => {
         )
       }
       </div>
+      )}
     </main>
   );
 }

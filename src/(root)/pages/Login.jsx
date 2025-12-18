@@ -139,7 +139,7 @@ const Login = () => {
             </div> */}
             
             <p className="text-center mt-8 text-slate-600">
-                Don't have an account? <Link to="https://lextorah.com/register-now/" className="text-green-300 font-bold hover:underline">Sign Up</Link>
+                Don't have an account? <Link to="https://www.lextorah-elearning.com/elearning/register" className="text-green-300 font-bold hover:underline">Sign Up</Link>
             </p>
         </div>
     </div>

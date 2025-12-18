@@ -45,7 +45,7 @@ const Ask = () => {
             
             setLoading(true);
             try {
-                const res = await fetch('http://localhost:8000/transcribe', {
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/transcribe`, {
                     method: 'POST',
                     body: formData
                 });
@@ -83,7 +83,7 @@ const Ask = () => {
    useEffect(() => {
         const fetchHistory = async () => {
             try {
-                const response = await fetch(`http://localhost:8000/history/${userId}`);
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/history/${userId}`);
                 if (!response.ok) throw new Error('Failed to fetch history');
                 
                 const data = await response.json();
@@ -125,7 +125,7 @@ const Ask = () => {
     const token = localStorage.getItem('token');
    
     try {
-      const url = `http://localhost:8000/ask?chatid=${encodeURIComponent(userId)}`;
+      const url = `${import.meta.env.VITE_BACKEND_URL}/ask?chatid=${encodeURIComponent(userId)}`;
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json',
@@ -152,7 +152,7 @@ const Ask = () => {
   };
   const handlePlayAudio = async (text) => {
     try {
-      const res = await fetch('http://localhost:8000/getAudio', {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/getAudio`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ input: text }), // Send the text as input in the body
@@ -169,12 +169,26 @@ const Ask = () => {
     }
   };
 
-  const clearConversation = () => setMessages([]);
+  const clearConversation = async () => {
+      try {
+          // Clear backend
+          await fetch(`${import.meta.env.VITE_BACKEND_URL}/chat_history`, {
+              method: 'DELETE',
+              headers: { 
+                  'Authorization': 'Bearer ' + localStorage.getItem('token')
+              }
+          });
+          // Clear frontend
+          setMessages([]);
+      } catch (e) {
+          console.error("Failed to clear chat history", e);
+      }
+  };
 
   return (
     <main className="px-6">
       <div className='text-3xl text-green-600 text-center my- font-MadaBold'>Ai Tutor - Ask Questions</div>
-      <div className="mb-3 text-sm text-gray-600">User id: <span className="font-mono">{userId ?? '...'}</span></div>
+      {/* <div className="mb-3 text-sm text-gray-600">User id: <span className="font-mono">{userId ?? '...'}</span></div> */}
 
       <div className="space-y-3 max-w-3xl mx-auto h-[calc(100vh-150px)] flex flex-col pb-4">
         {messages.length === 0 && (

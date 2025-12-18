@@ -25,16 +25,17 @@ const Course = () => {
                 // }
 
                 // Fetch Transcripts
-                // const transRes = await fetch('http://localhost:8000/transcripts', {
-                //     headers: { Authorization: `Bearer ${token}` }
-                // });
-                // if (transRes.ok) {
-                //     const data = await transRes.json();
-                //     setTranscripts(data.transcripts || []);
-                // }
+                const transRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/transcripts`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (transRes.ok) {
+                    const data = await transRes.json();
+                    console.log("Transcripts: ",data.transcripts);
+                    setTranscripts(data.transcripts || []);
+                }
                 
                 // Fetch Structure
-                const structRes = await fetch('http://localhost:8000/course_structure', {
+                const structRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/course_structure`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (structRes.ok) {
@@ -54,7 +55,7 @@ const Course = () => {
 
     const handleDownload = async (id, filename) => {
         try {
-            const res = await fetch(`http://localhost:8000/download_transcript/${id}`, {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/download_transcript/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -77,6 +78,7 @@ const Course = () => {
     const filteredTranscripts = selectedTopic 
         ? transcripts.filter(t => t.topic && t.topic.toLowerCase().includes(selectedTopic.topic.toLowerCase()))
         : [];
+    console.log("Filtered Transcripts: ", filteredTranscripts);
 
     if (loading) {
         return <div className="p-8 text-center text-slate-500">Loading course details...</div>;
@@ -90,7 +92,7 @@ const Course = () => {
             </header>
 
             {/* Overall Progress */}
-            {progress && progress.course !== "None" && (
+            {/* {progress && progress.course !== "None" && (
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-8 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
                     <div className="relative z-10">
@@ -105,7 +107,7 @@ const Course = () => {
                         <p className="text-sm text-slate-500 text-right">{progress.progress}% Complete</p>
                     </div>
                 </div>
-            )}
+            )} */}
 
             {/* Modules Grid */}
             <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -129,11 +131,16 @@ const Course = () => {
                             <span className="text-xs font-bold text-indigo-500 uppercase tracking-wider bg-indigo-50 px-2 py-1 rounded-md">
                                 {item.week || `Module ${idx + 1}`}
                             </span>
-                            {item.has_material ? (
-                                <CheckCircle className="w-4 h-4 text-green-500" />
-                            ) : (
-                                <span className="w-2 h-2 rounded-full bg-slate-300" />
-                            )}
+                            <div className="flex gap-2">
+                                {item.is_completed && (
+                                     <span className="bg-green-100 text-green-600 px-2 py-0.5 rounded text-xs font-bold border border-green-200">Done</span>
+                                )}
+                                {item.has_material ? (
+                                    <CheckCircle className={`w-4 h-4 ${item.is_completed ? 'text-green-500' : 'text-slate-400'}`} />
+                                ) : (
+                                    <span className="w-2 h-2 rounded-full bg-slate-300" />
+                                )}
+                            </div>
                         </div>
                         <h3 className="font-bold text-slate-900 text-lg mb-1">{item.topic}</h3>
                         <p className="text-sm text-slate-500">

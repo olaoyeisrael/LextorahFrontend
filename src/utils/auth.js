@@ -4,7 +4,7 @@ export const getToken = () => {
 
 export const decode = async(token) => {
     try {
-        const response = await fetch('http://localhost:8000/decode?token=' + token, {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/decode?token=` + token, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
