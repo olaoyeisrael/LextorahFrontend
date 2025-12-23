@@ -9,7 +9,7 @@ import { updateEnrollment } from '../../store/userSlice';
 import Schedule from '../../components/Schedule';
 
 const Dashboard = () => {
-  const { firstName, token, enrolledLevel } = useSelector((state) => state.user);
+  const { firstName, token, enrolledLevel, enrolledCourse } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const [scheduleData, setScheduleData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -112,6 +112,43 @@ const Dashboard = () => {
   }
 
   // Student View
+  const [liveClasses, setLiveClasses] = useState([]);
+ 
+//   const enrolledLevel = useSelector((state) => state.user.enrolledLevel); // Already selected above
+console.log("Enrolled course:", enrolledCourse)
+
+  useEffect(() => {
+    const fetchLiveClasses = async () => {
+        if (!enrolledCourse || !enrolledLevel) return;
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/live_classes?course=${enrolledCourse.toLowerCase()}&level=${enrolledLevel.toLowerCase()}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            console.log("Live classes:", data)
+            setLiveClasses(data.live_classes || []);
+        } catch (err) {
+            console.error("Failed to fetch live classes", err);
+        }
+    };
+    if (token) fetchLiveClasses();
+  }, [token, enrolledCourse, enrolledLevel]);
+
+  const getStatus = (dateStr, timeStr, duration) => {
+      // Parse date and time to Date object
+      // Assumption: dateStr is YYYY-MM-DD, timeStr is HH:MM
+      const now = new Date();
+      const classStart = new Date(`${dateStr}T${timeStr}`);
+      const classEnd = new Date(classStart.getTime() + duration * 60000);
+      
+      // Allow joining 15 mins before
+      const joinStart = new Date(classStart.getTime() - 15 * 60000);
+
+      if (now > classEnd) return 'ended';
+      if (now >= joinStart && now <= classEnd) return 'active';
+      return 'upcoming';
+  };
+
   return (
     <div className='max-w-5xl mx-auto'>
         <div className="mb-8">
@@ -126,29 +163,47 @@ const Dashboard = () => {
                 <div className="flex justify-between items-end mb-6">
                     <div>
                         <h2 className="text-2xl font-bold mb-2">Live Classes Schedule</h2>
-                        <p className="text-indigo-200">Total of 6 interactive 1-hour sessions for this course.</p>
+                        <p className="text-indigo-200 capitalize">Interactive sessions for {enrolledCourse} {enrolledLevel}</p>
                     </div>
                      <div className="hidden md:block">
-                        <span className="bg-indigo-800 px-4 py-2 rounded-full text-sm font-medium">6 Sessions Total</span>
+                        <span className="bg-indigo-800 px-4 py-2 rounded-full text-sm font-medium">{liveClasses.length} Sessions</span>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    {[
-                        { day: "Monday", time: "10:00 AM" },
-                        { day: "Tuesday", time: "2:00 PM" },
-                        { day: "Wednesday", time: "4:00 PM" },
-                        { day: "Thursday", time: "10:00 AM" },
-                        { day: "Saturday", time: "11:00 AM" },
-                        { day: "Sunday", time: "6:00 PM" }
-                    ].map((session, index) => (
-                        <div key={index} className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 text-center hover:bg-white/20 transition-colors">
-                            <span className="block text-indigo-300 text-xs uppercase font-bold tracking-wider mb-1">{session.day}</span>
-                            <span className="block text-lg font-bold">{session.time}</span>
-                            <span className="block text-xs text-indigo-200 mt-1">1 Hour</span>
-                        </div>
-                    ))}
-                </div>
+                {liveClasses.length === 0 ? (
+                    <div className="text-center py-8 text-indigo-300 bg-white/5 rounded-xl border border-white/10">
+                        No live classes scheduled for your course level yet.
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                        {liveClasses.map((session) => {
+                            const status = getStatus(session.date, session.time, session.duration);
+                            return (
+                                <div key={session.id} className={`p-4 rounded-xl border transition-all relative overflow-hidden group ${
+                                    status === 'active' 
+                                        ? 'bg-indigo-600 border-indigo-400 shadow-lg shadow-indigo-900/50 transform scale-105 z-10' 
+                                        : 'bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20'
+                                }`}>
+                                    <div className="text-center">
+                                        <span className="block text-indigo-300 text-[10px] uppercase font-bold tracking-wider mb-1">{session.week}</span>
+                                        <span className="block text-xs font-bold mb-1 opacity-75">{new Date(session.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                                        <span className="block text-lg font-bold mb-2">{session.time}</span>
+                                        
+                                        {status === 'active' ? (
+                                            <a href={session.meeting_link} target="_blank" rel="noreferrer" className="block w-full py-1.5 bg-white text-indigo-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition-colors animate-pulse">
+                                                Join Now
+                                            </a>
+                                        ) : status === 'ended' ? (
+                                            <span className="inline-block px-3 py-1 bg-black/20 rounded-full text-[10px] font-medium text-indigo-300">Ended</span>
+                                        ) : (
+                                            <span className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-medium text-indigo-200">Upcoming</span>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
         </div>
 
@@ -179,7 +234,7 @@ const Dashboard = () => {
                  <div className="flex justify-between items-start mb-4">
                     <div>
                          <h2 className="text-xl font-bold text-slate-900 mb-2">Quick Question</h2>
-                         <p className="text-slate-600 text-sm mb-4">Ask our AI Tutor anything about German grammar or vocabulary.</p>
+                         <p className="text-slate-600 text-sm mb-4">Ask Ms Lexi - Our Tutor AI anything about Lessons.</p>
                     </div>
                      <div className="w-16 h-16 bg-slate-900 rounded-lg flex items-center justify-center">
                         <HelpCircle className="w-8 h-8 text-yellow-500" />

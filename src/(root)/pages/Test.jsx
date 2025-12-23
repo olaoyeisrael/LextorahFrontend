@@ -10,7 +10,7 @@ const Test = () => {
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [topics, setTopics] = useState([]);
   const [testMaterial, setTestMaterial] = useState(null);
@@ -20,16 +20,22 @@ const Test = () => {
 
     const token = localStorage.getItem('token');
     const getCourses = async () => {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/course_structure`, {
-        method: 'GET',  
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      const data = await res.json();
-      console.log(data.structure);
-      setTopics(data.structure);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/course_structure`, {
+            method: 'GET',  
+            headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+            }
+        });
+        const data = await res.json();
+        console.log(data.structure);
+        setTopics(data.structure);
+      } catch (error) {
+          console.error("Failed to fetch topics:", error);
+      } finally {
+          setLoading(false);
+      }
     }
     getCourses();
     
@@ -112,12 +118,46 @@ const Test = () => {
 
   // Handle Test Completion
   useEffect(() => {
-      if (step === 'result' && topics.length > 0) {
+      if (step === 'result' && questions.length > 0) {
           const score = calculateScore();
           const percentage = (score / questions.length) * 100;
+          const token = localStorage.getItem('token');
+
+          // 1. Submit Quiz Result (Always)
+          if (testMaterial?.topic) {
+            const details = questions.map((q, idx) => {
+                const userAnswer = answers[idx] || "No Answer";
+                const isCorrect = (userAnswer && userAnswer.includes(q.answer)) || (q.answer.includes(userAnswer) && userAnswer !== "No Answer") || (userAnswer.split('.')[0] === q.answer.split('.')[0]); 
+                // Note: Reusing approximate logic from calculateScore for consistency, though simple equality might be safer if standardized.
+                return {
+                    question: q.question,
+                    user_answer: userAnswer,
+                    correct_answer: q.answer,
+                    is_correct: isCorrect
+                };
+            });
+
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/submit_quiz_result`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    topic: testMaterial.topic,
+                    course_title: (enrolledCourse || "General").toLowerCase(),
+                    level: (enrolledLevel || "A1").toLowerCase(),
+                    score: score,
+                    total: questions.length,
+                    details: details
+                })
+            }).then(res => res.json())
+              .then(data => console.log("Quiz result saved:", data))
+              .catch(err => console.error("Failed to save quiz result:", err));
+          }
           
+          // 2. Mark Topic Complete (If Passed)
           if (percentage >= 50 && testMaterial?.topic) {
-             const token = localStorage.getItem('token');
              console.log("Passing Score! Marking complete...");
              
              fetch(`${import.meta.env.VITE_BACKEND_URL}/complete_topic`, {
@@ -171,29 +211,18 @@ const Test = () => {
               >
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Test Course</label>
-                   {/* {enrolledCourse ? (
-                      <div className="p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
-                          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-700">
-                              {enrolledCourse[0]}
-                          </div>
-                          <div>
-                              <h3 className="font-bold text-slate-900">{enrolledCourse} {enrolledLevel}</h3>
-                              <p className="text-xs text-slate-500">Your currently enrolled course</p>
-                          </div>
-                      </div>
-                   ) : (
-                       <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-                           You are not enrolled in any course. Please go to Courses to enroll.
+                   
+                   {loading ? (
+                       <div className="flex flex-col items-center justify-center p-12 text-slate-400">
+                           <Loader2 className="w-8 h-8 animate-spin mb-2 text-green-600" />
+                           <p>Loading topics...</p>
                        </div>
-                   )} */}
-                   {topics.length > 0 ? (
+                   ) : topics.length > 0 ? (
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                            {topics.map((t, idx) => (
                                <div 
                                 key={idx} 
                                 onClick={() => {
-                                    // Set the Cloudinary URL as the material to be tested
-                                    // Also set topic for metadata/display in quiz
                                     setTestMaterial({
                                         material: t.cloud_url,
                                         topic: t.topic,
@@ -217,7 +246,7 @@ const Test = () => {
                        </div>
                    ) : (
                        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-                           You are not enrolled in any course. Please go to Courses to enroll.
+                           You are not enrolled in any course.
                        </div>
                    )}
                 </div>

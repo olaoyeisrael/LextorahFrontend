@@ -47,15 +47,15 @@ const Login = () => {
             token: token,
             role: decoded.role || '',
             user_id: decoded.id || '',
-            enrolled_course: decoded.course || '',
-            enrolled_level: decoded.level || '',
+            enrolledCourse: (decoded.enrolled_course || '').toLowerCase(),
+            enrolledLevel: (decoded.enrolled_level || '').toLowerCase(),
         }));
         setLoading(false)
         navigate('/dashboard')
         localStorage.setItem('token', token)
         localStorage.setItem('user_id', decoded.id)
-        localStorage.setItem('enrolled_course', decoded.course)
-        localStorage.setItem('enrolled_level', decoded.level)
+        localStorage.setItem('enrolledCourse', (decoded.enrolled_course || '').toLowerCase())
+        localStorage.setItem('enrolledLevel', (decoded.enrolled_level || '').toLowerCase())
         localStorage.setItem('firstName', decoded.first_name || decoded.firstname || '')
         localStorage.setItem('lastName', decoded.last_name || decoded.lastName || '')
        }else{

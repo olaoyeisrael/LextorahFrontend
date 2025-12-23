@@ -49,7 +49,7 @@ const NavBar = () => {
 
         {/* Mobile Menu Overlay */}
         {open && (
-            <div className='fixed top-[73px] left-0 right-0 bottom-0 bg-white z-40 p-6 flex flex-col gap-6 border-t border-slate-100'>
+            <div className='fixed top-[73px] left-0 right-0 bottom- bg-white z-40 p-6 flex flex-col gap-6 border-t border-slate-100'>
                 <NavLink to='/' onClick={closeMenu} className='text-lg font-medium text-slate-700 hover:text-green-600'>
                     Home
                 </NavLink>

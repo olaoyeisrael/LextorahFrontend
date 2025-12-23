@@ -22,6 +22,8 @@ import Curriculum from './(root)/pages/Curriculum'
 import Test from './(root)/pages/Test'
 import ProtectedRoute from './components/ProtectedRoute'
 
+import LiveClasses from './(root)/pages/LiveClasses'
+
 function App() {
  
 
@@ -45,6 +47,7 @@ function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/student-performance" element={<StudentPerformance />} />
           <Route path="/curriculum" element={<Curriculum />} />
+          <Route path="/live-classes-admin" element={<LiveClasses />} />
 
 
         </Route>

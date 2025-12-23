@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
-import {Mic, Send, Volume2, Bot, User, Loader} from 'lucide-react'
-
+import {Mic, Send, Volume2, Bot, User, Loader, Play, Pause} from 'lucide-react'
+import msLexi from '../../assets/msLexi.png'
 const Ask = () => {
   const [userId, setUserId] = useState(null);
   const [question, setQuestion] = useState('');
@@ -12,6 +12,10 @@ const Ask = () => {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
+
+  // Audio Playback State
+  const [playingState, setPlayingState] = useState({ id: null, isPlaying: false, loading: false });
+  const audioRef = useRef(null);
 
   const scrollToBottom = () => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -150,12 +154,32 @@ const Ask = () => {
       setLoading(false);
     }
   };
-  const handlePlayAudio = async (text) => {
+  const handlePlayAudio = async (text, msgId) => {
+    // If clicking the same message
+    if (playingState.id === msgId) {
+        if (playingState.isPlaying) {
+            audioRef.current?.pause();
+            setPlayingState(prev => ({ ...prev, isPlaying: false }));
+        } else {
+            audioRef.current?.play();
+            setPlayingState(prev => ({ ...prev, isPlaying: true }));
+        }
+        return;
+    }
+
+    // New message logic
+    if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+    }
+
+    setPlayingState({ id: msgId, isPlaying: false, loading: true });
+
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/getAudio`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input: text }), // Send the text as input in the body
+        body: JSON.stringify({ input: text }), 
       });
       if (!res.ok) {
         throw new Error('Failed to fetch audio');
@@ -163,9 +187,18 @@ const Ask = () => {
       const audioBlob = await res.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
-      audio.play();
+      
+      audio.onended = () => {
+          setPlayingState(prev => ({ ...prev, isPlaying: false }));
+      };
+      
+      audioRef.current = audio;
+      await audio.play();
+      setPlayingState({ id: msgId, isPlaying: true, loading: false });
+      
     } catch (error) {
       console.error('Error playing audio:', error);
+      setPlayingState({ id: null, isPlaying: false, loading: false });
     }
   };
 
@@ -186,21 +219,21 @@ const Ask = () => {
   };
 
   return (
-    <main className="px-6">
-      <div className='text-3xl text-green-600 text-center my- font-MadaBold'>Ai Tutor - Ask Questions</div>
+    <main className="md:px-6 px-2 ">
+      <div className='md:text-3xl text-xl text-green-600 text-center my- font-MadaBold'>Ms Lexi - Ask Questions</div>
       {/* <div className="mb-3 text-sm text-gray-600">User id: <span className="font-mono">{userId ?? '...'}</span></div> */}
 
-      <div className="space-y-3 max-w-3xl mx-auto h-[calc(100vh-150px)] flex flex-col pb-4">
+      <div className="space-y-3 md:max-w-3xl  mx-auto h-[calc(100vh-150px)] flex flex-col pb-4">
         {messages.length === 0 && (
           <div className="text-center text-gray-500">No conversation yet. Ask a question below.</div>
         )}
 
-        <div className="space-y-2 flex-grow overflow-y-auto px-4">
+        <div className="space-y-2 flex-grow overflow-y-auto md:px-4 ">
           {messages.map((m) => (
             <div key={m.id} className={`flex ${m.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
 
               <div className={`${m.sender === 'user' ? 'bg-green-600 text-white text-right' : 'bg-white text-left'} w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 m-2`}>
-                {m.sender === 'user' ? <User className="w-6 h-6" /> : <Bot className="w-6 h-6" />}
+                {m.sender === 'user' ? <User className="w-6 h-6" /> : <img src={msLexi} className="w-10 h-10 rounded-full" />}
               </div>
               <div className={`${m.sender === 'user' ? 'bg-green-600 text-white text-right rounded-tr-none' : 'bg-white text-left rounded-tl-none border border-green-100'} max-w-[80%] p-4 rounded-lg shadow-sm`}>
                 <div className="text-sm">{m.text}</div>
@@ -208,10 +241,17 @@ const Ask = () => {
                 {
                   m.sender === 'Lextorah Ai' && (
                     <button
-                      onClick={() => handlePlayAudio(m.text)}
-                      className="mt-2 text-sm text-blue-600 hover:underline"
+                      onClick={() => handlePlayAudio(m.text, m.id)}
+                      className="mt-2 text-sm text-green-600 hover:text-green-700 disabled:opacity-50"
+                      disabled={playingState.loading && playingState.id === m.id}
                     >
-                      <Volume2 />
+                      {playingState.loading && playingState.id === m.id ? (
+                          <Loader className="w-4 h-4 animate-spin" />
+                      ) : playingState.id === m.id && playingState.isPlaying ? (
+                          <Pause className="w-4 h-4" />
+                      ) : (
+                          <Volume2 className="w-4 h-4" />
+                      )}
                     </button>
                   )
                 }

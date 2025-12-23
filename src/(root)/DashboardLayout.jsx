@@ -15,9 +15,9 @@ const DashboardLayout = () => {
                 <header className="md:hidden bg-white border-b border-green-100 p-4 flex items-center justify-between">
                      <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-white font-bold">
-                            AI
+                            LA
                         </div>
-                        <span className="text-xl font-bold text-slate-900">AI Tutor</span>
+                        <span className="text-xl font-bold text-slate-900">Lextorah AI</span>
                     </div>
                     <button 
                         onClick={() => setIsSidebarOpen(true)}

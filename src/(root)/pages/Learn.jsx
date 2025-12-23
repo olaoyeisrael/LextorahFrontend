@@ -149,8 +149,8 @@ const Learn = () => {
       let filenameParam = null;
       if (topicObj && topicObj.cloud_url) {
           // Extract filename from Cloudinary URL
-          const parts = topicObj.cloud_url.split('/');
-          filenameParam = parts[parts.length - 1]; // Get the last part
+          
+          filenameParam = topicObj.cloud_url;
           console.log("Using Cloudinary Filename:", filenameParam);
       } else if (topicObj && topicObj.file) {
           filenameParam = topicObj.file;
@@ -275,7 +275,7 @@ const Learn = () => {
           if (learningContext) {
             console.log("Full Content:", fullContentRef.current);
               try {
-                  await fetch(`${import.meta.env.VITE_BACKEND_URL}/complete_topic`, {
+                  await fetch(`http://localhost:8000/complete_topic`, {
                       method: 'POST',
                       headers: {
                           'Content-Type': 'application/json',

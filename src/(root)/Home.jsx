@@ -24,7 +24,7 @@ const Home = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight"
         >
-            Master any subject with <span className="text-green-500">AI Tutor</span>
+            Master any subject with <span className="text-green-500">Lextorah AI</span>
         </motion.h1>
         <motion.p 
             initial={{ opacity: 0, y: 20 }}

@@ -25,7 +25,7 @@ const Course = () => {
                 // }
 
                 // Fetch Transcripts
-                const transRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/transcripts`, {
+                const transRes = await fetch(`http://localhost:8000/transcripts`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (transRes.ok) {

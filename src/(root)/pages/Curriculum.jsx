@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { isAdmin, getToken } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
 import { Plus, BookOpen, Loader2, Trash2 } from 'lucide-react';
+import { COURSE_GROUPS, getLevelsForCourse } from '../../utils/courseData';
 
 const Curriculum = () => {
     const navigate = useNavigate();
@@ -54,7 +55,12 @@ const Curriculum = () => {
     }, [filters]); 
 
     const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        if (e.target.name === 'course') {
+            const levels = getLevelsForCourse(e.target.value);
+            setForm({ ...form, course: e.target.value, level: levels[0] || '' });
+        } else {
+            setForm({ ...form, [e.target.name]: e.target.value });
+        }
     };
 
     const handleTopicChange = (index, value) => {
@@ -75,7 +81,12 @@ const Curriculum = () => {
 
 
     const handleFilterChange = (e) => {
-        setFilters({ ...filters, [e.target.name]: e.target.value });
+        if (e.target.name === 'course') {
+            const levels = getLevelsForCourse(e.target.value);
+            setFilters({ ...filters, course: e.target.value, level: levels[0] || '' });
+        } else {
+            setFilters({ ...filters, [e.target.name]: e.target.value });
+        }
     };
 
     // Handle Submit
@@ -143,18 +154,30 @@ const Curriculum = () => {
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">Course</label>
-                            <input 
-                                type="text" name="course" value={form.course} onChange={handleChange} 
+                            <select 
+                                name="course" value={form.course} onChange={handleChange} 
                                 className="w-full p-2 border border-slate-200 rounded-lg focus:ring-green-500 focus:border-green-500" 
-                            />
+                            >
+                                {COURSE_GROUPS.map((group, idx) => (
+                                    <optgroup key={idx} label={group.groupName}>
+                                        {group.courses.map(course => (
+                                            <option key={course} value={course}>{course}</option>
+                                        ))}
+                                    </optgroup>
+                                ))}
+                            </select>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Level</label>
-                                <input 
-                                    type="text" name="level" value={form.level} onChange={handleChange}
+                                <select
+                                    name="level" value={form.level} onChange={handleChange}
                                     className="w-full p-2 border border-slate-200 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                />
+                                >
+                                    {getLevelsForCourse(form.course).map(level => (
+                                        <option key={level} value={level}>{level}</option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
 
@@ -226,18 +249,21 @@ const Curriculum = () => {
                                     name="course" value={filters.course} onChange={handleFilterChange} 
                                     className="p-2 border border-slate-200 rounded-lg text-sm"
                                 >
-                                    <option value="German">German</option>
-                                    <option value="English">English</option>
-                                    <option value="French">French</option>
+                                    {COURSE_GROUPS.map((group, idx) => (
+                                        <optgroup key={idx} label={group.groupName}>
+                                            {group.courses.map(course => (
+                                                <option key={course} value={course}>{course}</option>
+                                            ))}
+                                        </optgroup>
+                                    ))}
                                 </select>
                                 <select 
                                     name="level" value={filters.level} onChange={handleFilterChange}
                                     className="p-2 border border-slate-200 rounded-lg text-sm"
                                 >
-                                    <option value="A1">A1</option>
-                                    <option value="A2">A2</option>
-                                    <option value="B1">B1</option>
-                                    <option value="B2">B2</option>
+                                    {getLevelsForCourse(filters.course).map(level => (
+                                        <option key={level} value={level}>{level}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
