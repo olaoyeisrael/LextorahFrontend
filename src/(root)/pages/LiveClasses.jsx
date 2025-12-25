@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Calendar, Clock, Link, Save, Video, Edit2, Check, X } from 'lucide-react';
+import { Calendar, Clock, Link, Save, Video, Edit2, Check, X, Trash2 } from 'lucide-react';
 import { COURSE_GROUPS, getLevelsForCourse } from '../../utils/courseData';
 
 const LiveClasses = () => {
@@ -102,6 +102,46 @@ const LiveClasses = () => {
         }
     };
 
+    const handleJoinClass = async (cls) => {
+        try {
+             await fetch(`${import.meta.env.VITE_BACKEND_URL}/complete_live_class`, {
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json',
+                     'Authorization': `Bearer ${token}`
+                 },
+                 body: JSON.stringify({
+                     topic: cls.topic,
+                     course: cls.course,
+                     level: cls.level,
+                     week: cls.week,
+                     date: cls.date
+                 })
+             });
+        } catch (e) {
+            console.error("Failed to mark class as attended", e);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this class?")) return;
+        
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/live_class/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                fetchClasses();
+            } else {
+                alert("Failed to delete class");
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-8">
       <div className="flex items-center gap-3 mb-8">
@@ -148,6 +188,8 @@ const LiveClasses = () => {
                               <option>Week 2</option>
                               <option>Week 3</option>
                               <option>Week 4</option>
+                              <option>Week 6</option>
+                              <option>Week 8</option>
                           </select>
                       </div>
                       <div>
@@ -247,21 +289,49 @@ const LiveClasses = () => {
                                           </div>
                                       ) : (
                                           <div className="flex items-center gap-2 text-xs">
-                                              <span className={`px-2 py-1 rounded ${cls.recording_link ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-400'}`}>
-                                                  {cls.recording_link ? 'Recording Available' : 'No Recording'}
-                                              </span>
+                                              {cls.recording_link ? (
+                                                  <a 
+                                                    href={cls.recording_link} 
+                                                    target="_blank" 
+                                                    rel="noreferrer"
+                                                    className="px-2 py-1 rounded bg-green-50 text-green-600 hover:bg-green-100 hover:underline flex items-center gap-1"
+                                                    onClick={(e) => e.stopPropagation()} 
+                                                  >
+                                                      <Video className="w-3 h-3" /> Recording Available
+                                                  </a>
+                                              ) : (
+                                                  <span className="px-2 py-1 rounded bg-slate-50 text-slate-400">
+                                                      No Recording
+                                                  </span>
+                                              )}
                                               <span className="text-slate-400 text-[10px]">(Click row to edit)</span>
                                           </div>
                                       )}
                                       
-                                      <a href={cls.meeting_link} target="_blank" rel="noreferrer" className="ml-auto text-xs font-bold text-red-500 bg-red-50 px-3 py-1.5 rounded hover:bg-red-100 transition-colors">
-                                          Join Link
-                                      </a>
+                                      <div className='flex items-center gap-2 ml-auto'>
+                                           <a 
+                                                href={cls.meeting_link} 
+                                                target="_blank" 
+                                                rel="noreferrer" 
+                                                onClick={() => handleJoinClass(cls)}
+                                                className="text-xs font-bold text-red-500 bg-red-50 px-3 py-1.5 rounded hover:bg-red-100 transition-colors"
+                                            >
+                                                Join Link
+                                            </a>
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); handleDelete(cls.id); }}
+                                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                                title="Delete Class"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                      </div>
                                   </div>
                               </div>
                           </div>
                       ))
                   )}
+
               </div>
           </div>
       </div>

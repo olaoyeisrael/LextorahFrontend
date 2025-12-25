@@ -5,8 +5,8 @@ import { ChevronRight, CheckCircle2, XCircle, Timer, Award, MoveRight, Loader2 }
 
 const Test = () => {
   const [step, setStep] = useState('setup'); // setup, taking, result
-  const enrolledCourse = localStorage.getItem('enrolled_course')
-  const enrolledLevel = localStorage.getItem('enrolled_level')
+  const enrolledCourse = localStorage.getItem('enrolledCourse')
+  const enrolledLevel = localStorage.getItem('enrolledLevel')
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -103,14 +103,16 @@ const Test = () => {
   const calculateScore = () => {
     let score = 0;
     questions.forEach((q, idx) => {
-      // Simple string matching, might need normalization
-      if (answers[idx] && answers[idx].includes(q.answer) || q.answer.includes(answers[idx])) { 
-          // The API returns "Option Text" sometimes or just "A", assumes option string matches somewhat
-          // Let's refine this check based on typical OpenAI output. 
-          // Usually options are "A. Answer". Answer key might be "A" or "A. Answer".
-          // We can check if the select option *starts with* the answer letter or matches exactly.
-          if(answers[idx] === q.answer) score++;
-          else if (answers[idx].split('.')[0] === q.answer.split('.')[0]) score++;
+      const userAnswer = answers[idx];
+      if (userAnswer) {
+          // Robust check: Compare first letter (e.g., "A" from "A. Answer")
+          // This handles cases where answer is just "A" or "A. Answer Text"
+          const userCode = userAnswer.charAt(0).toUpperCase();
+          const correctCode = q.answer.charAt(0).toUpperCase();
+          
+          if (userCode === correctCode) {
+              score++;
+          }
       }
     });
     return score;
@@ -127,12 +129,16 @@ const Test = () => {
           if (testMaterial?.topic) {
             const details = questions.map((q, idx) => {
                 const userAnswer = answers[idx] || "No Answer";
-                const isCorrect = (userAnswer && userAnswer.includes(q.answer)) || (q.answer.includes(userAnswer) && userAnswer !== "No Answer") || (userAnswer.split('.')[0] === q.answer.split('.')[0]); 
-                // Note: Reusing approximate logic from calculateScore for consistency, though simple equality might be safer if standardized.
+                const userCode = userAnswer.charAt(0).toUpperCase();
+                const correctCode = q.answer.charAt(0).toUpperCase();
+                const isCorrect = userAnswer !== "No Answer" && userCode === correctCode;
+                
+                const fullCorrectAnswer = q.options?.find(o => o.startsWith(q.answer)) || q.answer;
+
                 return {
                     question: q.question,
                     user_answer: userAnswer,
-                    correct_answer: q.answer,
+                    correct_answer: fullCorrectAnswer,
                     is_correct: isCorrect
                 };
             });
@@ -215,7 +221,7 @@ const Test = () => {
                    {loading ? (
                        <div className="flex flex-col items-center justify-center p-12 text-slate-400">
                            <Loader2 className="w-8 h-8 animate-spin mb-2 text-green-600" />
-                           <p>Loading topics...</p>
+                           <p>Loading test...</p>
                        </div>
                    ) : topics.length > 0 ? (
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -291,8 +297,8 @@ const Test = () => {
                   <span className="text-sm font-medium text-slate-400">
                     Question {currentQuestion + 1} of {questions.length}
                   </span>
-                  <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-1 rounded-full text-xs font-bold">
-                    <Timer className="w-3 h-3" /> 00:00 (InDev)
+                  <div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-1 rounded-full text-xs font-bold">
+                    <h1>Do not refresh the page.</h1>
                   </div>
                 </div>
 
@@ -354,6 +360,49 @@ const Test = () => {
                         <span className="block text-xs text-slate-400 uppercase font-bold tracking-wider">Accuracy</span>
                         <span className="text-3xl font-bold text-slate-900">{Math.round((calculateScore() / questions.length) * 100)}%</span>
                     </div>
+                </div>
+
+                {/* Review Section */}
+                <div className="text-left max-w-2xl mx-auto mb-10">
+                  <h3 className="font-bold text-slate-800 mb-6 pb-2 border-b border-slate-100">Review Your Answers</h3>
+                  <div className="space-y-8">
+                    {questions.map((q, idx) => {
+                       // Re-use logic for consistency
+                       const userAnswer = answers[idx] || "No Answer";
+                       // Logic from calculateScore
+                       const userCode = userAnswer.charAt(0).toUpperCase();
+                       const correctCode = q.answer.charAt(0).toUpperCase();
+                       const isCorrect = userAnswer !== "No Answer" && userCode === correctCode;
+
+                       return (
+                          <div key={idx} className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                              <p className="font-medium text-slate-900 mb-4"><span className="text-slate-400 mr-2">{idx + 1}.</span> {q.question}</p>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+                                   <div className={`p-3 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
+                                       <span className="block text-xs font-bold opacity-70 mb-1">YOUR ANSWER</span>
+                                       {userAnswer || "No Answer"}
+                                   </div>
+                                   <div className="p-3 rounded-lg border bg-white border-slate-200 text-slate-700">
+                                       <span className="block text-xs font-bold opacity-70 mb-1">CORRECT ANSWER</span>
+                                       {/* Try to find full option text if possible, else just answer code */}
+                                       {q.options?.find(o => o.startsWith(q.answer)) || q.answer}
+                                   </div>
+                              </div>
+
+                              {q.explanation && (
+                                  <div className="bg-yellow-50 border border-yellow-100 p-4 rounded-xl text-sm text-yellow-900 flex gap-3">
+                                      <span className="text-xl">💡</span>
+                                      <div>
+                                        <span className="font-bold block mb-1">Explanation</span>
+                                        {q.explanation}
+                                      </div>
+                                  </div>
+                              )}
+                          </div>
+                       )
+                    })}
+                  </div>
                 </div>
 
                 <button

@@ -85,13 +85,20 @@ const Ask = () => {
   // fetch chat history
   console.log("User ID: ",userId)
    useEffect(() => {
+        let ignore = false;
+        
         const fetchHistory = async () => {
+            if (!userId) return;
+            
             try {
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/history/${userId}`);
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/chat_history/${userId}`);
                 if (!response.ok) throw new Error('Failed to fetch history');
                 
                 const data = await response.json();
                 console.log(data)
+                
+                if (ignore) return;
+
                 if (data.History && Array.isArray(data.History)) {
                     const formattedMessages = data.History.map((msg, index) => ({
                       // id: `history-${index}-${Date.now()}`,
@@ -99,9 +106,9 @@ const Ask = () => {
                         text: msg.content
                     }));
                     setMessages(formattedMessages);
-                    
                 }
             } catch (error) {
+                if (ignore) return;
                 console.error("Error loading chat history:", error);
                 // Fallback initial message if fetch fails
                 setMessages([{ role: 'ai', content: 'Hello! I am your AI Tutor. I could not load your history, but I am ready to help!' }]);
@@ -109,6 +116,10 @@ const Ask = () => {
         };
 
         fetchHistory();
+        
+        return () => {
+            ignore = true;
+        };
     }, [userId]);
     console.log(messages)
 
@@ -242,15 +253,24 @@ const Ask = () => {
                   m.sender === 'Lextorah Ai' && (
                     <button
                       onClick={() => handlePlayAudio(m.text, m.id)}
-                      className="mt-2 text-sm text-green-600 hover:text-green-700 disabled:opacity-50"
+                      className="mt-2 text-xs font-medium text-green-600 hover:text-green-700 disabled:opacity-50 flex items-center gap-1.5 bg-green-50 px-2 py-1 rounded-md transition-colors"
                       disabled={playingState.loading && playingState.id === m.id}
                     >
                       {playingState.loading && playingState.id === m.id ? (
-                          <Loader className="w-4 h-4 animate-spin" />
+                          <>
+                            <Loader className="w-3.5 h-3.5 animate-spin" />
+                            <span>Loading...</span>
+                          </>
                       ) : playingState.id === m.id && playingState.isPlaying ? (
-                          <Pause className="w-4 h-4" />
+                          <>
+                            <Pause className="w-3.5 h-3.5" />
+                            <span>Pause</span>
+                          </>
                       ) : (
-                          <Volume2 className="w-4 h-4" />
+                          <>
+                            <Volume2 className="w-3.5 h-3.5" />
+                            <span>Play Answer</span>
+                          </>
                       )}
                     </button>
                   )

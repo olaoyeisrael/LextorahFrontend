@@ -14,6 +14,7 @@ const Learn = () => {
     const [selectedAnswer, setSelectedAnswer] = useState(null);
     const [score, setScore] = useState(0);
     const [showResults, setShowResults] = useState(false);
+    const [userAnswers, setUserAnswers] = useState({}); // Stores user answers
     const [loading, setLoading] = useState(true);
     const [loadingMessage, setLoadingMessage] = useState("Loading your customized lesson..."); // New state
     const [data, setData] = useState(null);
@@ -262,7 +263,12 @@ const Learn = () => {
 
   const handleNextQuestion = async () => {
       const currentQuestion = quizData[currentQuestionIndex];
-      if (selectedAnswer[0] === currentQuestion.answer) {
+      const isCorrect = selectedAnswer[0] === currentQuestion.answer;
+      
+      const newAnswers = { ...userAnswers, [currentQuestionIndex]: selectedAnswer };
+      setUserAnswers(newAnswers);
+
+      if (isCorrect) {
           setScore(score + 1);
       }
 
@@ -275,6 +281,30 @@ const Learn = () => {
           if (learningContext) {
             console.log("Full Content:", fullContentRef.current);
               try {
+                  // Save Quiz Result
+                  const finalScore = score + (isCorrect ? 1 : 0);
+                  await fetch(`http://localhost:8000/submit_quiz_result`, {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${token}` 
+                      },
+                      body: JSON.stringify({
+                          course_title: learningContext.course,
+                          level: learningContext.level,
+                          topic: learningContext.topic,
+                          score: finalScore,
+                          total: quizData.length,
+                          details: Object.entries(newAnswers).map(([idx, ans]) => ({
+                              question: quizData[idx].question,
+                              answer: ans,
+                              correct: quizData[idx].answer,
+                              correct_option: quizData[idx].options.find(o => o.startsWith(quizData[idx].answer))
+                          })) 
+                      })
+                  });
+
+                  // Complete Topic
                   await fetch(`http://localhost:8000/complete_topic`, {
                       method: 'POST',
                       headers: {
@@ -429,12 +459,51 @@ const Learn = () => {
                          <p className='text-slate-600 text-lg mb-8'>
                              You answered <span className='font-bold text-slate-900'>{score}</span> out of {quizData.length} questions correctly.
                          </p>
-                         <button 
-                            onClick={handleClose}
-                            className='bg-slate-900 text-white px-10 py-4 rounded-xl font-semibold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl'
-                         >
-                             Back to Dashboard
-                         </button>
+
+                          <div className='flex flex-col gap-4 text-left w-full'>
+                              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                  <h3 className="font-bold text-slate-800 mb-4 sticky top-0 bg-slate-50 pb-2 border-b border-slate-200">Review Your Answers</h3>
+                                  {quizData.map((q, idx) => {
+                                      const userAnswer = userAnswers[idx];
+                                      // Check if userAnswer matches current q.answer. q.answer is usually just the letter "A", "B" etc or full string?
+                                      // The previous logic checked `selectedAnswer[0] === currentQuestion.answer`.
+                                      // So `userAnswer` is likely an array or string.
+                                      const isCorrect = userAnswer && userAnswer[0] === q.answer;
+                                      
+                                      return (
+                                          <div key={idx} className="mb-8 border-b border-slate-200 pb-6 last:border-0 last:pb-0">
+                                              <p className="font-medium text-slate-900 mb-3"><span className="text-slate-400 mr-2">{idx + 1}.</span> {q.question}</p>
+                                              
+                                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-3">
+                                                   <div className={`p-3 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
+                                                       <span className="block text-xs font-bold opacity-70 mb-1">YOUR ANSWER</span>
+                                                       {userAnswer || "No Answer"}
+                                                   </div>
+                                                   <div className="p-3 rounded-lg border bg-slate-50 border-slate-200 text-slate-700">
+                                                       <span className="block text-xs font-bold opacity-70 mb-1">CORRECT ANSWER</span>
+                                                       {/* Find option starting with the specific letter answer */}
+                                                       {q.options.find(o => o.startsWith(q.answer)) || q.answer}
+                                                   </div>
+                                              </div>
+
+                                              {q.explanation && (
+                                                  <div className="bg-yellow-50 border border-yellow-100 p-4 rounded-xl text-sm text-yellow-900">
+                                                      <span className="font-bold mr-2">💡 Explanation:</span>
+                                                      {q.explanation}
+                                                  </div>
+                                              )}
+                                          </div>
+                                      );
+                                  })}
+                              </div>
+                              
+                              <button 
+                                 onClick={handleClose}
+                                 className='bg-slate-900 text-white px-10 py-4 rounded-xl font-semibold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl mt-4 self-center'
+                              >
+                                  Back to Dashboard
+                              </button>
+                          </div>
                      </div>
                  )}
              </div>

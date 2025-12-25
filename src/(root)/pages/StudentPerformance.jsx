@@ -40,6 +40,7 @@ const StudentPerformance = () => {
                             <tr>
                                 <th className="px-6 py-4">Student</th>
                                 <th className="px-6 py-4">Course</th>
+                                <th className="px-6 py-4">Level</th>
                                 <th className="px-6 py-4">Topic</th>
                                 <th className="px-6 py-4">Score</th>
                                 <th className="px-6 py-4">Date</th>
@@ -49,9 +50,9 @@ const StudentPerformance = () => {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {loading ? (
-                                <tr><td colSpan="7" className="p-8 text-center">Loading data...</td></tr>
+                                <tr><td colSpan="8" className="p-8 text-center">Loading data...</td></tr>
                             ) : performanceData.length === 0 ? (
-                                <tr><td colSpan="7" className="p-8 text-center">No assessment records found.</td></tr>
+                                <tr><td colSpan="8" className="p-8 text-center">No assessment records found.</td></tr>
                             ) : (
                                 performanceData.map((item, idx) => (
                                     <motion.tr 
@@ -63,6 +64,7 @@ const StudentPerformance = () => {
                                     >
                                         <td className="px-6 py-4 font-medium text-slate-900">{item.student_name || 'Unknown'}</td>
                                         <td className="px-6 py-4 capitalize">{item.course_title}</td>
+                                        <td className="px-6 py-4 capitalize">{item.level || '-'}</td>
                                         <td className="px-6 py-4">{item.topic}</td>
                                         <td className="px-6 py-4 font-bold">
                                             {item.score} / {item.total}
@@ -96,7 +98,7 @@ const StudentPerformance = () => {
             </div>
 
             <AnimatePresence>
-                {selectedResult && (
+                {selectedResult && (console.log("Selected Result:", selectedResult),
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
                         <motion.div 
                             initial={{ opacity: 0, scale: 0.95 }}
@@ -159,6 +161,9 @@ const StudentPerformance = () => {
                                         <div className="max-h-60 overflow-y-auto space-y-4 pr-2">
                                             {selectedResult.details.map((detail, idx) => (
                                                 <div key={idx} className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-sm">
+                                                    {/* DEBUG: Show raw data to identify key names */}
+                                                    {/* <pre className="text-xs text-slate-400 mb-2 overflow-x-auto">{JSON.stringify(detail, null, 2)}</pre> */}
+                                                    
                                                     <p className="font-medium text-slate-800 mb-2">{idx + 1}. {detail.question}</p>
                                                     <div className="grid grid-cols-1 gap-1">
                                                         <div className={`p-2 rounded ${detail.is_correct ? 'bg-green-100 text-green-800' : 'bg-red-50 text-red-700'}`}>

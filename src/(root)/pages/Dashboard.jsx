@@ -194,7 +194,13 @@ console.log("Enrolled course:", enrolledCourse)
                                                 Join Now
                                             </a>
                                         ) : status === 'ended' ? (
-                                            <span className="inline-block px-3 py-1 bg-black/20 rounded-full text-[10px] font-medium text-indigo-300">Ended</span>
+                                            session.recording_link ? (
+                                                <a href={session.recording_link} target="_blank" rel="noreferrer" className="block w-full py-1.5 bg-green-500 text-white rounded-lg text-xs font-bold hover:bg-green-600 transition-colors">
+                                                    Watch Recording
+                                                </a>
+                                            ) : (
+                                                <span className="inline-block px-3 py-1 bg-black/20 rounded-full text-[10px] font-medium text-indigo-300">Ended</span>
+                                            )
                                         ) : (
                                             <span className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-medium text-indigo-200">Upcoming</span>
                                         )}
@@ -234,14 +240,14 @@ console.log("Enrolled course:", enrolledCourse)
                  <div className="flex justify-between items-start mb-4">
                     <div>
                          <h2 className="text-xl font-bold text-slate-900 mb-2">Quick Question</h2>
-                         <p className="text-slate-600 text-sm mb-4">Ask Ms Lexi - Our Tutor AI anything about Lessons.</p>
+                         <p className="text-slate-600 text-sm mb-4">Ask Ms Lexi - Our AI Tutor anything about Lessons.</p>
                     </div>
                      <div className="w-16 h-16 bg-slate-900 rounded-lg flex items-center justify-center">
                         <HelpCircle className="w-8 h-8 text-yellow-500" />
                     </div>
                 </div>
                 <Link to="/ask" className="w-full py-3 bg-sky-100 hover:bg-sky-200 text-sky-700 font-bold rounded-xl text-center transition-colors">
-                    Ask AI
+                    Ask Ms Lexi
                 </Link>
             </motion.div>
         </div>

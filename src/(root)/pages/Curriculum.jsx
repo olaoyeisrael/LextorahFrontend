@@ -136,6 +136,24 @@ const Curriculum = () => {
         }
     };
 
+    const handleDeleteTopic = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this topic?")) return;
+        
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/curriculum/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                fetchCurriculum();
+            } else {
+                alert("Failed to delete topic");
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     return (
         <section className="max-w-6xl mx-auto p-4 md:p-8">
@@ -289,9 +307,13 @@ const Curriculum = () => {
                                             </div>
                                         </div>
 
-                                        {/* <button className="text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button 
+                                            onClick={() => handleDeleteTopic(item._id || item.id)}
+                                            className="text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            title="Delete Topic"
+                                        >
                                             <Trash2 size={18} />
-                                        </button> */}
+                                        </button>
                                     </div>
                                 ))}
                             </div>
