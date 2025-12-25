@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, CheckCircle2, XCircle, Timer, Award, MoveRight, Loader2 } from 'lucide-react';
+import { ChevronRight, CheckCircle2, XCircle, Timer, Award, MoveRight, Loader2, Lock } from 'lucide-react';
 
 const Test = () => {
   const [step, setStep] = useState('setup'); // setup, taking, result
@@ -162,25 +162,10 @@ const Test = () => {
               .catch(err => console.error("Failed to save quiz result:", err));
           }
           
-          // 2. Mark Topic Complete (If Passed)
-          if (percentage >= 50 && testMaterial?.topic) {
-             console.log("Passing Score! Marking complete...");
-             
-             fetch(`${import.meta.env.VITE_BACKEND_URL}/complete_topic`, {
-                 method: 'POST',
-                 headers: {
-                     'Authorization': `Bearer ${token}`,
-                     'Content-Type': 'application/json'
-                 },
-                 body: JSON.stringify({
-                     topic: testMaterial.topic,
-                     course: enrolledCourse,
-                     level: enrolledLevel,
-                     material_content: testMaterial.material // Sending URL as content for now
-                 })
-             }).then(res => res.json())
-               .then(data => console.log("Completion saved:", data))
-               .catch(err => console.error("Failed to save completion:", err));
+          // 2. Mark Topic Complete (If Passed) - REMOVED per requirements.
+          // Topics are only completed via the Learn module.
+          if (percentage >= 50) {
+             console.log("Passing Score!");
           }
       }
   }, [step]);
@@ -225,30 +210,42 @@ const Test = () => {
                        </div>
                    ) : topics.length > 0 ? (
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           {topics.map((t, idx) => (
+                           {topics.map((t, idx) => {
+                              const isLocked = !t.is_completed;
+                              return (
                                <div 
                                 key={idx} 
                                 onClick={() => {
-                                    setTestMaterial({
-                                        material: t.cloud_url,
-                                        topic: t.topic,
-                                        week: t.week
-                                    });
+                                    if(!isLocked) {
+                                      setTestMaterial({
+                                          material: t.cloud_url,
+                                          topic: t.topic,
+                                          week: t.week
+                                      });
+                                    } else {
+                                      alert("Please complete the lesson for this topic first.");
+                                    }
                                 }}
-                                className={`p-4 border rounded-xl flex items-center justify-between cursor-pointer transition-all hover:bg-green-50 hover:border-green-300 ${testMaterial?.material === t.cloud_url ? 'bg-green-50 border-green-500 ring-2 ring-green-200' : 'bg-white border-slate-200'}`}
+                                className={`p-4 border rounded-xl flex items-center justify-between transition-all ${
+                                     isLocked 
+                                     ? 'bg-slate-50 border-slate-200 cursor-not-allowed opacity-70' 
+                                     : 'cursor-pointer hover:bg-green-50 hover:border-green-300 bg-white border-slate-200'
+                                 } ${testMaterial?.material === t.cloud_url ? 'bg-green-50 border-green-500 ring-2 ring-green-200' : ''}`}
                                >
                                    <div className="flex items-center gap-3">
-                                       <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-700">
-                                           {idx + 1}
+                                       <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                                            isLocked ? 'bg-slate-200 text-slate-500' : 'bg-green-100 text-green-700'
+                                        }`}>
+                                           {isLocked ? <Lock className="w-4 h-4" /> : idx + 1}
                                        </div>
                                        <div>
-                                           <h3 className="font-bold text-slate-900">{t.topic}</h3>
+                                           <h3 className={`font-bold ${isLocked ? 'text-slate-500' : 'text-slate-900'}`}>{t.topic}</h3>
                                            <p className="text-xs text-slate-500">{t.week || `Module ${idx+1}`}</p>
                                        </div>
                                    </div>
-                                   {testMaterial?.cloud_url === t.cloud_url && <CheckCircle2 className="w-5 h-5 text-green-600" />}
+                                   {testMaterial?.material === t.cloud_url && <CheckCircle2 className="w-5 h-5 text-green-600" />}
                                </div>
-                           ))}
+                           )})}
                        </div>
                    ) : (
                        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">

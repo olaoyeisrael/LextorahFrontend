@@ -165,18 +165,27 @@ const StudentPerformance = () => {
                                                     {/* <pre className="text-xs text-slate-400 mb-2 overflow-x-auto">{JSON.stringify(detail, null, 2)}</pre> */}
                                                     
                                                     <p className="font-medium text-slate-800 mb-2">{idx + 1}. {detail.question}</p>
-                                                    <div className="grid grid-cols-1 gap-1">
-                                                        <div className={`p-2 rounded ${detail.is_correct ? 'bg-green-100 text-green-800' : 'bg-red-50 text-red-700'}`}>
-                                                            <span className="font-bold text-xs uppercase block text-opacity-70">Your Answer</span>
-                                                            {detail.user_answer}
-                                                        </div>
-                                                        {!detail.is_correct && (
-                                                            <div className="p-2 bg-slate-200 text-slate-700 rounded">
-                                                                <span className="font-bold text-xs uppercase block text-opacity-70">Correct Answer</span>
-                                                                {detail.correct_answer}
+                                                    {(() => {
+                                                        // Calculate correctness if missing (legacy/Learn module data)
+                                                        const isCorrect = detail.is_correct !== undefined 
+                                                            ? detail.is_correct 
+                                                            : (detail.answer && detail.correct && detail.answer.startsWith(detail.correct));
+                                                            
+                                                        return (
+                                                            <div className="grid grid-cols-1 gap-1">
+                                                                <div className={`p-2 rounded ${isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-50 text-red-700'}`}>
+                                                                    <span className="font-bold text-xs uppercase block text-opacity-70">Your Answer</span>
+                                                                    {detail.user_answer || detail.answer || "No Answer"}
+                                                                </div>
+                                                                {!isCorrect && (
+                                                                    <div className="p-2 bg-green-50 text-green-700 rounded border border-green-100">
+                                                                        <span className="font-bold text-xs uppercase block text-opacity-70">Correct Answer</span>
+                                                                        {detail.correct_answer || detail.correct_option || detail.correct || "N/A"}
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                        )}
-                                                    </div>
+                                                        );
+                                                    })()}
                                                 </div>
                                             ))}
                                         </div>
