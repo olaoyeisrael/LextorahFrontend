@@ -26,7 +26,14 @@
   font-family: MadaMedium;
   src: url('../src/assets/fonts/Mada-Medium.ttf');
 }
-
+@font-face {
+  font-family: InterBold;
+  src: url('../src/assets/fonts/Inter_18pt-Bold.ttf');
+}
+@font-face {
+  font-family: Inter;
+  src: url('../src/assets/fonts/Inter_18pt-Regular.ttf');
+}
 
 
 @theme{
@@ -36,6 +43,8 @@
   --font-MadaBold: MadaBold, 'sans-serif'; 
   --font-MadaLight: MadaLight, 'sans-serif';
   --font-MadaMedium: MadaMedium, 'sans-serif'; 
+  --font-InterBold: InterBold, 'sans-serif'; 
+  --font-Inter: Inter, 'sans-serif'; 
 };
 
 ::-webkit-scrollbar {

@@ -16,7 +16,7 @@ const NavBar = () => {
   };
 
   return (
-    <nav className='lg:px-20 px-6 py-4 flex justify-between items-center fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md z-50 border-b border-green-100'>
+    <nav className='lg:px-20 px-6 py-4 flex justify-between items-center fixed top-0 left-0 right-0 bg-[#FFFFFF] backdrop-blur-md z-50 border-b border-green-100'>
         {/* Logo */}
         <div className="flex items-center gap-2">
             <img src={logo} alt="logo" className='h-8 w-auto object-contain' />
@@ -27,8 +27,14 @@ const NavBar = () => {
             <NavLink to='/' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
                 Home
             </NavLink>
+            <a href='/#aitutor' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
+                AI Tutor
+            </a>
              <a href='/#features' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
                 Features
+            </a>
+            <a href='/#howitworks' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
+                    How It Works
             </a>
 
             
@@ -53,8 +59,14 @@ const NavBar = () => {
                 <NavLink to='/' onClick={closeMenu} className='text-lg font-medium text-slate-700 hover:text-green-600'>
                     Home
                 </NavLink>
+                <a href='/#aitutor' onClick={closeMenu} className='text-lg font-medium text-slate-700 hover:text-green-600'>
+                    AI Tutor
+                </a>
                  <a href='#' onClick={closeMenu} className='text-lg font-medium text-slate-700 hover:text-green-600'>
                     Features
+                </a>
+                <a href='#' onClick={closeMenu} className='text-lg font-medium text-slate-700 hover:text-green-600'>
+                    How It Works    
                 </a>
                  <a href='#' onClick={closeMenu} className='text-lg font-medium text-slate-700 hover:text-green-600'>
                     Testimonials
