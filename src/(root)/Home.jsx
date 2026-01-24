@@ -87,7 +87,7 @@ const Home = () => {
     >
         <motion.div variants={fadeInUp} className="relative">
             <img src={msLexi} alt="Ms. Lexi" className="w-full h-auto" />
-            <div className="absolute bottom-6 right-0 md:bottom-1 md:-right-10 bg-white p-4 md:p-5 rounded-2xl shadow-lg border border-slate-50 z-20 max-w-[200px] md:max-w-[240px]">
+            <div className="absolute bottom-6 right-0 md:bottom-1.5 md:-right-10 bg-white p-4 md:p-5 rounded-2xl shadow-lg border border-slate-50 z-20 max-w-[200px] md:max-w-[240px]">
                 <div className="flex items-center gap-3 mb-1.5">
                     <div className="w-2.5 h-2.5 bg-[#22C55E] rounded-full animate-pulse"></div>
                     <h3 className="font-bold text-slate-900 text-sm md:text-base">Available 24/7</h3>
