@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, MessageSquare, Zap, Target, Smile, Clock, BookOpen, Shield, GraduationCap, Check, UserStar, Landmark, Instagram, Twitter, Linkedin, Facebook, CircleQuestionMark, Lightbulb, PenLine, ChartLine, NotepadText, ShieldCheck, Globe, MapPin } from 'lucide-react'
 import heroBg from '../assets/lextorah-home.jpg'
 import SupportChat from '../components/SupportChat'
-import lextorah from '../assets/container.png'
+import msLexi from '../assets/container.png'
 import student from '../assets/student.png'
 import teacher from '../assets/teacher.png'
 import institution from '../assets/institution.png'
@@ -41,14 +41,14 @@ const Home = () => {
       
       {/* Hero Section */}
       <div 
-        className="pt-28 pb-12 md:pb-20 px-4 md:px-8 mx-auto flex flex-col items-center text-center bg-cover bg-center min-h-[600px] md:min-h-[900px] w-full"
+        className="pt-[480px] md:pt-0 pb-12 md:pb-22 px-4 md:px- mx-auto flex flex-col items-start justify-center md:items-start text-left bg-cover bg-center min-h-[600px] md:min-h-[900px] w-full"
         style={{ backgroundImage: `url(${heroBg})` }}
       >
-        <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
+        <div className="max-w-3xl mx-auto md:mx-0 flex flex-col items-center text-left md:pl-0">
         <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight"
+            className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight text-center"
         >
             Master any subject with <span className="text-green-500 gradient-to-r from-yellow-500 to-green-600">Lextorah AI Tutor</span>
         </motion.h1>
@@ -56,7 +56,7 @@ const Home = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-xl md:text-2xl text-white mb-10 max-w-3xl leading-relaxed"
+            className="text-xl md:text-2xl text-white mb-10 max-w-3xl leading-relaxed text-center"
         >
             Experience personalized learning with voice interaction, step-by-step guidance, and instant feedback.
         </motion.p>
@@ -64,12 +64,12 @@ const Home = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="flex flex-col sm:flex-row gap-4"
+            className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-            <a href="https://www.lextorah-elearning.com/elearning/register" className="px-8 py-4 bg-green-500 hover:bg-green-600 text-white text-lg font-bold rounded-full transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">
+            <a href="https://www.lextorah-elearning.com/elearning/register" className="px-8 py-4 bg-[#00C950] hover:bg-green-700 text-white text-lg font-bold rounded-4xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">
                 Get Started for Free
             </a>
-             <Link to="/login" className="px-8 py-4 bg-white text-slate-700 border-2 border-slate-100 hover:border-green-200 text-lg font-bold rounded-full transition-all hover:-translate-y-1">
+             <Link to="/login" className="px-8 py-4 bg-white text-slate-700 border-2 border-slate-100 hover:border-green-200 text-lg font-bold rounded-4xl text-center transition-all hover:-translate-y-1">
                 Log In
             </Link>
         </motion.div>
@@ -85,10 +85,19 @@ const Home = () => {
         className='px-6 md:px-12 lg:px-28 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center' 
         id='aitutor'
     >
-        <motion.img variants={fadeInUp} src={lextorah} alt="" className="w-full h-auto rounded-2xl" />
+        <motion.div variants={fadeInUp} className="relative">
+            <img src={msLexi} alt="Ms. Lexi" className="w-full h-auto" />
+            <div className="absolute bottom-6 right-0 md:bottom-1 md:-right-10 bg-white p-4 md:p-5 rounded-2xl shadow-lg border border-slate-50 z-20 max-w-[200px] md:max-w-[240px]">
+                <div className="flex items-center gap-3 mb-1.5">
+                    <div className="w-2.5 h-2.5 bg-[#22C55E] rounded-full animate-pulse"></div>
+                    <h3 className="font-bold text-slate-900 text-sm md:text-base">Available 24/7</h3>
+                </div>
+                <p className="text-[10px] md:text-xs text-slate-500 leading-snug">Ready to help you learn anytime, anywhere</p>
+            </div>
+        </motion.div>
         <motion.div variants={fadeInUp}>
         <div className='bg-[#CCFBF1] py-3 px-6 rounded-full mb-6'>
-            <h1 className='text-[#0F766E] text-[24px] font-InterBold'> Meet Ms. Lexi     — Your AI Tutor & Learning Guide</h1>
+            <h1 className='text-[#0F766E] text-[24px] font-InterBold'> Meet Ms. Lexi® — Your AI Tutor & Learning Guide</h1>
         </div>
             <p className='text-[#374151] text-lg mb-6 font-Inter'>Ms. Lexi is Lextorah's AI-powered tutor and learning assistant, designed
                 to support learners, teachers, and institutions with personalized, on-
@@ -253,7 +262,7 @@ const Home = () => {
             id='howitworks'
         >
             <motion.div variants={fadeInUp}>
-                <h1 className='bg-[#CCFBF1] px-8 md:px-15 py-5 rounded-full w-fit mx-auto text-[#0F766E] font-InterBold text-[20px] md:text-[24px]'>Simple & Effective</h1>
+                <h1 className='bg-[#CCFBF1] px-8 md:px-15 py-5 rounded-full w-fit mx-auto text-[#0F766E] font-InterBold text-[20px] md:text-[42px]'>Simple & Effective</h1>
                 <h1 className='w-fit mx-auto mt-4 font-InterBold text-3xl md:text-[39px]'>How it works</h1>
                 <p className='w-fit mx-auto text-[#4B5563] mt-4 font-Inter text-center'>Four simple steps to smarter learning</p>
             </motion.div>
@@ -279,7 +288,7 @@ const Home = () => {
                     <img src={practice} alt="" className='mb-6' />
                     <PenLine className="w-12 h-12 py-1 px-3 bg-[#CCFBF1] rounded-lg text-[#0D9488] mb-3" />
                     <h1 className='font-InterBold mb-3'>Practice</h1>
-                    <p className='font-Inter text-[#4B5563]'>Learners receive exercises, quizzes, and revision prompts.</p>
+                    <p className='font-Inter text-[#4B5563] max-w-48'>Learners receive exercises, quizzes, and revision prompts.</p>
 
                 </motion.div>
 
@@ -306,7 +315,7 @@ const Home = () => {
             className='px-6 md:px-12 lg:px-20 py-16 md:py-20'
         >
             <motion.div variants={fadeInUp} className='px-0 md:px-6 text-center'>
-                <h1 className='text-[#0F766E] font-InterBold text-xl md:text-2xl bg-[#CCFBF1] mx-auto w-fit rounded-full py-4 px-4 mb-6'>Why Choose Lextorah AI?</h1>
+                <h1 className='text-[#0F766E] font-InterBold text-xl md:text-[52px] bg-[#CCFBF1] mx-auto w-fit rounded-full py-4 px-4 mb-6'>Why Choose Lextorah AI?</h1>
                 <h2 className='font-InterBold text-3xl md:text-4xl text-center mb-4'>Built for Education. Designed for Impact.</h2>
                 <p className='font-Inter text-[#4B5563] text-center mt-2 text-lg'>Not just another chatbot—a purpose-built educational AI platform</p>
             </motion.div>
@@ -318,7 +327,7 @@ const Home = () => {
 
                 <motion.div variants={staggerContainer} className='space-y-6'>
                     <div className='p-6 flex gap-4 bg-gradient-to-br from-[#F0FDFA] to-[#FFFFFF] rounded-xl shadow-xl border border-[#CCFBF1] transition-transform hover:-translate-y-1'>
-                        <BookOpen className="w-12 h-12 py-1 px-3 bg-[#CCFBF1] rounded-lg text-[#0D9488] mb-3 flex-shrink-0" />
+                        <BookOpen className="w-12 h-12 py-1 px-3 bg-[#0D9488] rounded-lg text-white mb-3 flex-shrink-0" />
                         <div className='gap-2' >
                             <h1 className='font-InterBold'>Education-First AI</h1>
                             <p className='font-Inter text-[#374151] text-sm'>Not a generic chatbot—purpose-built for learning with pedagogical principles at its core.</p>
@@ -326,7 +335,7 @@ const Home = () => {
                     </div>
 
                     <div className='p-6 flex gap-4 bg-gradient-to-br from-[#F0FDFA] to-[#FFFFFF] rounded-xl shadow-xl border border-[#CCFBF1] transition-transform hover:-translate-y-1'>
-                        <NotepadText className="w-12 h-12 py-1 px-3 bg-[#CCFBF1] rounded-lg text-[#0D9488] mb-3 flex-shrink-0" />
+                        <NotepadText className="w-12 h-12 py-1 px-3 bg-[#0D9488] rounded-lg text-white mb-3 flex-shrink-0" />
                         <div className='gap-2' >
                             <h1 className='font-InterBold'>Curriculum Aligned</h1>
                             <p className='font-Inter text-[#374151] text-sm'>Aligned with Lextorah curricula and programs to ensure consistent, quality education.</p>
@@ -334,7 +343,7 @@ const Home = () => {
                     </div>
 
                     <div className='p-6 flex gap-4 bg-gradient-to-br from-[#F0FDFA] to-[#FFFFFF] rounded-xl shadow-xl border border-[#CCFBF1] transition-transform hover:-translate-y-1'>
-                        <ShieldCheck className="w-12 h-12 py-1 px-3 bg-[#CCFBF1] rounded-lg text-[#0D9488] mb-3 flex-shrink-0" />
+                        <ShieldCheck className="w-12 h-12 py-1 px-3 bg-[#0D9488] rounded-lg text-white mb-3 flex-shrink-0" />
                         <div className='gap-2' >
                             <h1 className='font-InterBold'>Ethical Learning Support</h1>
                             <p className='font-Inter text-[#374151] text-sm'>No shortcuts or academic misconduct—designed to support genuine understanding.</p>
@@ -342,7 +351,7 @@ const Home = () => {
                     </div>
 
                     <div className='p-6 flex gap-4 bg-gradient-to-br from-[#F0FDFA] to-[#FFFFFF] rounded-xl shadow-xl border border-[#CCFBF1] transition-transform hover:-translate-y-1'>
-                        <Globe className="w-12 h-12 py-1 px-3 bg-[#CCFBF1] rounded-lg text-[#0D9488] mb-3 flex-shrink-0" />
+                        <Globe className="w-12 h-12 py-1 px-3 bg-[#0D9488] rounded-lg text-white mb-3 flex-shrink-0" />
                         <div className='gap-2' >
                             <h1 className='font-InterBold'>Multilingual & Inclusive</h1>
                             <p className='font-Inter text-[#374151] text-sm'>Supports multiple languages and learning levels for diverse learners worldwide.</p>
@@ -350,7 +359,7 @@ const Home = () => {
                     </div>
 
                     <div className='p-6 flex gap-4 bg-gradient-to-br from-[#F0FDFA] to-[#FFFFFF] rounded-xl shadow-xl border border-[#CCFBF1] transition-transform hover:-translate-y-1'>
-                        <MapPin className="w-12 h-12 py-1 px-3 bg-[#CCFBF1] rounded-lg text-[#0D9488] mb-3 flex-shrink-0" />
+                        <MapPin className="w-12 h-12 py-1 px-3 bg-[#0D9488] rounded-lg text-white mb-3 flex-shrink-0" />
                         <div className='gap-2' >
                             <h1 className='font-InterBold'>Built for Africa & Beyond</h1>
                             <p className='font-Inter text-[#374151] text-sm'>Designed for African and global learners with culturally relevant content.</p>
@@ -487,11 +496,11 @@ const Home = () => {
 
        {/* CTA Section */}
        <div className="py-18 relative">
-           <div className="max-w-5xl mx-auto px-4 text-center">
+           <div className="max-w-7xl mx-auto px-4 text-center">
                <div className="bg-[#0F766E] rounded-3xl p-12 md:p-20 relative overflow-hidden">
                     <div className="relative z-10">
                         <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Start Learning Smarter with Ms. Lexi®</h2>
-                        <p className="text-slate-300 text-lg mb-10 max-w-2xl mx-auto">Join thousands of learners, educators, and institutions transforming
+                        <p className="text-slate-300 text-lg mb-10 max-w-2xl mx-auto px-11">Join thousands of learners, educators, and institutions transforming
 education with AI-powered support</p>
                         <a href="https://www.lextorah-elearning.com/elearning/register" className="inline-block px-10 py-5 bg-white hover:bg-green-600 text-[#0D9488] font-bold rounded-full transition-all shadow-lg hover:shadow-green-500/25 text-lg hover:text-white">
                             Sign Up Now
@@ -501,11 +510,11 @@ education with AI-powered support</p>
            </div>
        </div>
 
-       <footer className="px-6 md:px-12 lg:px-20 bg-gradient-to-r from-[#0D9488] to-[#0F766E]">
+       <footer className="px-6 md:px-12 lg:px-20 bg-linear-to-r from-[#0D9488] to-[#0F766E]">
         <div className="py-16 px-4 md:px-8 space-y-12">
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12'>
                 <div className='space-y-8'>
-                    <img src={logo} alt="" className='w-[128px]' />
+                    <img src={logo} alt="" className='w-32' />
                     <h1 className='text-white font-Inter'>Empowering Learning. Guiding Progress Globally.</h1>
                     <div className='flex gap-4 '>
                         <Instagram className='text-white'/>
@@ -516,29 +525,29 @@ education with AI-powered support</p>
                 </div>
 
                 <div className='space-y-8 '>
-                    <h1 className='font-InterBold text-white'>Product</h1>
-                    <ul className='space-y-3'>
+                    <h2 className='font-Inter text-white'>Explore Lextorah Programs.</h2>
+                    {/* <ul className='space-y-3'>
                         <li className='text-sm font-Inter text-white'>AI Tutor</li>
                         <li className='text-sm font-Inter text-white'>Digital Learning Support</li>
                         <li className='text-sm font-Inter text-white'>For Students</li>
                         <li className='text-sm font-Inter text-white'>For Parents</li>
                        
-                    </ul>
+                    </ul> */}
                 </div>
                 <div className='space-y-8 '>
-                    <h1 className='font-InterBold text-white'>Company</h1>
+                    {/* <h1 className='font-InterBold text-white'>Company</h1> */}
                     <ul className='space-y-3'>
                         <li className='text-sm font-Inter text-white'>About Us</li>
-                        <li className='text-sm font-Inter text-white'>Contact Us</li>
+                        <li className='text-sm font-Inter text-[#FFFFFF] py-0.5'>Contact Us</li>
                     </ul>
                 </div>
                 <div className='space-y-8 '>
-                    <h1 className='font-InterBold text-white'>Resources</h1>
+                    {/* <h1 className='font-InterBold text-white'>Resources</h1> */}
                     <ul className='space-y-3'>
-                        <li className='text-sm font-Inter text-white'>Help Center</li>
+                        {/* <li className='text-sm font-Inter text-white'>Help Center</li> */}
                         <li className='text-sm font-Inter text-white'>Privacy Policy</li>
-                        <li className='text-sm font-Inter text-white'>Terms of Use</li>
-                        <li className='text-sm font-Inter text-white'>Cookie Policy</li>
+                        <li className='text-sm font-Inter text-white'>Terms of Service</li>
+                        {/* <li className='text-sm font-Inter text-white'>Cookie Policy</li> */}
                     </ul>
                 </div>
 

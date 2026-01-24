@@ -24,26 +24,26 @@ const NavBar = () => {
        
         {/* Desktop Menu */}
         <div className='items-center gap-8 hidden lg:flex'>
-            <NavLink to='/' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
-                Home
-            </NavLink>
             <a href='/#aitutor' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
-                AI Tutor
+                Meet Ms. Lexi®
+            </a>
+            <a href='/#features' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
+                Learners
             </a>
              <a href='/#features' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
-                Features
+                Teachers
             </a>
-            <a href='/#howitworks' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
-                    How It Works
+            <a href='/#features' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
+                    Parents
+            </a>
+            <a href='/#features' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
+                    Institutions
             </a>
 
             
             <div className="flex items-center gap-4 ml-4">
-                <Link to='/login' className='text-slate-900 font-bold hover:text-green-600 transition-colors'>
-                    Log In
-                </Link>
-                <Link to='https://www.lextorah-elearning.com/elearning/register' className='px-5 py-2.5 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full transition-all shadow-md hover:shadow-lg'>
-                    Sign Up
+                <Link to='https://www.lextorah-elearning.com/elearning/register' className='px-5 py-2.5 bg-[#0D9488] hover:bg-green-700 text-white font-bold rounded-md transition-all shadow-md hover:shadow-lg'>
+                    Get Started
                 </Link>
             </div>
         </div>
