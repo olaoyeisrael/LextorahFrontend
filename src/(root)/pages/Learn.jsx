@@ -1,4 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react'
+
+import { apiClient } from '../../utils/api';
+
+
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -61,18 +65,19 @@ const Learn = () => {
                 // If "All" access, we might need a level from localStorage or location.
                 let level = localStorage.getItem('last_level');
                 console.log("level:", level);
-                let url = `${import.meta.env.VITE_BACKEND_URL}/course_structure`;
-                console.log("url:", url);
+
+            
+
+                // let url = `${import.meta.env.VITE_BACKEND_URL}/course_structure`;
+                // console.log("url:", url);
               
 
-                const res = await fetch(url, {
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    method: 'GET'
-                });
+                const res = await apiClient('/course_structure');
                 
-                if (!res.ok) {
-                    throw new Error("Failed to fetch structure");
-                }
+                // if (!res.ok) {
+                //     throw new Error("Failed to fetch structure");
+                // } // apiClient handles errors roughly but returns response. res.ok is available since apiClient returns fetch response (after interceptor)
+
 
                 const data = await res.json();
          
@@ -283,12 +288,10 @@ const Learn = () => {
               try {
                   // Save Quiz Result
                   const finalScore = score + (isCorrect ? 1 : 0);
-                  await fetch(`http://localhost:8000/submit_quiz_result`, {
+
+                  await apiClient('/submit_quiz_result', {
                       method: 'POST',
-                      headers: {
-                          'Content-Type': 'application/json',
-                          'Authorization': `Bearer ${token}` 
-                      },
+
                       body: JSON.stringify({
                           course_title: learningContext.course,
                           level: learningContext.level,
@@ -305,12 +308,10 @@ const Learn = () => {
                   });
 
                   // Complete Topic
-                  await fetch(`http://localhost:8000/complete_topic`, {
+
+                  await apiClient('/complete_topic', {
                       method: 'POST',
-                      headers: {
-                          'Content-Type': 'application/json',
-                          'Authorization': `Bearer ${token}` 
-                      },
+
                       body: JSON.stringify({
                           course: learningContext.course,
                           level: learningContext.level,

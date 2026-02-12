@@ -3,6 +3,8 @@ import { useSelector } from 'react-redux';
 import { Calendar, Clock, Link, Save, Video, Edit2, Check, X, Trash2 } from 'lucide-react';
 import { COURSE_GROUPS, getLevelsForCourse } from '../../utils/courseData';
 
+import { apiClient } from '../../utils/api';
+
 const LiveClasses = () => {
     const { token } = useSelector((state) => state.user);
     const [schedule, setSchedule] = useState([]);
@@ -25,9 +27,7 @@ const LiveClasses = () => {
 
     const fetchClasses = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/live_classes?course=${formData.course.toLowerCase()}&level=${formData.level.toLowerCase()}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const res = await apiClient(`/live_classes?course=${formData.course.toLowerCase()}&level=${formData.level.toLowerCase()}`);
             const data = await res.json();
             setSchedule(data.live_classes || []);
         } catch (err) {
@@ -59,12 +59,8 @@ const LiveClasses = () => {
                 level: formData.level.toLowerCase()
             };
 
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/live_class`, {
+            const res = await apiClient('/live_class', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
                 body: JSON.stringify(submitData)
             });
             
@@ -84,12 +80,8 @@ const LiveClasses = () => {
 
     const handleUpdateRecording = async (id) => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/live_class/${id}`, {
+            const res = await apiClient(`/live_class/${id}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
                 body: JSON.stringify({ recording_link: editLink })
             });
 
@@ -104,12 +96,8 @@ const LiveClasses = () => {
 
     const handleJoinClass = async (cls) => {
         try {
-             await fetch(`${import.meta.env.VITE_BACKEND_URL}/complete_live_class`, {
+             await apiClient('/complete_live_class', {
                  method: 'POST',
-                 headers: {
-                     'Content-Type': 'application/json',
-                     'Authorization': `Bearer ${token}`
-                 },
                  body: JSON.stringify({
                      topic: cls.topic,
                      course: cls.course,
@@ -127,9 +115,8 @@ const LiveClasses = () => {
         if (!window.confirm("Are you sure you want to delete this class?")) return;
         
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/live_class/${id}`, {
+            const res = await apiClient(`/live_class/${id}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (res.ok) {

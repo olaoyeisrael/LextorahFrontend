@@ -3,6 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, CheckCircle2, XCircle, Timer, Award, MoveRight, Loader2, Lock } from 'lucide-react';
 
+
+import { apiClient } from '../../utils/api';
+
+
 const Test = () => {
   const [step, setStep] = useState('setup'); // setup, taking, result
   const enrolledCourse = localStorage.getItem('enrolledCourse')
@@ -21,13 +25,9 @@ const Test = () => {
     const token = localStorage.getItem('token');
     const getCourses = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/course_structure`, {
-            method: 'GET',  
-            headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-            }
-        });
+
+        const res = await apiClient('/course_structure');
+
         const data = await res.json();
         console.log(data.structure);
         setTopics(data.structure);
@@ -58,7 +58,9 @@ const Test = () => {
     setError('');
     console.log("testMaterial: ",testMaterial)
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/quiz`, {
+
+      const response = await apiClient('/quiz', {
+
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(testMaterial),
@@ -143,12 +145,10 @@ const Test = () => {
                 };
             });
 
-            fetch(`${import.meta.env.VITE_BACKEND_URL}/submit_quiz_result`, {
+
+            apiClient('/submit_quiz_result', {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
+
                 body: JSON.stringify({
                     topic: testMaterial.topic,
                     course_title: (enrolledCourse || "General").toLowerCase(),

@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { COURSE_GROUPS, getLevelsForCourse } from '../../utils/courseData';
 
 
+import { apiClient } from '../../utils/api';
+
 const Upload = () => {
     const navigate = useNavigate();
 
@@ -25,7 +27,33 @@ const Upload = () => {
     const fileInputRef = useRef(null)
     const [mes, setMes] = useState('')
     const [loading, setLoading] = useState(false)
+    const [topics, setTopics] = useState([]);
+    const [loadingTopics, setLoadingTopics] = useState(false);
     
+    // Fetch topics when course or level changes
+    useEffect(() => {
+        if (form.course_title && form.level) {
+            const fetchTopics = async () => {
+                setLoadingTopics(true);
+                try {
+                    // const token = getToken(); // handled by apiClient
+                    const res = await apiClient(`/curriculum?course=${form.course_title}&level=${form.level}`);
+                    const data = await res.json();
+                    if (data.curriculum) {
+                        setTopics(data.curriculum);
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch topics", err);
+                } finally {
+                    setLoadingTopics(false);
+                }
+            };
+            fetchTopics();
+        } else {
+            setTopics([]);
+        }
+    }, [form.course_title, form.level]);
+
     // When course changes, reset level
     const handleCourseChange = (e) => {
         setForm({
@@ -72,23 +100,19 @@ const Upload = () => {
 
         console.log("formdata: ", formData)
     
-        const token = getToken();
+        // const token = getToken(); // handled by apiClient
         
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/upload`,{
+            const res = await apiClient('/upload', {
                 method: "POST",
                 body: formData,
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
             })
 
             const response = await res.json()
             console.log("Response: ",response)
-            setMes(response.msg || "Uploaded successfully!")
             
-            // Success cleanup
             if (res.ok) {
+                setMes(response.msg || "Uploaded successfully!")
                 setForm({
                     course_title: "",
                     topic: "",
@@ -99,6 +123,8 @@ const Upload = () => {
                 if (fileInputRef.current) {
                     fileInputRef.current.value = ""
                 }
+            } else {
+                 setMes(response.error || response.detail || "Upload failed. Please try again.")
             }
         } catch (err) {
             console.error(err);
@@ -141,30 +167,6 @@ const Upload = () => {
             </div>
 
             <div  className='flex gap-2 flex-col '>
-                <label htmlFor="" className='text-lg font-medium text-slate-700'>Topic/Module</label>
-                <input 
-                    type="text" 
-                    className='border border-slate-300 rounded-xl p-3 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all w-full' 
-                    name='topic' 
-                    value={form.topic} 
-                    onChange={handleChange}
-                    placeholder="e.g. Introduction to Verbs"
-                />
-            </div>
-
-            <div  className='flex gap-2 flex-col '>
-                <label htmlFor="" className='text-lg font-medium text-slate-700'>Skill</label>
-                <input 
-                    type="text" 
-                    className='border border-slate-300 rounded-xl p-3 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all w-full' 
-                    name='skill' 
-                    value={form.skill} 
-                    onChange={handleChange}
-                    placeholder="e.g. Listening"
-                />
-            </div>
-
-            <div  className='flex gap-2 flex-col '>
                 <label htmlFor="" className='text-lg font-medium text-slate-700'>Level</label>
                 <select 
                     name="level" 
@@ -178,6 +180,43 @@ const Upload = () => {
                         <option key={level} value={level}>{level}</option>
                     ))}
                 </select>
+            </div>
+
+            <div  className='flex gap-2 flex-col '>
+                <label htmlFor="" className='text-lg font-medium text-slate-700'>Topic/Module</label>
+                {loadingTopics ? (
+                    <div className="flex items-center gap-2 p-3 text-slate-500 bg-slate-50 border border-slate-200 rounded-xl">
+                        <Loader size={16} className="animate-spin" /> Loading topics...
+                    </div>
+                ) : (
+                    <select 
+                        name="topic"
+                        value={form.topic} 
+                        onChange={handleChange}
+                        className='border border-slate-300 rounded-xl p-3 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all w-full bg-white'
+                        disabled={!form.course_title || !form.level || topics.length === 0}
+                    >
+                        <option value="">Select Topic</option>
+                        {topics.map((t) => (
+                            <option key={t.id || t._id} value={t.topic}>{t.topic}</option>
+                        ))}
+                    </select>
+                )}
+                {topics.length === 0 && form.course_title && form.level && !loadingTopics && (
+                    <p className="text-xs text-amber-600">No topics found. Please add topics to the curriculum first.</p>
+                )}
+            </div>
+
+            <div  className='flex gap-2 flex-col '>
+                <label htmlFor="" className='text-lg font-medium text-slate-700'>Skill</label>
+                <input 
+                    type="text" 
+                    className='border border-slate-300 rounded-xl p-3 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all w-full' 
+                    name='skill' 
+                    value={form.skill} 
+                    onChange={handleChange}
+                    placeholder="e.g. Listening"
+                />
             </div>
 
             <div className='flex gap-2 flex-col mt-4'>

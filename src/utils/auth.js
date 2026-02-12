@@ -2,13 +2,14 @@ export const getToken = () => {
     return localStorage.getItem('token');
 };
 
+
+import { apiClient } from './api';
+
 export const decode = async(token) => {
     try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/decode?token=` + token, {
+        const response = await apiClient(`/decode?token=${token}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+
         });
         const data = await response.json();
         console.log("Decoded:", data);

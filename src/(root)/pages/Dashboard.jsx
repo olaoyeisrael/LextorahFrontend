@@ -8,6 +8,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { updateEnrollment } from '../../store/userSlice';
 import Schedule from '../../components/Schedule';
 
+import { apiClient } from '../../utils/api';
+
 const Dashboard = () => {
   const { firstName, token, enrolledLevel, enrolledCourse } = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -39,11 +41,10 @@ const Dashboard = () => {
       if (!token) return;
       setLoading(true);
       try {
-          await   fetch(`${import.meta.env.VITE_BACKEND_URL}/enroll`, 
+          await apiClient('/enroll', 
             {
                 method: 'POST',
                 body: JSON.stringify({ course: "German", level: level }),
-                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
             }
           );
           dispatch(updateEnrollment({ course: "German", level }));
@@ -121,9 +122,7 @@ console.log("Enrolled course:", enrolledCourse)
     const fetchLiveClasses = async () => {
         if (!enrolledCourse || !enrolledLevel) return;
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/live_classes?course=${enrolledCourse.toLowerCase()}&level=${enrolledLevel.toLowerCase()}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const res = await apiClient(`/live_classes?course=${enrolledCourse.toLowerCase()}&level=${enrolledLevel.toLowerCase()}`);
             const data = await res.json();
             console.log("Live classes:", data)
             setLiveClasses(data.live_classes || []);

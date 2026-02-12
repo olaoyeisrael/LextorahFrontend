@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, Loader } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+
+import { apiClient } from '../utils/api';
+
+
 const SupportChat = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
@@ -38,9 +42,10 @@ const SupportChat = () => {
         setLoading(true);
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/support`, {
+
+            const response = await apiClient('/support', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+
                 body: JSON.stringify({
                     session_id: sessionId,
                     question: userMsg

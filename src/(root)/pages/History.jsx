@@ -3,6 +3,8 @@ import { useSelector } from 'react-redux';
 import { MessageSquare, Calendar, ChevronRight, RefreshCw, Trash2, CheckCircle, Award, Video, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { apiClient } from '../../utils/api';
+
 const History = () => {
   const { user_id, token } = useSelector((state) => state.user);
   const [history, setHistory] = useState([]);
@@ -11,9 +13,7 @@ const History = () => {
   const fetchHistory = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/history/${user_id}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await apiClient(`/history/${user_id}`);
       const data = await res.json();
       console.log("History Data:", data);
       setHistory(data.History || []);

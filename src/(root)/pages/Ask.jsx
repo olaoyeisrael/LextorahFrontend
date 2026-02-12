@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import {Mic, Send, Volume2, Bot, User, Loader, Play, Pause} from 'lucide-react'
 import msLexi from '../../assets/msLexi.png'
+
+import { apiClient } from '../../utils/api';
+
+
 const Ask = () => {
   const [userId, setUserId] = useState(null);
   const [question, setQuestion] = useState('');
@@ -23,6 +27,12 @@ const Ask = () => {
   useEffect(() => {
       scrollToBottom();
   }, [messages]);
+
+
+
+
+// ... 
+
 
   const handleMicClick = async () => {
     if (isRecording) {
@@ -49,7 +59,8 @@ const Ask = () => {
             
             setLoading(true);
             try {
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/transcribe`, {
+                const res = await apiClient('/transcribe', {
+
                     method: 'POST',
                     body: formData
                 });
@@ -91,7 +102,9 @@ const Ask = () => {
             if (!userId) return;
             
             try {
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/chat_history/${userId}`);
+
+                const response = await apiClient(`/chat_history/${userId}`);
+
                 if (!response.ok) throw new Error('Failed to fetch history');
                 
                 const data = await response.json();
@@ -137,14 +150,16 @@ const Ask = () => {
     pushMessage(userMsg);
     setQuestion('');
     setLoading(true);
-    const token = localStorage.getItem('token');
+
+    // const token = localStorage.getItem('token'); // Handled by apiClient
    
     try {
-      const url = `${import.meta.env.VITE_BACKEND_URL}/ask?chatid=${encodeURIComponent(userId)}`;
-      const res = await fetch(url, {
+      // const url = `${import.meta.env.VITE_BACKEND_URL}/ask?chatid=${encodeURIComponent(userId)}`;
+      const res = await apiClient(`/ask?chatid=${encodeURIComponent(userId)}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
+        headers: { 
+            // 'Authorization': 'Bearer ' + token // Handled by apiClient
+
          },
         body: JSON.stringify({ question: q }),
       });
@@ -187,9 +202,10 @@ const Ask = () => {
     setPlayingState({ id: msgId, isPlaying: false, loading: true });
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/getAudio`, {
+
+      const res = await apiClient('/getAudio', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+
         body: JSON.stringify({ input: text }), 
       });
       if (!res.ok) {
@@ -216,11 +232,9 @@ const Ask = () => {
   const clearConversation = async () => {
       try {
           // Clear backend
-          await fetch(`${import.meta.env.VITE_BACKEND_URL}/chat_history`, {
+
+          await apiClient('/chat_history', {
               method: 'DELETE',
-              headers: { 
-                  'Authorization': 'Bearer ' + localStorage.getItem('token')
-              }
           });
           // Clear frontend
           setMessages([]);

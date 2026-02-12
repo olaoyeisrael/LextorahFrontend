@@ -13,7 +13,10 @@ import ask from '../assets/ask.png'
 import learn from '../assets/learn.png'
 import progress from '../assets/progress.png'
 import practice from '../assets/practice.png'
-import educationtech from '../assets/educationtechnology.png'
+
+import educationtech from '../assets/EducationTechnology.png'
+
+
 import logo from '../assets/logo.png'
 
 
@@ -322,7 +325,10 @@ const Home = () => {
 
             <div className='grid lg:grid-cols-2 gap-12 mt-8 md:mt-16 items-center py-8'>
                 <motion.div variants={fadeInUp} className='w-full rounded-xl'>
-                    <img src={educationtech} alt="" className='rounded-2xl w-full h-auto' />
+
+
+                     <img src={educationtech} alt="" className='rounded-2xl w-full h-auto' /> 
+
                 </motion.div>
 
                 <motion.div variants={staggerContainer} className='space-y-6'>

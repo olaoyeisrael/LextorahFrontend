@@ -3,18 +3,21 @@ import { useSelector } from 'react-redux';
 import { BarChart, Search, FileText, Eye, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { COURSE_GROUPS, getLevelsForCourse } from '../../utils/courseData';
+
+import { apiClient } from '../../utils/api';
+
 const StudentPerformance = () => {
     const { token } = useSelector((state) => state.user);
     const [performanceData, setPerformanceData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedResult, setSelectedResult] = useState(null);
+    const [filters, setFilters] = useState({ course: '', level: '' });
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/student_performance`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const res = await apiClient('/student_performance');
                 if (res.ok) {
                     const data = await res.json();
                     setPerformanceData(data.performance || []);
@@ -28,10 +31,78 @@ const StudentPerformance = () => {
         fetchData();
     }, [token]);
 
+    const handleFilterChange = (e) => {
+        if (e.target.name === 'course') {
+            const levels = getLevelsForCourse(e.target.value);
+            setFilters({ ...filters, course: e.target.value, level: '' });
+        } else {
+            setFilters({ ...filters, [e.target.name]: e.target.value });
+        }
+    };
+
+    const filteredData = performanceData.filter(item => {
+        // DEBUG: Check values
+        // console.log("Item:", item.course_title, item.level, "Filter:", filters.course, filters.level);
+        
+        const itemCourse = item.course_title ? item.course_title.toLowerCase().trim() : '';
+        const filterCourse = filters.course ? filters.course.toLowerCase().trim() : '';
+        
+        const itemLevel = item.level ? item.level.toLowerCase().trim() : '';
+        const filterLevel = filters.level ? filters.level.toLowerCase().trim() : '';
+
+        const matchesCourse = filterCourse ? itemCourse === filterCourse : true;
+        const matchesLevel = filterLevel ? itemLevel === filterLevel : true;
+        
+        return matchesCourse && matchesLevel;
+    });
+
     return (
         <div className="max-w-6xl mx-auto p-4">
             <h1 className="text-3xl font-bold text-slate-900 mb-2">Student Performance</h1>
             <p className="text-slate-600 mb-8">Overview of student assessments and progress.</p>
+
+            {/* Filter Section */}
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 mb-6 flex flex-wrap gap-4 items-center">
+                <div className="flex items-center gap-2 text-slate-500 font-medium">
+                    <Search className="w-5 h-5" />
+                    <span>Filter Results:</span>
+                </div>
+                <select 
+                    name="course" 
+                    value={filters.course} 
+                    onChange={handleFilterChange} 
+                    className="p-2 border border-slate-200 rounded-lg text-sm min-w-[200px] focus:ring-green-500 focus:border-green-500 outline-none"
+                >
+                    <option value="">All Courses</option>
+                    {COURSE_GROUPS.map((group, idx) => (
+                        <optgroup key={idx} label={group.groupName}>
+                            {group.courses.map(course => (
+                                <option key={course} value={course}>{course}</option>
+                            ))}
+                        </optgroup>
+                    ))}
+                </select>
+                <select 
+                    name="level" 
+                    value={filters.level} 
+                    onChange={handleFilterChange}
+                    disabled={!filters.course}
+                    className="p-2 border border-slate-200 rounded-lg text-sm min-w-[150px] focus:ring-green-500 focus:border-green-500 outline-none disabled:bg-slate-50 disabled:text-slate-400"
+                >
+                    <option value="">All Levels</option>
+                    {filters.course && getLevelsForCourse(filters.course).map(level => (
+                        <option key={level} value={level}>{level}</option>
+                    ))}
+                </select>
+                {(filters.course || filters.level) && (
+                    <button 
+                        onClick={() => setFilters({ course: '', level: '' })}
+                        className="text-sm text-red-500 hover:text-red-700 font-medium ml-auto"
+                    >
+                        Clear Filters
+                    </button>
+                )}
+            </div>
 
             <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
                 <div className="overflow-x-auto">
@@ -51,10 +122,13 @@ const StudentPerformance = () => {
                         <tbody className="divide-y divide-slate-100">
                             {loading ? (
                                 <tr><td colSpan="8" className="p-8 text-center">Loading data...</td></tr>
-                            ) : performanceData.length === 0 ? (
-                                <tr><td colSpan="8" className="p-8 text-center">No assessment records found.</td></tr>
+                            ) : filteredData.length === 0 ? (
+                                <tr><td colSpan="8" className="p-8 text-center text-slate-500">
+                                    {performanceData.length === 0 ? "No assessment records found." : "No results match your filters."}
+                                </td></tr>
                             ) : (
-                                performanceData.map((item, idx) => (
+                                filteredData.map((item, idx) => (
+
                                     <motion.tr 
                                         key={item.id || idx}
                                         initial={{ opacity: 0 }}
@@ -99,11 +173,15 @@ const StudentPerformance = () => {
 
             <AnimatePresence>
                 {selectedResult && (console.log("Selected Result:", selectedResult),
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+                    <div 
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+                        onClick={() => setSelectedResult(null)}
+                    >
                         <motion.div 
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
+                            onClick={(e) => e.stopPropagation()}
                             className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
                         >
                             <div className="p-6 border-b border-slate-100 flex justify-between items-center">

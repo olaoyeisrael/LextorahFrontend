@@ -40,6 +40,12 @@ const userSlice = createSlice({
         localStorage.setItem('enrolledCourse', action.payload.course);
         localStorage.setItem('enrolledLevel', action.payload.level);
     },
+
+    updateToken: (state, action) => {
+        state.token = action.payload;
+        localStorage.setItem('token', action.payload);
+    },
+
     logout: (state) => {
       state.firstName = '';
       state.lastName = '';
@@ -61,5 +67,7 @@ const userSlice = createSlice({
   },
 });
 
-export const { setUser, logout, updateEnrollment } = userSlice.actions;
+
+export const { setUser, logout, updateEnrollment, updateToken } = userSlice.actions;
+
 export default userSlice.reducer;

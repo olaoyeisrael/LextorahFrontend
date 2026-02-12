@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { isAdmin, getToken } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
-import { Plus, BookOpen, Loader2, Trash2 } from 'lucide-react';
+import { Plus, BookOpen, Loader2, Trash2, FileText } from 'lucide-react';
 import { COURSE_GROUPS, getLevelsForCourse } from '../../utils/courseData';
+
+import { apiClient } from '../../utils/api';
 
 const Curriculum = () => {
     const navigate = useNavigate();
@@ -36,9 +38,7 @@ const Curriculum = () => {
     const fetchCurriculum = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/curriculum?course=${filters.course}&level=${filters.level}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await apiClient(`/curriculum?course=${filters.course}&level=${filters.level}`);
             const data = await res.json();
             if (data.curriculum) {
                 setItems(data.curriculum);
@@ -111,14 +111,9 @@ const Curriculum = () => {
         console.log("Batch: ",batch);
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/curriculum/batch`, {
+            const res = await apiClient('/curriculum/batch', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
                 body: JSON.stringify(batch)
-                
             });
 
             if (res.ok) {
@@ -140,9 +135,8 @@ const Curriculum = () => {
         if (!window.confirm("Are you sure you want to delete this topic?")) return;
         
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/curriculum/${id}`, {
+            const res = await apiClient(`/curriculum/${id}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (res.ok) {
@@ -303,7 +297,17 @@ const Curriculum = () => {
                                                 Mod {item.index != null ? item.index + 1 : "?"}
                                             </div>
                                             <div>
-                                                <h3 className="font-bold text-slate-800">{item.topic}</h3>
+                                                <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                                                    {item.topic}
+                                                    {item.material_filename && (
+                                                        <div 
+                                                            title={`Material: ${item.material_filename}`}
+                                                            className="text-blue-500 bg-blue-50 p-1 rounded hover:bg-blue-100 transition-colors cursor-hel"
+                                                        >
+                                                            <FileText size={16} />
+                                                        </div>
+                                                    )}
+                                                </h3>
                                             </div>
                                         </div>
 

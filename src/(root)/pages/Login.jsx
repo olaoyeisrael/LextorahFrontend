@@ -25,7 +25,9 @@ const Login = () => {
             email: credential.email,
             password: credential.password
         }
-       const response = await fetch('https://www.lextorah-elearning.com/ap/laravel/api/login', {
+
+       const response = await fetch('https://www.lextorah-elearning.com/ap/laravel/api/aitutor-login', {
+
            method: 'POST',
            headers: {
                'Content-Type': 'application/json'
@@ -33,8 +35,10 @@ const Login = () => {
            body: JSON.stringify(loginData)
        })
        const data = await response.json()
-       if (data.success) {
-        const token = data.token
+
+       if (response.ok) {
+        const token = data.access_token
+
         const decoded = await decode(token);
         console.log("decoded: ", decoded)
         
@@ -60,7 +64,9 @@ const Login = () => {
         localStorage.setItem('lastName', decoded.last_name || decoded.lastName || '')
        }else{
 
-        setError(data.msg)
+
+        setError(data.error)
+
         setLoading(false)
        }
       
@@ -115,7 +121,10 @@ const Login = () => {
                 <button className="w-full py-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all" onClick={handleLogin}>
                     Log In
                 </button>}
-                {error && <p className="text-red-500 mt-2">{error}</p>}
+
+
+                {error && <p className="text-red-500 mt-2 text-center">{error}</p>}
+
             </div>
 
             <div className="relative mb-8">

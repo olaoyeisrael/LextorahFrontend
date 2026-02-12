@@ -3,6 +3,10 @@ import { useSelector } from 'react-redux';
 import { FileText, Download, BookOpen, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+
+import { apiClient } from '../../utils/api';
+
+
 const Course = () => {
     const { token } = useSelector((state) => state.user);
     const [progress, setProgress] = useState(null);
@@ -16,18 +20,14 @@ const Course = () => {
             if (!token) return;
             try {
                 // Fetch Progress
-                // const progRes = await fetch('http://localhost:8000/progress', {
-                //     headers: { Authorization: `Bearer ${token}` }
-                // });
+                // const progRes = await apiClient('/progress');
                 // if (progRes.ok) {
                 //     const data = await progRes.json();
                 //     setProgress(data);
                 // }
 
                 // Fetch Transcripts
-                const transRes = await fetch(`http://localhost:8000/transcripts`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const transRes = await apiClient('/transcripts');
                 if (transRes.ok) {
                     const data = await transRes.json();
                     console.log("Transcripts: ",data.transcripts);
@@ -35,9 +35,7 @@ const Course = () => {
                 }
                 
                 // Fetch Structure
-                const structRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/course_structure`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const structRes = await apiClient('/course_structure');
                 if (structRes.ok) {
                     const data = await structRes.json();
                     setTopics(data.structure || []);
@@ -55,9 +53,7 @@ const Course = () => {
 
     const handleDownload = async (id, filename) => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/download_transcript/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await apiClient(`/download_transcript/${id}`);
             if (res.ok) {
                 const blob = await res.blob();
                 const url = window.URL.createObjectURL(blob);
