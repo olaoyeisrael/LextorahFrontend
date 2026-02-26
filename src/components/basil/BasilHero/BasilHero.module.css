@@ -1,0 +1,205 @@
+.hero {
+  position: relative;
+  padding: 4rem 1.5rem 8rem;
+  background: linear-gradient(135deg, #1E3A8A 0%, #1E40AF 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: white;
+  margin: 0;
+}
+
+.schoolName {
+  color: white;
+}
+
+.highlight {
+  color: white;
+}
+
+.poweredBy {
+  display: inline !important;
+  padding: var(--spacing-sm) var(--spacing-md);
+  gap: .5rem;
+  background: #E91E6333;
+  color: #FBCFE8;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  margin-bottom: var(--spacing-md);
+}
+
+.description {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.primaryButton {
+  padding: 0.75rem 1.5rem;
+  background: #E91E63;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.primaryButton:hover {
+  background: #DB2777;
+  transform: translateY(-2px);
+}
+
+.secondaryButton {
+  padding: 0.75rem 1.5rem;
+  background: #fff;
+  color: #1E3A8A;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  transition: all 0.2s ease;
+}
+
+.secondaryButton:hover {
+  border-color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.featureCard {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.featureIcon {
+  width: 40px;
+  height: 40px;
+  background: #E91E63;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.featureCard:nth-child(2) .featureIcon,
+.featureCard:nth-child(3) .featureIcon 
+{
+  background: #F472B6;
+}
+
+.featureText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.featureValue {
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+}
+
+.featureLabel {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  line-height: 0;
+}
+
+.wave svg {
+  width: 100%;
+  height: 80px;
+}
+
+@media (max-width: 968px) {
+  .container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .content {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .title {
+    text-align: center;
+  }
+
+  .featuresGrid {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 6rem 1rem 6rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .buttons {
+    flex-direction: column;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    text-align: center;
+  }
+
+  .featuresGrid {
+    grid-template-columns: 1fr;
+  }
+}

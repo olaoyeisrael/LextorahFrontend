@@ -1,0 +1,67 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 50%, #EFF6FF 100%);
+}
+
+.nav {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-sm) var(--container-padding);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logoImage {
+  width: 80px;
+  height: auto;
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.loginBtn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: background 0.2s ease;
+}
+
+.loginBtn:hover {
+  background: #1D4ED8;
+  color: #fff;
+}
+
+.helpBtn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: #16A34A;
+  color: var(--white);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid #16A34A;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.helpBtn:hover {
+  background: #15803d;
+  border-color: #15803d;
+  color: #fff;
+}

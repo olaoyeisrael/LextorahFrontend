@@ -40,6 +40,7 @@ const Learn = () => {
     const [currentTopicIndex, setCurrentTopicIndex] = useState(0);
     const [progress, setProgress] = useState(0); // Progress percentage
     const isAutoMode = false; // Placeholder for now
+    const [topicIsCompleted, setTopicIsCompleted] = useState(false);
 
     const location = useLocation();
 
@@ -105,6 +106,7 @@ const Learn = () => {
                     resolvedTopic = currentTopicObj.topic;
                     setCurrentTopic(resolvedTopic)
                     setCurrentTopicIndex(currentTopicObj.index)
+                    setTopicIsCompleted(currentTopicObj.is_completed || false)
                 }
 
                 if (!resolvedTopic) {
@@ -139,123 +141,102 @@ const Learn = () => {
 
 
 
-  useEffect(() => {
-    if (!currentTopic) return; // Wait for currentTopic to be set
+  // Start Stream function (called initially and on 'Contine')
+  const startStream = (targetSection = null, customLoadingMessage = "Agent is explaining...") => {
+    if (!currentTopic || !user_id) return;
+    
+    setLoading(true);
+    setData(""); // Clear current explanation
+    setLoadingMessage(customLoadingMessage);
+    
+    // Close existing connection if any
+    if (wsRef.current) {
+        wsRef.current.close();
+    }
 
     const BASE_URL = import.meta.env.VITE_BACKEND_URL;
-    const WS_URL = BASE_URL.replace('http', 'ws');
-    const ws = new WebSocket(`${WS_URL}/ws/teach/${user_id}`);
-    wsRef.current = ws;
-
-    ws.onopen = () => {
-      // Send initialization message with TOPIC instead of filename
-      
-      // Find the full topic object to get cloud_url/filename
-      const topicObj = topics.find(t => t.topic === currentTopic);
-      let filenameParam = null;
-      if (topicObj && topicObj.cloud_url) {
-          // Extract filename from Cloudinary URL
-          
-          filenameParam = topicObj.cloud_url;
-          console.log("Using Cloudinary Filename:", filenameParam);
-      } else if (topicObj && topicObj.file) {
-          filenameParam = topicObj.file;
-      }
-
-      ws.send(JSON.stringify({
-          token: token,
-          topic: currentTopic, // Send topic name
-          filename: filenameParam, // Send extracted filename
-          start_section: 1, // Or user's current section
-          auto: isAutoMode
-      }));
-
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const parsed = JSON.parse(event.data);
-        if (parsed.type === 'quiz') {
-            const q = typeof parsed.quiz === 'string' ? JSON.parse(parsed.quiz) : parsed.quiz;
-            setQuizData(q);
-            setLoading(false);
-            setData(null); 
-        } else if (parsed.type === 'syllabus') {
-            setSections(parsed.sections);
-        } else if (parsed.type === 'info') {
-             console.log("Info:", parsed.message);
-             setLoading(true);
-             setLoadingMessage(parsed.message); // Update UI with backend message
-        } else if (parsed.type === 'explanation') {
-
-             setData(parsed.explanation);
-             setActiveSection(parsed.section_index);
-             setLoading(false);
-             // Accumulate full content for transcript
-             if (parsed.explanation) {
-                 fullContentRef.current += `\n\n## Section ${parsed.section_index}\n\n` + parsed.explanation;
-             }
-        } else {
-             // Fallback/Legacy
-             if(parsed.explanation) {
-                 setData(parsed.explanation);
-                 setLoading(false);
-                  if (parsed.explanation) {
-                     fullContentRef.current += "\n\n" + parsed.explanation;
-                 }
-             }
-        }
-      } catch {
-         // handle error gracefully
-      }
-    };
-
-    ws.onerror = (err) => {
-      console.error('WebSocket error:', err);
-      setLoading(false); 
-    };
-
-    return () => {
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        wsRef.current.close();
-      }
-      wsRef.current = null;
-    };
-  }, [currentTopic, token, user_id, isAutoMode, topics]); // Depend on currentTopic, token, user_id, isAutoMode, topics
-
-
-  const sendCmd = (cmd, payload = {}) => {
-    setLoading(true);
-    setData(null);
-    const ws = wsRef.current;
-    if (!ws || ws.readyState !== WebSocket.OPEN) {
-      console.warn('WebSocket not open');
-      return;
+    let url = `${BASE_URL}/classroom/next/${user_id}?topic=${encodeURIComponent(currentTopic)}`;
+    if (targetSection !== null) {
+        url += `&section=${targetSection}`;
     }
-    ws.send(JSON.stringify({ cmd, ...payload }));
+    const eventSource = new EventSource(url);
+    wsRef.current = eventSource;
+    
+    let currentExplanation = "";
+
+    eventSource.onmessage = (event) => {
+        try {
+            // Check if the stream for the current chunk is done
+            if (event.data === "[DONE]") {
+                eventSource.close();
+                wsRef.current = null;
+                setLoading(false);
+                return;
+            }
+
+            const parsed = JSON.parse(event.data);
+            
+            if (parsed.type === 'quiz') {
+                const q = typeof parsed.data === 'string' ? JSON.parse(parsed.data) : parsed.data;
+                setQuizData(q);
+                setLoading(false);
+                setData(null); 
+                eventSource.close();
+                wsRef.current = null;
+            } else if (parsed.type === 'syllabus') {
+                setSections(parsed.sections);
+            } else if (parsed.type === 'info') {
+                setActiveSection(parsed.section_index);
+                setLoading(false);
+            } else if (parsed.type === 'explanation' && parsed.text) {
+                 setData((prev) => prev ? prev + parsed.text : parsed.text);
+                 currentExplanation += parsed.text;
+                 setLoading(false);
+                 // We don't append to fullContentRef on every chunk to avoid duplication.
+                 // We'll append the full text once it's completely rendered or needed.
+            }
+            
+        } catch (e) {
+             // Fallback string append if it wasn't JSON
+             setData((prev) => prev ? prev + event.data : event.data);
+        }
+    };
+
+    eventSource.onerror = (err) => {
+        console.error("SSE Connection failed:", err);
+        eventSource.close();
+        wsRef.current = null;
+        setLoading(false);
+    };
   };
 
-  const handleNext = () => {
-    // Logic to move to next section or finish
-    if (activeSection < sections.length) {
-        // Optimistic update or just wait for backend? 
-        // Backend handles "next" command best for linear flow
-        setLoading(true);
-        setLoadingMessage("Generating explanation...");
-        sendCmd('next');
-    } else {
-        // Prepare for quiz
-        setLoading(true);
-        setLoadingMessage("Generating quiz...");
-        sendCmd('next'); // trigger completion/quiz
-        // removed setLoading(false) to keep it spinning
+  useEffect(() => {
+    if (!currentTopic) return;
+    
+    // Do not auto-start if we just finished a topic or if we are in quiz mode
+    if (!quizData && !courseFinished) {
+         startStream(topicIsCompleted ? 1000 : null, topicIsCompleted ? "Generating quiz..." : "Agent is explaining...");
     }
 
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+    };
+  }, [currentTopic, user_id]); // Auto-start the stream when topic resolves
+
+  const handleNext = () => {
+     // Check if we are at the very end of sections
+     let msg = "Agent is explaining...";
+     if (sections.length > 0 && activeSection >= sections.length) {
+         msg = "Generating quiz...";
+     }
+     startStream(null, msg);
   };
 
   const handleClose = () => {
-    sendCmd('close');
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+    if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
     }
@@ -329,8 +310,10 @@ const Learn = () => {
 
 
   const handleSectionClick = (section) => {
-      setLoading(true);
-      sendCmd('goto', { section: section.index });
+      if (activeSection !== section.index) {
+          setActiveSection(section.index);
+          startStream(section.index);
+      }
   };
 
 

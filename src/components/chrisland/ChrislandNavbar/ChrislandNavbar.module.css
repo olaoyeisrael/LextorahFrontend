@@ -1,0 +1,69 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: #fff;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-sm) var(--container-padding);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.loginBtn,
+.helpBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+}
+
+.loginBtn {
+  background: #1B5E20;
+  color: var(--white);
+}
+
+.loginBtn:hover {
+  background: #207725;
+  color: var(--white);
+}
+
+.helpBtn {
+  background: #F9A825;
+  color: #1B5E20;
+  border: 1px solid var(--white);
+}
+
+.helpBtn:hover {
+  background: #b4812f;
+  color: #fff;
+}
+
+@media (max-width: 480px) {
+  .loginBtn,
+  .helpBtn {
+    padding: 0.4rem 0.75rem;
+    font-size: var(--font-size-xs);
+  }
+}

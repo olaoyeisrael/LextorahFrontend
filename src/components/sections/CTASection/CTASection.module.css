@@ -1,0 +1,79 @@
+.section {
+  padding: var(--spacing-3xl) 0;
+  background: linear-gradient(135deg, #0D9488 0%, #0F766E 50%, #1a3a4a 100%);
+}
+
+.container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+.content {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: var(--font-size-3xl);
+  color: var(--white);
+  margin-bottom: var(--spacing-md);
+}
+
+.description {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: var(--spacing-xl);
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-xl);
+}
+
+.btn {
+  padding: var(--spacing-md) var(--spacing-2xl);
+}
+
+.btnPrimary {
+  background-color: var(--white);
+  color: var(--primary);
+}
+
+.btnPrimary:hover {
+  background-color: transparent;
+  border: 2px solid var(--white);
+  color: var(--white);
+}
+
+.btnSecondary {
+  background-color: transparent;
+  border: 2px solid var(--white);
+  color: var(--white);
+}
+
+.btnSecondary:hover {
+  background-color: #00C950;
+  border-color: #00C950;
+  color: var(--white);
+}
+
+.note {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+}
+
+@media (max-width: 576px) {
+  .buttons {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

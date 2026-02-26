@@ -3,12 +3,14 @@ import { NavLink } from 'react-router-dom'; // Assuming react-router-dom is used
 import { LayoutDashboard, BookOpen, History, Settings, LogOut, MonitorCheck, Video, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
+import msLexi from '../assets/msLexi.png';
 
 const studentLinks = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: BookOpen, label: 'My Courses', path: '/courses' },
   { icon: MonitorCheck, label: 'Take a Test', path: '/test' },
   { icon: History, label: 'Course History', path: '/history' },
+  // { icon: History, label: 'Course Room', path: '/classroom' },
   // { icon: Settings, label: 'Settings', path: '/settings' },
 ];
 
@@ -55,9 +57,10 @@ const Sidebar = ({ isOpen, onClose }) => {
       `}>
         <div className="p-6">
             <div className="flex items-center gap-2 mb-8">
-               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-white font-bold">
+               {/* <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-white font-bold">
                  LA
-               </div>
+               </div> */}
+                <img src={msLexi} alt="Lextorah Logo" className="w-8 h-8 rounded-full" />  
                <span className="text-xl font-bold text-slate-900">Lextorah AI</span>
             </div>
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import { Menu } from 'lucide-react';
+import msLexi from '../assets/msLexi.png';
 
 const DashboardLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
@@ -14,9 +15,10 @@ const DashboardLayout = () => {
                 {/* Mobile Header */}
                 <header className="md:hidden bg-white border-b border-green-100 p-4 flex items-center justify-between">
                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-white font-bold">
+                        {/* <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-white font-bold">
                             LA
-                        </div>
+                        </div> */}
+                        <img src={msLexi} alt="Lextorah Logo" className="w-8 h-8 rounded-full" />
                         <span className="text-xl font-bold text-slate-900">Lextorah AI</span>
                     </div>
                     <button 

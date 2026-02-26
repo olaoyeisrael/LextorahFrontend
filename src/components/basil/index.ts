@@ -1,0 +1,9 @@
+export { BasilNavbar } from "./BasilNavbar";
+export { BasilHero } from "./BasilHero";
+export { BasilForStudents } from "./BasilForStudents";
+export { BasilForTeachers } from "./BasilForTeachers";
+export { BasilLeadership } from "./BasilLeadership";
+export { BasilPlatformUsage } from "./BasilPlatformUsage";
+export { BasilIntegrity } from "./BasilIntegrity";
+export { BasilSupport } from "./BasilSupport";
+export { BasilFooter } from "./BasilFooter";

@@ -1,0 +1,329 @@
+.section {
+  padding: var(--spacing-3xl) var(--spacing-xl);
+  background: var(--white);
+}
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.formSection {
+  background: var(--background-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  /* border: 1px solid var(--border-color); */
+  box-shadow: var(--shadow-sm);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.sectionIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  /* background: var(--primary-light); */
+  border-radius: var(--radius-md);
+  color: var(--primary);
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sectionDescription {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+.required {
+  color: #dc2626;
+  margin-left: 2px;
+}
+
+/* Radio buttons */
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--background-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  transition: var(--transition-base);
+}
+
+.radioLabel:hover {
+  border-color: var(--primary);
+  background: var(--white);
+}
+
+.radioInput {
+  display: none;
+}
+
+.radioCustom {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--text-muted);
+  border-radius: 50%;
+  position: relative;
+  flex-shrink: 0;
+  transition: var(--transition-base);
+}
+
+.radioInput:checked + .radioCustom {
+  border-color: var(--primary);
+}
+
+.radioInput:checked + .radioCustom::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: var(--primary);
+  border-radius: 50%;
+}
+
+.radioText {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+/* Inline radio group for institution type */
+.inlineRadioGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.inlineRadioLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-sm);
+  background: var(--background-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  transition: var(--transition-base);
+  font-size: 0.875rem;
+}
+
+.inlineRadioLabel:hover {
+  border-color: var(--primary);
+}
+
+.inlineRadioLabel .radioCustom {
+  width: 16px;
+  height: 16px;
+}
+
+.inlineRadioLabel .radioInput:checked + .radioCustom::after {
+  width: 8px;
+  height: 8px;
+}
+
+.inlineRadioLabel .radioText {
+  font-size: 0.875rem;
+}
+
+/* Checkbox */
+.checkboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--background-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  transition: var(--transition-base);
+}
+
+.checkboxLabel:hover {
+  border-color: var(--primary);
+  background: var(--white);
+}
+
+.checkboxInput {
+  display: none;
+}
+
+.checkboxCustom {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--text-muted);
+  border-radius: var(--radius-sm);
+  position: relative;
+  flex-shrink: 0;
+  transition: var(--transition-base);
+}
+
+.checkboxInput:checked + .checkboxCustom {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+.checkboxInput:checked + .checkboxCustom::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 6px;
+  width: 5px;
+  height: 10px;
+  border: solid var(--white);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkboxText {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+/* Consent group */
+.consentGroup {
+  display: flex;
+}
+
+.consentGroup .checkboxLabel {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.consentGroup .checkboxLabel:hover {
+  background: transparent;
+}
+
+/* Text fields */
+.fieldsGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.mixedGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.mixedField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.fieldLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  background: var(--white);
+  transition: var(--transition-base);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Submit button */
+.submitButton {
+  width: 100%;
+  max-width: 250px;
+  margin: var(--spacing-md) auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md) var(--spacing-xl);
+  background: var(--primary);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.submitButton:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: var(--spacing-2xl) var(--spacing-md);
+  }
+
+  .formSection {
+    padding: var(--spacing-lg);
+  }
+
+  .inlineRadioGroup {
+    flex-direction: column;
+  }
+
+  .inlineRadioLabel {
+    width: 100%;
+  }
+}

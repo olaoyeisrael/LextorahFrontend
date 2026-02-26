@@ -24,21 +24,21 @@ const NavBar = () => {
        
         {/* Desktop Menu */}
         <div className='items-center gap-8 hidden lg:flex'>
-            <a href='/#aitutor' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
+            <NavLink to='/#aitutor' className='text-slate-600 hover:text-[#0D9488] font-medium transition-colors'>
                 Meet Ms. Lexi®
-            </a>
-            <a href='/#features' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
+            </NavLink>
+            <NavLink to='/learners' className='text-slate-600 hover:text-[#0D9488] hover:-underline-offset-8 font-medium transition-colors'>
                 Learners
-            </a>
-             <a href='/#features' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
+            </NavLink>
+             <NavLink to='/teachers' className='text-slate-600 hover:text-[#0D9488] hover:underline font-medium transition-colors'>
                 Teachers
-            </a>
-            <a href='/#features' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
+            </NavLink>
+            <NavLink to='/parents' className='text-slate-600 hover:text-[#0D9488] font-medium transition-colors'>
                     Parents
-            </a>
-            <a href='/#features' className='text-slate-600 hover:text-green-600 font-medium transition-colors'>
+            </NavLink>
+            <NavLink to ='/institution' className='text-slate-600 hover:text-[#0D9488] font-medium transition-colors'>
                     Institutions
-            </a>
+            </NavLink>
 
             
             <div className="flex items-center gap-4 ml-4">
@@ -59,18 +59,18 @@ const NavBar = () => {
                 <NavLink to='/' onClick={closeMenu} className='text-lg font-medium text-slate-700 hover:text-green-600'>
                     Home
                 </NavLink>
-                <a href='/#aitutor' onClick={closeMenu} className='text-lg font-medium text-slate-700 hover:text-green-600'>
-                    AI Tutor
-                </a>
-                 <a href='#' onClick={closeMenu} className='text-lg font-medium text-slate-700 hover:text-green-600'>
-                    Features
-                </a>
-                <a href='#' onClick={closeMenu} className='text-lg font-medium text-slate-700 hover:text-green-600'>
-                    How It Works    
-                </a>
-                 <a href='#' onClick={closeMenu} className='text-lg font-medium text-slate-700 hover:text-green-600'>
-                    Testimonials
-                </a>
+                <NavLink to='/learners' onClick={closeMenu} className='text-lg font-medium text-slate-700 hover:text-green-600'>
+                    Learners
+                </NavLink>
+                 <NavLink to='/teachers' onClick={closeMenu} className='text-lg font-medium text-slate-700 hover:text-green-600'>
+                    Teachers
+                </NavLink>
+                <NavLink to='/parents' onClick={closeMenu} className='text-lg font-medium text-slate-700 hover:text-green-600'>
+                    Parents  
+                </NavLink>
+                 <NavLink to='/institution' onClick={closeMenu} className='text-lg font-medium text-slate-700 hover:text-green-600'>
+                    Institution
+                </NavLink   >
                 <hr className="border-slate-100" />
                 <Link to='/login' onClick={closeMenu} className='text-lg font-bold text-slate-900 text-center'>
                     Log In

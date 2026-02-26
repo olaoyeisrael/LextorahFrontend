@@ -1,0 +1,133 @@
+.section {
+  padding: var(--spacing-3xl) var(--spacing-xl);
+  background: linear-gradient(135deg, #F9FAFB 0%, #F9FAFB 50%, #F0FDFA 100%);
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.intro {
+  margin-bottom: var(--spacing-2xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.introParagraph {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin-bottom: var(--spacing-md);
+}
+
+.introParagraph:last-child {
+  margin-bottom: 0;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.sectionBlock {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  /* border: 1px solid var(--border-color); */
+}
+
+.sectionTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+}
+
+.sectionNumber {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.sectionContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.paragraph {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin-bottom: var(--spacing-sm);
+}
+
+.paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.bulletItem {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  padding-left: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.bulletItem::first-letter {
+  color: #0D9488;
+  font-weight: bold;
+}
+
+.redBullet::first-letter {
+  color: #DC2626;
+  font-weight: bold;
+}
+
+.bulletItem:last-child {
+  margin-bottom: 0;
+}
+
+.spacer {
+  height: var(--spacing-sm);
+}
+
+.disclaimer {
+  margin-top: var(--spacing-2xl);
+  padding: var(--spacing-lg);
+  /* background: #fef3c7; */
+  border-radius: var(--radius-lg);
+  /* border-left: 4px solid #f59e0b; */
+}
+
+.disclaimerText {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.bulletItem strong,
+.paragraph strong,
+.introParagraph strong
+.disclaimerText strong {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: var(--spacing-2xl) var(--spacing-md);
+  }
+
+  .sectionBlock {
+    padding: var(--spacing-lg);
+  }
+
+  .sectionTitle {
+    font-size: 1.05rem;
+  }
+}

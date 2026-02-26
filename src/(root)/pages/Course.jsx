@@ -112,7 +112,7 @@ const Course = () => {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                {topics.map((item, idx) => (
+                { topics && topics.length > 0 ? topics.map((item, idx) => (
                     <motion.div 
                         key={idx}
                         whileHover={{ scale: 1.01 }}
@@ -143,7 +143,7 @@ const Course = () => {
                              Click to view progress & transcripts
                         </p>
                     </motion.div>
-                ))}
+                )) : <p className="text-slate-500">No topics found</p>}
             </div>
 
             {/* Topic Detail Modal/Section */}

@@ -1,0 +1,9 @@
+export { WhitesandsNavbar } from "./WhitesandsNavbar";
+export { WhitesandsHero } from "./WhitesandsHero";
+export { WhitesandsForStudents } from "./WhitesandsForStudents";
+export { WhitesandsForTeachers } from "./WhitesandsForTeachers";
+export { WhitesandsLeadership } from "./WhitesandsLeadership";
+export { WhitesandsPlatformUsage } from "./WhitesandsPlatformUsage";
+export { WhitesandsIntegrity } from "./WhitesandsIntegrity";
+export { WhitesandsSupport } from "./WhitesandsSupport";
+export { WhitesandsFooter } from "./WhitesandsFooter";

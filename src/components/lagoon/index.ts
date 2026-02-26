@@ -1,0 +1,9 @@
+export { LagoonNavbar } from "./LagoonNavbar";
+export { LagoonHero } from "./LagoonHero";
+export { LagoonForStudents } from "./LagoonForStudents";
+export { LagoonForTeachers } from "./LagoonForTeachers";
+export { LagoonLeadership } from "./LagoonLeadership";
+export { LagoonPlatformUsage } from "./LagoonPlatformUsage";
+export { LagoonIntegrity } from "./LagoonIntegrity";
+export { LagoonSupport } from "./LagoonSupport";
+export { LagoonFooter } from "./LagoonFooter";

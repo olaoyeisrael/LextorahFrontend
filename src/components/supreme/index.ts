@@ -1,0 +1,9 @@
+export { SupremeNavbar } from "./SupremeNavbar";
+export { SupremeHero } from "./SupremeHero";
+export { SupremeForStudents } from "./SupremeForStudents";
+export { SupremeForTeachers } from "./SupremeForTeachers";
+export { SupremeLeadership } from "./SupremeLeadership";
+export { SupremePlatformUsage } from "./SupremePlatformUsage";
+export { SupremeIntegrity } from "./SupremeIntegrity";
+export { SupremeSupport } from "./SupremeSupport";
+export { SupremeFooter } from "./SupremeFooter";

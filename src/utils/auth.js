@@ -7,9 +7,11 @@ import { apiClient } from './api';
 
 export const decode = async(token) => {
     try {
-        const response = await apiClient(`/decode?token=${token}`, {
+        const response = await fetch(`http://localhost:8000/decode?token=${encodeURIComponent(token)}`, {
             method: 'POST',
-
+             headers: {
+                        'Content-Type': 'application/json'
+                    }
         });
         const data = await response.json();
         console.log("Decoded:", data);

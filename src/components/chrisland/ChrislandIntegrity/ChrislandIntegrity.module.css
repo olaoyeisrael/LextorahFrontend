@@ -1,0 +1,67 @@
+.section {
+  padding: var(--spacing-2xl) 0;
+  background: linear-gradient(135deg, #F1F8E9 0%, #FFFFFF 50%);
+}
+
+.container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+.card {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+  background: #FFFFFF;
+  border-top: 4px solid #1B5E20;
+  border-radius: var(--radius-lg);
+  transition: all 0.4s ease;
+}
+
+.card:hover {
+  border-top: 4px solid #219e2a;
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: #1B5E20;
+  text-align: center;
+  margin: 0 0 var(--spacing-lg);
+}
+
+.points {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.pointItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  background: #1B5E20;
+  border-radius: var(--radius-full);
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: var(--spacing-lg);
+  }
+}

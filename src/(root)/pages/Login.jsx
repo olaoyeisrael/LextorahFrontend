@@ -35,12 +35,19 @@ const Login = () => {
            body: JSON.stringify(loginData)
        })
        const data = await response.json()
+       console.log("Login response:", data)
 
        if (response.ok) {
         const token = data.access_token
 
         const decoded = await decode(token);
         console.log("decoded: ", decoded)
+        
+        if (!decoded) {
+            setError("Failed to decode authentication token. Please contact support or try again.");
+            setLoading(false);
+            return;
+        }
         
         // Dispatch to Redux using decoded token data
         // Trying common claim names. User said token contains it.
@@ -81,9 +88,12 @@ const Login = () => {
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <div className="w-full max-w-md">
             <div className="text-center mb-8">
+                <Link to="/" className="inline-flex items-center gap-2 mb-4">
                 <div className="w-12 h-12 bg-green-500 text-white rounded-xl flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10v6"/><path d="M20 16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2"/><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M12 2v4"/><path d="M12 18v4"/></svg>
                 </div>
+                {/* <span className="text-2xl font-bold text-slate-900">Lextorah AI</span> */}
+                </Link>
                 <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome Back!</h1>
                 <p className="text-slate-600">Continue your personalized learning journey.</p>
             </div>
