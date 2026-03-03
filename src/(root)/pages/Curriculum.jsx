@@ -12,9 +12,9 @@ const Curriculum = () => {
 
     // Protection
     useEffect(() => {
-        if (!isAdmin()) {
-            navigate('/');
-        }
+        // if (!isAdmin()) {
+        //     navigate('/');
+        // }
     }, [navigate]);
 
     // State

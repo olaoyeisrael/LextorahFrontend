@@ -30,7 +30,7 @@ const StudentPerformance = lazy(() => import('./(root)/pages/StudentPerformance'
 const Curriculum = lazy(() => import('./(root)/pages/Curriculum'))
 const Dashboard = lazy(() => import('./(root)/pages/Dashboard'))
 const Test = lazy(() => import('./(root)/pages/Test'))
-const Login = lazy(() => import('./(root)/pages/Login'))
+const Login = lazy(() => import('./(root)/auth/Login'))
 const Signup = lazy(() => import('./(root)/pages/Signup'))
 const LiveClasses = lazy(() => import('./(root)/pages/LiveClasses'))
 const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'))
@@ -54,6 +54,11 @@ const WhitesandsSchoolsPage = lazy(() => import('./(root)/schools/whitesands'))
 const InstitutionPage = lazy(() => import('./(root)/pages/Institution'))
 const StarterPack = lazy(()=> import('./(root)/pages/StarterPack'))
 const Classroom2 = lazy(() => import('./classroom2'))
+const Assessment = lazy(() => import('./(root)/pages/Assessment'))
+const ExamPrep = lazy(() => import('./(root)/pages/ExamPrep'))
+const TutorLiveClasses = lazy(() => import('./(root)/pages/TutorLiveClasses'))
+const Notification = lazy(() => import('./(root)/pages/Notification'))
+const AIReport = lazy(() => import('./(root)/pages/Aialert'))
 
 
 
@@ -85,6 +90,7 @@ function App() {
         <Route path="/terms-of-use" element={<TermsOfUsePage />} />
         <Route path="/institution" element={<InstitutionPage />} />
         <Route path='/starter-pack-access-request' element={<StarterPack/>}/>
+          <Route path="*" element={<NotFound />} />
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
@@ -113,6 +119,11 @@ function App() {
           <Route path="/student-performance" element={<StudentPerformance />} />
           <Route path="/curriculum" element={<Curriculum />} />
           <Route path="/live-classes-admin" element={<LiveClasses />} />
+          <Route path="/assessment" element={<Assessment />} />
+          <Route path="/exam-prep" element={<ExamPrep />} />
+          <Route path="/tutor-live-classes" element={<TutorLiveClasses />} />
+          <Route path="/notifications" element={<Notification />} />
+          <Route path="/ai-report" element={<AIReport />} />
 
 
         </Route>

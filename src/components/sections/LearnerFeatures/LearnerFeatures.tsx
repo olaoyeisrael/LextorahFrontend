@@ -1,3 +1,5 @@
+import { useRef } from "react";
+import { motion, useInView } from "framer-motion";
 import styles from "./LearnerFeatures.module.css";
 
 interface MsLexiInfo {
@@ -16,19 +18,32 @@ export default function LearnerFeatures({
   howItHelps,
   learnRightWay,
 }: LearnerFeaturesProps) {
+  const sectionRef = useRef(null);
+  const isInView = useInView(sectionRef, { once: true, amount: 0.1 });
+
   return (
-    <section className={styles.section}>
+    <section ref={sectionRef} className={styles.section}>
       <div className={styles.container}>
         {/* Section Header */}
-        <div className={styles.header}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6 }}
+          className={styles.header}
+        >
           <h2 className={styles.title}>Powerful Features for Effective Learning</h2>
           <p className={styles.subtitle}>
             Ms Lexi supports your learning — she does not replace your teachers or tutors.
           </p>
-        </div>
+        </motion.div>
 
         {/* Meet Ms Lexi Card */}
-        <div className={styles.msLexiCard}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className={styles.msLexiCard}
+        >
           <div className={styles.avatarContainer}>
             <img
               src="/images/Ms-Lexi-AI-Tutor.png"
@@ -50,10 +65,15 @@ export default function LearnerFeatures({
             <h3 className={styles.msLexiTitle}>{msLexiInfo.title}</h3>
             <p className={styles.msLexiDescription}>{msLexiInfo.description}</p>
           </div>
-        </div>
+        </motion.div>
 
         {/* How Lextorah Helps and Learn Right Way */}
-        <div className={styles.featuresGrid}>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className={styles.featuresGrid}
+        >
           {/* How Lextorah AI Helps You Learn */}
           <div className={styles.featureCard}>
             <div className={styles.featureIcon}>
@@ -76,10 +96,15 @@ export default function LearnerFeatures({
               className={styles.featureImage}
             />
           </div>
-        </div>
+        </motion.div>
 
         {/* How Lextorah Learn Right Way */}
-        <div className={styles.featuresGrid}>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className={styles.featuresGrid}
+        >
           {/* Learn the Right Way */}
           <div className={styles.featureImageWrapper}>
             <img
@@ -103,7 +128,7 @@ export default function LearnerFeatures({
             <p className={styles.featureDescription}>{learnRightWay.description}</p>
           </div>
           
-        </div>
+        </motion.div>
       </div>
     </section>
   );

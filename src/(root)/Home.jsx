@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import NavBar from '../components/NavBar'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ArrowRight, MessageSquare, Zap, Target, Smile, Clock, BookOpen, Shield, GraduationCap, Check, UserStar, Landmark, Instagram, Twitter, Linkedin, Facebook, CircleQuestionMark, Lightbulb, PenLine, ChartLine, NotepadText, ShieldCheck, Globe, MapPin } from 'lucide-react'
 import heroBg from '../assets/lextorah-home.jpg'
@@ -22,9 +22,22 @@ import Footer from '../components/Footer'
 
 
 const Home = () => {
+    const [heroTextIndex, setHeroTextIndex] = useState(0);
+    const heroTexts = [
+        <React.Fragment>Master any subject with <span className="text-green-500 gradient-to-r from-yellow-500 to-green-600">Lextorah AI Tutor</span></React.Fragment>,
+        <React.Fragment>Master any subject with AI-powered learning, guided by <span className="text-green-500 gradient-to-r from-yellow-500 to-green-600">Expert Tutors</span></React.Fragment>
+    ];
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setHeroTextIndex((prevIndex) => (prevIndex + 1) % heroTexts.length);
+        }, 5000);
+        return () => clearInterval(interval);
+    }, []);
+
     const fadeInUp = {
         hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+        visible: { opacity: 1, y: 0, transition: { delay: 0.3,duration: 0.6 } }
     };
 
     const staggerContainer = {
@@ -49,17 +62,24 @@ const Home = () => {
         style={{ backgroundImage: `url(${heroBg})` }}
       >
         <div className="max-w-3xl mx-auto md:mx-0 flex flex-col items-center text-left md:pl-0">
-        <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight text-center"
-        >
-            Master any subject with <span className="text-green-500 gradient-to-r from-yellow-500 to-green-600">Lextorah AI Tutor</span>
-        </motion.h1>
+        <div className="min-h-[140px] md:min-h-[180px] flex items-center justify-center mb-6 w-full">
+            <AnimatePresence mode="wait">
+                <motion.h1 
+                    key={heroTextIndex}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.8 }}
+                    className="text-5xl md:text-7xl font-bold text-white tracking-tight text-center"
+                >
+                    {heroTexts[heroTextIndex]}
+                </motion.h1>
+            </AnimatePresence>
+        </div>
         <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
             className="text-xl md:text-2xl text-white mb-10 max-w-3xl leading-relaxed text-center"
         >
             Experience personalized learning with voice interaction, step-by-step guidance, and instant feedback.
@@ -67,7 +87,7 @@ const Home = () => {
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
             className="flex flex-col sm:flex-row gap-4 justify-center"
         >
             <a href="https://www.lextorah-elearning.com/elearning/register" className="px-8 py-4 bg-[#00C950] hover:bg-green-700 text-white text-lg font-bold rounded-4xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">
@@ -103,36 +123,36 @@ const Home = () => {
         <div className='bg-[#CCFBF1] py-3 px-6 rounded-full mb-6'>
             <h1 className='text-[#0F766E] text-[24px] font-InterBold'> Meet Ms. Lexi® — Your AI Tutor & Learning Guide</h1>
         </div>
-            <p className='text-[#374151] text-lg mb-6 font-Inter'>Ms. Lexi is Lextorah's AI-powered tutor and learning assistant, designed
+            <p className='text-[#374151] mb-6 font-Inter'>Ms. Lexi is Lextorah's AI-powered tutor and learning assistant, designed
                 to support learners, teachers, and institutions with personalized, on-
                 demand academic guidance. She helps learners understand concepts,
                 practice skills, prepare for exams, and stay on track—without replacing
                 human teachers.</p>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                <div className='p-6 shadow-lg border border-[#CCFBF1] rounded-lg hover:border-green-600 hover:bg-[] hover:translate-y-1 transition-all'>
+                <motion.div variants={fadeInUp} className='p-6 shadow-lg border border-[#CCFBF1] rounded-lg hover:border-green-600 hover:bg-[] hover:translate-y-1 transition-all'>
                     <Smile className='w-12 h-12 py-1 px-3 bg-[#CCFBF1] rounded-lg text-green-600 mb-3'/>
                     <h1 className=' text-[24px] font-InterBold'> Personalized</h1>
                     <p className='text-[#4B5563] mt-1 font-Inter'>Adapts to your learning style</p>
 
-                </div>
-                <div className='p-6 shadow-lg border border-[#CCFBF1] rounded-lg hover:border-green-600 hover:bg-[] hover:translate-y-1 transition-all'>
+                </motion.div>
+                <motion.div variants={fadeInUp} className='p-6 shadow-lg border border-[#CCFBF1] rounded-lg hover:border-green-600 hover:bg-[] hover:translate-y-1 transition-all'>
                     <Clock className='w-12 h-12 py-1 px-3 bg-[#CCFBF1] rounded-lg text-green-600 mb-3'/>
                     <h1 className=' text-[24px] font-InterBold'> Always Available</h1>
                     <p className='text-[#4B5563] mt-1 font-Inter'>24/7 learning support</p>
 
-                </div>
-                <div className='p-6 shadow-lg border border-[#CCFBF1] rounded-lg hover:border-green-600 hover:bg-[] hover:translate-y-1 transition-all'>
+                </motion.div>
+                <motion.div variants={fadeInUp} className='p-6 shadow-lg border border-[#CCFBF1] rounded-lg hover:border-green-600 hover:bg-[] hover:translate-y-1 transition-all'>
                     <BookOpen className='w-12 h-12 py-1 px-3 bg-[#CCFBF1] rounded-lg text-green-600 mb-3'/>
                     <h1 className=' text-[24px] font-InterBold'> Multi-Subject</h1>
                     <p className='text-[#4B5563] mt-1 font-Inter'>All subjects covered</p>
 
-                </div>
-                <div className='p-6 shadow-lg border border-[#CCFBF1] rounded-lg hover:border-green-600 hover:bg-[] hover:translate-y-1 transition-all'>
+                </motion.div>
+                <motion.div variants={fadeInUp} className='p-6 shadow-lg border border-[#CCFBF1] rounded-lg hover:border-green-600 hover:bg-[] hover:translate-y-1 transition-all'>
                     <Shield className='w-12 h-12 py-1 px-3 bg-[#CCFBF1] rounded-lg text-green-600 mb-3'/>
                     <h1 className=' text-[24px] font-InterBold'> Safe & Ethical</h1>
                     <p className='text-[#4B5563] mt-1 font-Inter'>Supports real learning</p>
 
-                </div>
+                </motion.div>
                 
             </div>
 
@@ -142,13 +162,13 @@ const Home = () => {
 
 
     {/* Comprehensive Learning Support */}
-    <div className='px-6 md:px-12 lg:px-20 py-16 md:py-24' id='features'>
+    <div className='px-6 md:px-12 lg:px-20 pb-16 md:pb-24' id='features'>
         <motion.div 
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className='px-4 md:px-8 pb-10'
+            className='px-4 md:px-8 pb-1'
         >
             <motion.div variants={fadeInUp} className='mb-10 text-center'>
                 <h1 className='bg-[#CCFBF1] mx-auto w-fit p-4 rounded-full font-InterBold text-2xl md:text-[35px] text-[#0F766E]'>Comprehensive Learning Support</h1>
@@ -156,12 +176,12 @@ const Home = () => {
             </motion.div>
 
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
-                <motion.div variants={fadeInUp} className='px-8 py-8 bg-gradient-to-br from-[#F0FDFA] to-[#FFFFFF] border border-[#CCFBF1] rounded-xl shadow-lg'>
+                <motion.div variants={fadeInUp} className='px-8 py-8 bg-gradient-to-br from-[#F0FDFA] to-[#FFFFFF] border border-[#CCFBF1] rounded-xl shadow-lg flex flex-col h-full'>
                     <img src={student} alt="" className='mb-6' />
                     <GraduationCap className='w-12 h-12 py-1 px-3 bg-[#0D9488] rounded-lg text-white mb-3'/>
                     <h1 className='text-[24px] font-InterBold text-[#111827]'>For Students & Learners</h1>
                     
-                    <div className='space-y-3 mt-4'>
+                    <div className='space-y-3 mt-4 mb-8'>
                         <div className='flex gap-3'>
                             <Check className="w-5 h-6 text-green-600" />
                             <p className='font-Inter text-[#374151] text-sm'>Step-by-step explanations in simple language</p>
@@ -184,12 +204,14 @@ const Home = () => {
                         </div>
                     </div>
 
+                    <a href="/learners" className='mt-auto mx-auto flex px-6 py-3 bg-[#0D9488] text-white font-InterBold rounded-lg hover:bg-green-700 transition-all shadow-lg hover:shadow-green-500/25 text-sm' >Learn More</a>
+
                     
                 </motion.div>
 
 
 
-                <motion.div variants={fadeInUp} className='px-8 py-8 bg-gradient-to-br from-[#FFFBEB] to-[#FFFFFF] border border-[#FEF3C7] rounded-xl shadow-lg'>
+                <motion.div variants={fadeInUp} className='px-8 py-8 bg-gradient-to-br from-[#FFFBEB] to-[#FFFFFF] border border-[#FEF3C7] rounded-xl shadow-lg flex flex-col h-full'>
                     <img src={teacher} alt="" className='mb-6' />
                     <UserStar className='w-12 h-12 py-1 px-3 bg-[#D97706] rounded-lg text-white mb-3'/>
                     <h1 className='text-[24px] font-InterBold text-[#111827]'>For Teachers & Tutors</h1>
@@ -212,12 +234,14 @@ const Home = () => {
                         </div>
                        
                     </div>
+
+                    <a href="/teachers" className='mt-auto mx-auto flex px-6 py-3 bg-[#0D9488] text-white  font-InterBold rounded-lg hover:bg-orange-700 transition-all shadow-lg hover:shadow-orange-500/25 text-sm' >Learn More</a>
                     
                     
                 </motion.div>
 
 
-                <motion.div variants={fadeInUp} className='px-8 py-8 bg-gradient-to-br from-[#ECFDF5] to-[#FFFFFF] border border-[#D1FAE5] rounded-xl shadow-lg'>
+                <motion.div variants={fadeInUp} className='px-8 py-8 bg-gradient-to-br from-[#ECFDF5] to-[#FFFFFF] border border-[#D1FAE5] rounded-xl shadow-lg flex flex-col h-full'>
                     <img src={institution} alt="" className='mb-6 rounded-xl' />
                     <Landmark className='w-12 h-12 py-1 px-3 bg-[#059669] rounded-lg text-white mb-3'/>
                     <h1 className='text-[24px] font-InterBold text-[#111827]'>For Institutions</h1>
@@ -240,6 +264,8 @@ const Home = () => {
                         </div>
                        
                     </div>
+
+                    <a href='/institution' className='mt-auto mx-auto flex px-6 py-3 bg-[#0D9488] text-white font-InterBold rounded-lg hover:bg-green-700 transition-all shadow-lg hover:shadow-green-500/25 text-sm' >Learn More</a>
                     
                     
                 </motion.div>
@@ -266,7 +292,7 @@ const Home = () => {
             id='howitworks'
         >
             <motion.div variants={fadeInUp}>
-                <h1 className='bg-[#CCFBF1] px-8 md:px-15 py-5 rounded-full w-fit mx-auto text-[#0F766E] font-InterBold text-[20px] md:text-[42px]'>Simple & Effective</h1>
+                <h1 className='bg-[#CCFBF1] px-8 md:px-15 py-5 rounded-full w-fit mx-auto text-[#0F766E] font-InterBold text-2xl md:text-[42px]'>Simple & Effective</h1>
                 <h1 className='w-fit mx-auto mt-4 font-InterBold text-3xl md:text-[39px]'>How it works</h1>
                 <p className='w-fit mx-auto text-[#4B5563] mt-4 font-Inter text-center'>Four simple steps to smarter learning</p>
             </motion.div>
@@ -319,7 +345,7 @@ const Home = () => {
             className='px-6 md:px-12 lg:px-20 py-16 md:py-20'
         >
             <motion.div variants={fadeInUp} className='px-0 md:px-6 text-center'>
-                <h1 className='text-[#0F766E] font-InterBold text-xl md:text-[52px] bg-[#CCFBF1] mx-auto w-fit rounded-full py-4 px-4 mb-6'>Why Choose Lextorah AI?</h1>
+                <h1 className='text-[#0F766E] font-InterBold text-2xl md:text-[52px] bg-[#CCFBF1] mx-auto w-fit rounded-full py-4 px-4 mb-6'>Why Choose Lextorah AI?</h1>
                 <h2 className='font-InterBold text-3xl md:text-4xl text-center mb-4'>Built for Education. Designed for Impact.</h2>
                 <p className='font-Inter text-[#4B5563] text-center mt-2 text-lg'>Not just another chatbot—a purpose-built educational AI platform</p>
             </motion.div>
@@ -509,9 +535,19 @@ const Home = () => {
                         <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Start Learning Smarter with Ms. Lexi®</h2>
                         <p className="text-slate-300 text-lg mb-10 max-w-2xl mx-auto px-11">Join thousands of learners, educators, and institutions transforming
 education with AI-powered support</p>
-                        <a href="https://www.lextorah-elearning.com/elearning/register" className="inline-block px-10 py-5 bg-white hover:bg-green-600 text-[#0D9488] font-bold rounded-full transition-all shadow-lg hover:shadow-green-500/25 text-lg hover:text-white">
+<div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="https://www.lextorah-elearning.com/elearning/register" className="inline-block px-10 py-5 bg-white hover:bg-green-600 text-[#0D9488] font-bold rounded-lg transition-all shadow-lg hover:shadow-green-500/25 text-lg hover:text-white">
                             Sign Up Now
                         </a>
+
+                        <a href="/institution" className="inline-block px-10 py-5 bg-transparent border-2 border-white text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-white/25 text-lg hover:bg-white hover:text-[#0D9488]">
+                            Request Institutional Info
+                        </a>
+                        <a href="#features" className="inline-block px-10 py-5 bg-transparent border-2 border-white text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-white/25 text-lg hover:bg-white hover:text-[#0D9488]">
+                            Explore Lextorah Programs
+                        </a>
+                    </div>  
+
                     </div>
                </div>
            </div>

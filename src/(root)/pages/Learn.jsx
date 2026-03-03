@@ -142,7 +142,7 @@ const Learn = () => {
 
 
   // Start Stream function (called initially and on 'Contine')
-  const startStream = (targetSection = null, customLoadingMessage = "Agent is explaining...") => {
+  const startStream = (targetSection = null, customLoadingMessage = "Lextorah AI is explaining...") => {
     if (!currentTopic || !user_id) return;
     
     setLoading(true);

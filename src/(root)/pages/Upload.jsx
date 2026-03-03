@@ -11,9 +11,9 @@ const Upload = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!isAdmin()) {
-            navigate('/');
-        }
+        // if (!isAdmin()) {
+        //     navigate('/');
+        // }
     }, [navigate]);
 
     const [form, setForm] = useState({

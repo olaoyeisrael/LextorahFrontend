@@ -1,4 +1,6 @@
+import { useRef } from "react";
 import { Link } from "react-router-dom";
+import { motion, useInView } from "framer-motion";
 import styles from "../HeroSection/HeroSection.module.css";
 import heroStyles from "./LearnerHero.module.css";
 
@@ -25,8 +27,11 @@ export default function LearnerHero({
   backgroundImage = "/images/student-hero.png",
   align = "left",
 }: HeroSectionProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
+
   return (
-    <section className={styles.hero}>
+    <section ref={sectionRef} className={styles.hero}>
       <div className={styles.backgroundImage}>
         <img
           src={backgroundImage}
@@ -36,7 +41,12 @@ export default function LearnerHero({
         <div className={styles.overlay}></div>
       </div>
       <div className={`${styles.container} ${align === "center" ? styles.containerCenter : ""}`}>
-        <div className={`${styles.content} ${align === "center" ? styles.contentCenter : ""}`}>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.8 }}
+          className={`${styles.content} ${align === "center" ? styles.contentCenter : ""}`}
+        >
           {badge && <span className={styles.badge}>{badge}</span>}
           <h1 className={styles.title}>{title}</h1>
           {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
@@ -50,7 +60,7 @@ export default function LearnerHero({
               </Link>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

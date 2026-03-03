@@ -43,3 +43,9 @@ export const isAdmin = () => {
     if (!role) return false;
     return role.toLowerCase() === 'admin';
 };
+
+export const isTutor = () => {
+    const role = localStorage.getItem('role');
+    if (!role) return false;
+    return role.toLowerCase() === 'tutor';
+}

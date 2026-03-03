@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Lightbulb, HelpCircle, CloudUpload, CheckCircle, Lock } from 'lucide-react';
+import { Lightbulb, HelpCircle, CloudUpload, CheckCircle, Lock, Book, BookOpen, User, TriangleAlert, FileExclamationPoint, Calendar, Clock, Target, TrendingUp, ArrowRight, Zap, Play, ClipboardCheck, GraduationCap, Bot, BarChart2, Award, FileCheck, Video } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { isAdmin } from '../../utils/auth';
+import { isAdmin, isTutor } from '../../utils/auth';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { updateEnrollment } from '../../store/userSlice';
@@ -10,6 +10,25 @@ import Schedule from '../../components/Schedule';
 
 import { apiClient } from '../../utils/api';
 
+const classData = [
+    {
+        course: "German",
+        level: "A1",
+        students: 5,
+        Alerts: "1 alert"
+    },
+    {
+        course: "Spanish",
+        level: "A2",
+        students: 4,
+        Alerts: "No alerts"},
+    {
+        course: "French",
+        level: "B1",
+        students: 3,
+        Alerts: "2 alerts"
+    }
+]
 const Dashboard = () => {
   const { firstName, token, enrolledLevel, enrolledCourse } = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -111,12 +130,113 @@ const Dashboard = () => {
         </div>
       );
   }
+  if (isTutor()) {    
+
+return (
+    <div className='max-w-6xl mx-auto'>
+        <h1 className='font-InterBold text-2xl'>Dashboard</h1>
+        <p className='text-[#65758B] font-Inter'>Welcome back, Tutor</p>
+        <div className="mb-8 mt-6 grid md:grid-cols-4 gap-4">
+            <TutorDashboard 
+                title="My Classes" 
+                value= '3'
+                icon={BookOpen} 
+                color="blue-700"
+            />
+
+            <TutorDashboard 
+                title="Total Students" 
+                value= '12'
+                icon={User} 
+                color="blue-500"
+            />
+             <TutorDashboard 
+                title="Reports Pending" 
+                value= '2'
+                icon={FileExclamationPoint} 
+                color="yellow-500"
+            />
+
+             <TutorDashboard 
+                title="Students at Risk" 
+                value= '2'
+                icon={TriangleAlert} 
+                color="red-500"
+            />
+
+            
+        </div>
+
+        {/* my classes here */}
+        <div className='border-[#E1E7EF] border rounded-xl p-6 bg-white shadow-sm'>
+            <h1 className='font-InterBold text-3xl'>My Classes</h1>
+                <div className="overflow-x-auto mt-4">
+                <table className="w-full text-left">
+                    <thead className='text-[#65758B] font-Inter text-sm'>
+                        <tr className="border-b border-[#E1E7EF]">
+                            <th className="py-2">Course</th>
+                            <th className="py-2">Level</th>
+                            <th className="py-2">Students</th>
+                            <th className="py-2">Alerts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {classData.map((cls, index) => (
+                            <tr key={index} className="border-b border-[#E1E7EF] transition-colors">
+                                <td className="py-3">{cls.course}</td>
+                                <td className="py-3">{cls.level}</td>
+                                <td className="py-3">{cls.students}</td>
+                                <td className="py-3">{cls.Alerts}</td>
+                            </tr>
+                        ))}
+                    
+                    </tbody>
+                </table>
+            
+
+        </div>
+
+        
+    </div>
+
+    <div className='max-w-6xl mx-auto mt-6'>
+        <div className='flex items-center gap-2 mb-4'>
+        <Zap className="w-6 h-6 text-yellow-500" />
+        <h1 className='font-InterBold'>Quick Actions</h1>
+        </div>
+        <div className="mb-8 mt-6 grid md:grid-cols-4 gap-4">
+
+            <QuickActionCard
+
+                title="Live Classes"
+                icon={Video}
+                color="green-500"
+                onClick={() => alert("Starting class...")}
+            />
+
+            <QuickActionCard
+                title="Student Performance"
+                icon={ClipboardCheck}
+                color="blue-500"
+                onClick={() => alert("Viewing performance...")}
+            />
+            </div>
+
+        </div>
+    </div>
+)
+}
+
+
 
   // Student View
   const [liveClasses, setLiveClasses] = useState([]);
  
 //   const enrolledLevel = useSelector((state) => state.user.enrolledLevel); // Already selected above
-console.log("Enrolled course:", enrolledCourse)
+
+       
+            {/* Today's Classes */}
+            console.log("Enrolled course:", enrolledCourse)
 
   useEffect(() => {
     const fetchLiveClasses = async () => {
@@ -254,5 +374,48 @@ console.log("Enrolled course:", enrolledCourse)
   )
 }
 
+// Tutors Dashboard
+
+
 export default Dashboard
+
+const TutorDashboard = ({title, value, icon: Icon, color }) => {
+    return (
+        <div className="border border-[#1C43B0] border-t-4 rounded-xl px-6 py-5 flex items-center  max-w-2xs">
+            <div>
+                <h1 className="text-sm font-Inter text-[#65758B]">{title}</h1>
+                <p className="font-InterBold text-3xl">{value}</p>
+            </div>
+            <div className="ml-auto">
+                <Icon className={`w-8 h-8 text-${color}`} />
+            </div>
+        </div>
+    )
+}
+           
+        
+    
+const QuickActionCard = ({ title, description, icon: Icon, color, link }) => {
+    return (
+        <motion.div 
+            whileHover={{ y: -5 }}
+            className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between"
+        >
+             <div className="flex justify-between items-start mb-4">
+                <div>
+                     <h2 className="text-xl font-bold text-slate-900 mb-2">{title}</h2>
+                     <p className="text-slate-600 text-sm mb-4">{description}</p>
+                </div>
+                 <div className="w-16 h-16 bg-slate-100 rounded-lg flex items-center justify-center">
+                    <Icon className={`w-8 h-8 text-${color}`} />
+                </div>
+            </div>
+            <Link to={link} className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl text-center transition-colors">
+                View
+            </Link>
+        </motion.div>
+    )
+}
+  
+
 

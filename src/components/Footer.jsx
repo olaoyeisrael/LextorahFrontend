@@ -21,7 +21,9 @@ function Footer() {
                 </div>
 
                 <div className='space-y-8 '>
+                    <Link to="/https://www.lextorah-elearning.com/elearning/register">
                     <h2 className='font-Inter text-white'>Explore Lextorah Programs.</h2>
+                    </Link>
                     {/* <ul className='space-y-3'>
                         <li className='text-sm font-Inter text-white'>AI Tutor</li>
                         <li className='text-sm font-Inter text-white'>Digital Learning Support</li>
@@ -54,7 +56,7 @@ function Footer() {
 
             </div>
             <div className="border-t border-[#FFFFFF33] pt-8 ">
-                <h1 className="text-white text-center ">© 2025 Lextorah.ai. All rights reserved.</h1>
+                <h1 className="text-white text-center ">© 2026 Lextorah.ai. All rights reserved.</h1>
             </div>
 
 

@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { setUser } from '../../store/userSlice';
 import { decode } from '../../utils/auth';
 import { Loader } from 'lucide-react';
+import LexLogo from '../../assets/lextorahLogo.jpeg';
 
 const Login = () => {
     const [credential, setCredential] = useState({
@@ -89,8 +90,8 @@ const Login = () => {
         <div className="w-full max-w-md">
             <div className="text-center mb-8">
                 <Link to="/" className="inline-flex items-center gap-2 mb-4">
-                <div className="w-12 h-12 bg-green-500 text-white rounded-xl flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10v6"/><path d="M20 16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2"/><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M12 2v4"/><path d="M12 18v4"/></svg>
+                <div className="w-12 h-12 text-white rounded-xl flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+                    <img src={LexLogo} alt="Lextorah Logo" className="w-20 h-12" />
                 </div>
                 {/* <span className="text-2xl font-bold text-slate-900">Lextorah AI</span> */}
                 </Link>

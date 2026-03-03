@@ -22,21 +22,20 @@ const NavBar = () => {
             <img src={logo} alt="logo" className='h-8 w-auto object-contain' />
         </div>
        
-        {/* Desktop Menu */}
         <div className='items-center gap-8 hidden lg:flex'>
-            <NavLink to='/#aitutor' className='text-slate-600 hover:text-[#0D9488] font-medium transition-colors'>
+            <NavLink to='/#aitutor' className="relative text-slate-600 hover:text-[#0D9488] font-medium transition-colors after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-[#0D9488] after:transition-transform after:duration-300 hover:after:origin-bottom-left hover:after:scale-x-100">
                 Meet Ms. Lexi®
             </NavLink>
-            <NavLink to='/learners' className='text-slate-600 hover:text-[#0D9488] hover:-underline-offset-8 font-medium transition-colors'>
+            <NavLink to='/learners' className="relative text-slate-600 hover:text-[#0D9488] font-medium transition-colors after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-[#0D9488] after:transition-transform after:duration-300 hover:after:origin-bottom-left hover:after:scale-x-100">
                 Learners
             </NavLink>
-             <NavLink to='/teachers' className='text-slate-600 hover:text-[#0D9488] hover:underline font-medium transition-colors'>
+             <NavLink to='/teachers' className="relative text-slate-600 hover:text-[#0D9488] font-medium transition-colors after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-[#0D9488] after:transition-transform after:duration-300 hover:after:origin-bottom-left hover:after:scale-x-100">
                 Teachers
             </NavLink>
-            <NavLink to='/parents' className='text-slate-600 hover:text-[#0D9488] font-medium transition-colors'>
+            <NavLink to='/parents' className="relative text-slate-600 hover:text-[#0D9488] font-medium transition-colors after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-[#0D9488] after:transition-transform after:duration-300 hover:after:origin-bottom-left hover:after:scale-x-100">
                     Parents
             </NavLink>
-            <NavLink to ='/institution' className='text-slate-600 hover:text-[#0D9488] font-medium transition-colors'>
+            <NavLink to='/institution' className="relative text-slate-600 hover:text-[#0D9488] font-medium transition-colors after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-[#0D9488] after:transition-transform after:duration-300 hover:after:origin-bottom-left hover:after:scale-x-100">
                     Institutions
             </NavLink>
 

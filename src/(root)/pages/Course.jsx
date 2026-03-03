@@ -77,7 +77,12 @@ const Course = () => {
     console.log("Filtered Transcripts: ", filteredTranscripts);
 
     if (loading) {
-        return <div className="p-8 text-center text-slate-500">Loading course details...</div>;
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+            </div>
+        );
+        
     }
 
     return (
@@ -115,7 +120,7 @@ const Course = () => {
                 { topics && topics.length > 0 ? topics.map((item, idx) => (
                     <motion.div 
                         key={idx}
-                        whileHover={{ scale: 1.01 }}
+                        whileHover={{ scale: 1.02 }}
                         onClick={() => setSelectedTopic(item)}
                         className={`p-5 rounded-2xl border cursor-pointer transition-all ${
                             selectedTopic?.topic === item.topic 

@@ -74,8 +74,13 @@ const History = () => {
 
       <div className="space-y-4">
         {loading ? (
-             <div className="text-center py-20 text-slate-400">Loading history...</div>
-        ) : history.length === 0 ? (
+              
+        
+            <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+            </div>
+        )
+        : history.length === 0 ? (
              <div className="text-center py-20 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                  <Clock className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                  <p className="text-slate-500 font-medium">No activity recorded yet.</p>
