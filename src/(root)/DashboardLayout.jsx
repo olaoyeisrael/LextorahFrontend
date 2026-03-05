@@ -35,7 +35,7 @@ const DashboardLayout = () => {
                 <header className="hidden md:flex bg-white items-center justify-between p-4 px-8 border-b border-gray-100 shrink-0 h-20">
                     <div>
                         <h1 className="text-sm font-bold text-slate-800">Welcome back, {firstName || 'Lex'} 👋</h1>
-                        <p className="text-xs text-blue-500 underline cursor-pointer mt-0.5">Let's continue learning today</p>
+                       
                     </div>
                     <div className="flex items-center gap-6">
                         <Link className="relative p-2 text-slate-400 hover:text-slate-600 transition-colors" to="/notifications">
