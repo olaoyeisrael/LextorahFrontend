@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Lightbulb, HelpCircle, CloudUpload, CheckCircle, Lock, Book, BookOpen, User, TriangleAlert, FileExclamationPoint, Calendar, Clock, Target, TrendingUp, ArrowRight, Zap, Play, ClipboardCheck, GraduationCap, Bot, BarChart2, Award, FileCheck, Video } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Lightbulb, HelpCircle, CloudUpload, CheckCircle, Lock, Book, BookOpen, User, TriangleAlert, FileExclamationPoint, Calendar, Clock, Target, TrendingUp, ArrowRight, Zap, Play, ClipboardCheck, GraduationCap, Bot, BarChart2, Award, FileCheck, Video, Calendar1, Clock1, Clock4, TestTube, Calculator, PenTool, ChartLine, MonitorCheck, ChartColumnIncreasing } from 'lucide-react';
+import { motion, time } from 'framer-motion';
 import { isAdmin, isTutor } from '../../utils/auth';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -269,107 +269,202 @@ return (
   };
 
   return (
-    <div className='max-w-5xl mx-auto'>
-        <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900">Welcome back, {firstName || 'Student'}!</h1>
-            <p className="text-slate-600">Let's continue your learning journey to fluency.</p>
+    // <div className='max-w-5xl mx-auto'>
+    //     <div className="mb-8">
+    //         <h1 className="text-3xl font-bold text-slate-900">Welcome back, {firstName || 'Student'}!</h1>
+    //         <p className="text-slate-600">Let's continue your learning journey to fluency.</p>
+    //     </div>
+
+    //     {/* Live Classes Widget */}
+    //     <div className="mb-12 bg-indigo-900 rounded-2xl p-8 text-white relative overflow-hidden">
+    //         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-800 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+    //         <div className="relative z-10">
+    //             <div className="flex justify-between items-end mb-6">
+    //                 <div>
+    //                     <h2 className="text-2xl font-bold mb-2">Live Classes Schedule</h2>
+    //                     <p className="text-indigo-200 capitalize">Interactive sessions for {enrolledCourse} {enrolledLevel}</p>
+    //                 </div>
+    //                  <div className="hidden md:block">
+    //                     <span className="bg-indigo-800 px-4 py-2 rounded-full text-sm font-medium">{liveClasses.length} Sessions</span>
+    //                 </div>
+    //             </div>
+
+    //             {liveClasses.length === 0 ? (
+    //                 <div className="text-center py-8 text-indigo-300 bg-white/5 rounded-xl border border-white/10">
+    //                     No live classes scheduled for your course level yet.
+    //                 </div>
+    //             ) : (
+    //                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    //                     {liveClasses.map((session) => {
+    //                         const status = getStatus(session.date, session.time, session.duration);
+    //                         return (
+    //                             <div key={session.id} className={`p-4 rounded-xl border transition-all relative overflow-hidden group ${
+    //                                 status === 'active' 
+    //                                     ? 'bg-indigo-600 border-indigo-400 shadow-lg shadow-indigo-900/50 transform scale-105 z-10' 
+    //                                     : 'bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20'
+    //                             }`}>
+    //                                 <div className="text-center">
+    //                                     <span className="block text-indigo-300 text-[10px] uppercase font-bold tracking-wider mb-1">{session.week}</span>
+    //                                     <span className="block text-xs font-bold mb-1 opacity-75">{new Date(session.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+    //                                     <span className="block text-lg font-bold mb-2">{session.time}</span>
+                                        
+    //                                     {status === 'active' ? (
+    //                                         <a href={session.meeting_link} target="_blank" rel="noreferrer" className="block w-full py-1.5 bg-white text-indigo-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition-colors animate-pulse">
+    //                                             Join Now
+    //                                         </a>
+    //                                     ) : status === 'ended' ? (
+    //                                         session.recording_link ? (
+    //                                             <a href={session.recording_link} target="_blank" rel="noreferrer" className="block w-full py-1.5 bg-green-500 text-white rounded-lg text-xs font-bold hover:bg-green-600 transition-colors">
+    //                                                 Watch Recording
+    //                                             </a>
+    //                                         ) : (
+    //                                             <span className="inline-block px-3 py-1 bg-black/20 rounded-full text-[10px] font-medium text-indigo-300">Ended</span>
+    //                                         )
+    //                                     ) : (
+    //                                         <span className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-medium text-indigo-200">Upcoming</span>
+    //                                     )}
+    //                                 </div>
+    //                             </div>
+    //                         );
+    //                     })}
+    //                 </div>
+    //             )}
+    //         </div>
+    //     </div>
+
+    //     {/* Quick Actions */}
+    //     <div className="grid md:grid-cols-2 gap-6 mb-12">
+    //         <motion.div 
+    //             whileHover={{ y: -5 }}
+    //             className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between"
+    //         >
+    //             <div className="flex justify-between items-start mb-4">
+    //                 <div>
+    //                      <h2 className="text-xl font-bold text-slate-900 mb-2">Start Lesson</h2>
+    //                      <p className="text-slate-600 text-sm mb-4">Continue from where you left off in your course.</p>
+    //                 </div>
+    //                 <div className="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center">
+    //                     <Lightbulb className="w-8 h-8 text-orange-500" />
+    //                 </div>
+    //             </div>
+    //             <Link to="/learn" className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl text-center transition-colors">
+    //                 Go to Classroom
+    //             </Link>
+    //         </motion.div>
+
+    //         <motion.div 
+    //             whileHover={{ y: -5 }}
+    //             className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between"
+    //         >
+    //              <div className="flex justify-between items-start mb-4">
+    //                 <div>
+    //                      <h2 className="text-xl font-bold text-slate-900 mb-2">Quick Question</h2>
+    //                      <p className="text-slate-600 text-sm mb-4">Ask Ms Lexi - Our AI Tutor anything about Lessons.</p>
+    //                 </div>
+    //                  <div className="w-16 h-16 bg-slate-900 rounded-lg flex items-center justify-center">
+    //                     <HelpCircle className="w-8 h-8 text-yellow-500" />
+    //                 </div>
+    //             </div>
+    //             <Link to="/ask" className="w-full py-3 bg-sky-100 hover:bg-sky-200 text-sky-700 font-bold rounded-xl text-center transition-colors">
+    //                 Ask Ms Lexi
+    //             </Link>
+    //         </motion.div>
+    //     </div>
+    // </div>
+    <div className='max-w-6xl mx-auto'>
+        <div className='grid col-span-2 '>
+            <div className=' bg-linear-to-r from-[#3C83F6] to-[#5048E5] w-fit p-6 rounded-xl '>
+            <h1 className="text-3xl font-bold text-white">Welcome back, {firstName || 'Student'}</h1>
+            <p className="text-white/80">Let's continue your learning journey to fluency.</p>
+
         </div>
 
-        {/* Live Classes Widget */}
-        <div className="mb-12 bg-indigo-900 rounded-2xl p-8 text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-800 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            <div className="relative z-10">
-                <div className="flex justify-between items-end mb-6">
-                    <div>
-                        <h2 className="text-2xl font-bold mb-2">Live Classes Schedule</h2>
-                        <p className="text-indigo-200 capitalize">Interactive sessions for {enrolledCourse} {enrolledLevel}</p>
-                    </div>
-                     <div className="hidden md:block">
-                        <span className="bg-indigo-800 px-4 py-2 rounded-full text-sm font-medium">{liveClasses.length} Sessions</span>
-                    </div>
-                </div>
+        </div>
 
-                {liveClasses.length === 0 ? (
-                    <div className="text-center py-8 text-indigo-300 bg-white/5 rounded-xl border border-white/10">
-                        No live classes scheduled for your course level yet.
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                        {liveClasses.map((session) => {
-                            const status = getStatus(session.date, session.time, session.duration);
-                            return (
-                                <div key={session.id} className={`p-4 rounded-xl border transition-all relative overflow-hidden group ${
-                                    status === 'active' 
-                                        ? 'bg-indigo-600 border-indigo-400 shadow-lg shadow-indigo-900/50 transform scale-105 z-10' 
-                                        : 'bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20'
-                                }`}>
-                                    <div className="text-center">
-                                        <span className="block text-indigo-300 text-[10px] uppercase font-bold tracking-wider mb-1">{session.week}</span>
-                                        <span className="block text-xs font-bold mb-1 opacity-75">{new Date(session.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-                                        <span className="block text-lg font-bold mb-2">{session.time}</span>
-                                        
-                                        {status === 'active' ? (
-                                            <a href={session.meeting_link} target="_blank" rel="noreferrer" className="block w-full py-1.5 bg-white text-indigo-600 rounded-lg text-xs font-bold hover:bg-indigo-50 transition-colors animate-pulse">
-                                                Join Now
-                                            </a>
-                                        ) : status === 'ended' ? (
-                                            session.recording_link ? (
-                                                <a href={session.recording_link} target="_blank" rel="noreferrer" className="block w-full py-1.5 bg-green-500 text-white rounded-lg text-xs font-bold hover:bg-green-600 transition-colors">
-                                                    Watch Recording
-                                                </a>
-                                            ) : (
-                                                <span className="inline-block px-3 py-1 bg-black/20 rounded-full text-[10px] font-medium text-indigo-300">Ended</span>
-                                            )
-                                        ) : (
-                                            <span className="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] font-medium text-indigo-200">Upcoming</span>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
+        <div className='mb-8 mt-6 grid md:grid-cols-2 gap-4'>
+            <StudentDashboard title="Student Dashboard" data={Courses} />
+            <StudentDashboard title="Upcoming Schedule" data={ScheduleDash} />
+        
+            
+        </div>
+
+        <div className='mb-6'>
+            <div className='flex gap-3'>
+                <Zap className='w-6 h-6 text-yellow-500' />
+                <h1 className='mb-3 font-InterBold'>Quick Actions</h1>
+
+            </div>
+            
+
+            <div className='grid md:grid-cols-4 gap-4'>
+                <StudentQuickActionCard 
+                    title="Start Lesson"
+                    description="Continue where you left off"
+                    icon={Play}
+                    color="blue-500"
+                    link="/learn"
+                />
+                <StudentQuickActionCard
+                    title="Take a Test"
+                    description="Challenge your knowledge"
+                    icon={MonitorCheck}
+                    color="yellow-500"
+                    link="/assessment"
+                />
+                <StudentQuickActionCard
+                    title="Exam Preparation"
+                    description="Get ready for exams"
+                    icon={MonitorCheck}
+                    color="blue-500"
+                    
+                />
+                <StudentQuickActionCard
+                    title="Ask AI Tutor"
+                    description="Get instant answers"
+                    icon={Bot}
+                    color="green-500"
+                    link="/ask"
+                />
+            </div>
+            
+        </div>
+
+        <div>
+                <div className='flex gap-3'>
+            <ChartColumnIncreasing className="w-6 h-6 text-blue-500" />
+            <h1 className='mb-3 font-InterBold'>Performance Snapshot</h1>
+            </div>
+            <div className='grid md:grid-cols-4 gap-4 mt-4'>    
+                <StudentPerformanceSnapShot 
+                    title="Average Score"
+                    score="82%"
+                    icon={Award}
+                    color="blue-500"
+                />
+                <StudentPerformanceSnapShot 
+                    title="Tests Completed"
+                    score="14"
+                    icon={MonitorCheck}
+                    color="green-500"
+                />
+                <StudentPerformanceSnapShot 
+                    title="Improvement"
+                    score="+15%"
+                    icon={ChartLine}
+                    color="green-500"
+                />
+                <StudentPerformanceSnapShot 
+                    title="Strength"
+                    score="Vocabulary"
+                    icon={BookOpen}
+                    color="blue-500"
+                />
             </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 gap-6 mb-12">
-            <motion.div 
-                whileHover={{ y: -5 }}
-                className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between"
-            >
-                <div className="flex justify-between items-start mb-4">
-                    <div>
-                         <h2 className="text-xl font-bold text-slate-900 mb-2">Start Lesson</h2>
-                         <p className="text-slate-600 text-sm mb-4">Continue from where you left off in your course.</p>
-                    </div>
-                    <div className="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center">
-                        <Lightbulb className="w-8 h-8 text-orange-500" />
-                    </div>
-                </div>
-                <Link to="/learn" className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl text-center transition-colors">
-                    Go to Classroom
-                </Link>
-            </motion.div>
+        
 
-            <motion.div 
-                whileHover={{ y: -5 }}
-                className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between"
-            >
-                 <div className="flex justify-between items-start mb-4">
-                    <div>
-                         <h2 className="text-xl font-bold text-slate-900 mb-2">Quick Question</h2>
-                         <p className="text-slate-600 text-sm mb-4">Ask Ms Lexi - Our AI Tutor anything about Lessons.</p>
-                    </div>
-                     <div className="w-16 h-16 bg-slate-900 rounded-lg flex items-center justify-center">
-                        <HelpCircle className="w-8 h-8 text-yellow-500" />
-                    </div>
-                </div>
-                <Link to="/ask" className="w-full py-3 bg-sky-100 hover:bg-sky-200 text-sky-700 font-bold rounded-xl text-center transition-colors">
-                    Ask Ms Lexi
-                </Link>
-            </motion.div>
-        </div>
+      
     </div>
   )
 }
@@ -416,6 +511,116 @@ const QuickActionCard = ({ title, description, icon: Icon, color, link }) => {
         </motion.div>
     )
 }
+
+const StudentDashboard = ({title, data }) => {
+  return (
+    <div className="bg-white p-6 rounded-xl shadow-sm">
+        <div className='flex gap-2 items-center'>
+            <Calendar1 className="w-8 h-8 text-blue-500 mb-4" />
+             <h2 className="text-xl font-medium text-slate-900 mb-2">{title}</h2>
+
+        </div>
+        
+        {data.length === 0 ? (
+            <div className="text-center py-20 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                <Clock className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <p className="text-slate-500 font-medium">No classes scheduled for today.</p>
+                <p className="text-sm text-slate-400">Check back later or explore other sections.</p>
+                
+                </div>) :
+                ( 
+                    data.map((course, index) => (
+                        <div key={index} className=" bg-[#F1F5F980] rounded-xl p-4 mb-4 flex items-center justify-between">
+                            <div className='flex items-center gap-2'>
+                                <div className='bg-[#3C83F61A] p-2.5 w-fit mb-1 rounded-xl'>
+                                <Clock4 className="w-5 h-5 text-[#3C83F6] " />  
+                                </div>
+                                <div>
+                                <h3 className="font-medium font-Inter ">{course.title}</h3>
+                                {/* <div className='flex  items-center justify-center'> */}
+                                <p className="text-slate-600 text-sm">{course.time}</p>
+                                <p className="text-slate-600 text-sm">{course.tutor}</p>
+                                </div>
+                                {/* </div> */}
+                            </div>
+                            <Link to="" className="px-4 py-2 bg-[#3C83F6] hover:bg-[#2A6BCF] text-white rounded-lg text-sm font-bold transition-colors">
+                                Join
+                            </Link>
+                        </div>
+                    ))
+                )
+        }
+
+
+
+        </div>
+        )
+    }
   
 
+    const Courses = [
+        {
+            title: "German A1",
+            time: "10:00 AM - 11:00 AM",
+            tutor: "Ms. Adewale",
+        },
+         {
+            title: "German A1",
+            time: "12:00 PM - 1:00 PM",
+            tutor: "Ms. Adewale",
+        }
+    ]
+
+
+    const ScheduleDash = [
+        {
+            title: "German A1",
+            day: "Monday",
+            time: "5:00 PM"
+        },
+        {
+            title: "German A1",
+            day: "Wednesday",
+            time: "5:00 PM"
+        },
+        {
+            title: "German A1",
+            day: "Friday",
+            time: "5:00 PM"
+        }
+
+    ]
+
+
+    const StudentQuickActionCard = ({title, description, icon: Icon, color, link}) =>{
+        return (
+            <Link to={link} className="bg-white flex flex-col items-center rounded-xl p-4 mb-4 justify-center gap-4 border border-[#E1E7EF] shadow-sm hover:shadow-md transition-shadow">
+                <div>
+                     <Icon className={`w-6 h-6 text-${color}`} />
+                </div>
+               
+                
+                <div>
+                    <h3 className="font-medium font-Inter text-lg text-center">{title}</h3>
+                    <p className="text-[#65758B] font-Inter text-center">{description}</p>
+                </div>
+            </Link>
+        )
+
+    }
+
+
+    const StudentPerformanceSnapShot = ({title, score, icon: Icon, color}) => {
+        return (
+            <div className="bg-white p-4 rounded-xl border border-[#E1E7EF] flex items-center gap-4 shadow-sm ">
+               
+                    <Icon className={`w-6 h-6 text-${color}`} />
+                
+                <div>
+                    <h3 className="text-sm text-slate-500">{title}</h3>
+                    <p className="font-bold text-lg">{score}</p>
+                </div>
+            </div>
+        )
+    }
 
