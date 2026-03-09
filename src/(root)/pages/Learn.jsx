@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 import ReactMarkdown from "react-markdown";
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, MessageCircle, Loader, LoaderCircleIcon, BookOpen, ChevronRight, Award } from 'lucide-react';
-
+import { useQuery } from '@tanstack/react-query';
 
 const Learn = () => {
     const [quizData, setQuizData] = useState(null);
@@ -35,111 +35,38 @@ const Learn = () => {
 
     
     // Missing States
-    const [topics, setTopics] = useState([]);
-    const [currentTopic, setCurrentTopic] = useState(null);
-    const [currentTopicIndex, setCurrentTopicIndex] = useState(0);
-    const [progress, setProgress] = useState(0); // Progress percentage
-    const isAutoMode = false; // Placeholder for now
-    const [topicIsCompleted, setTopicIsCompleted] = useState(false);
-
     const location = useLocation();
+    const navigate = useNavigate();
+    const { token, enrolledCourse, enrolledLevel } = useSelector((state) => state.user);
 
-    const navigate = useNavigate()
+    // Destructure course context from LearnSelection
+    const { activeSprintId, courseName, courseCode, topicObj } = location.state || {};
+
+    const [currentTopic, setCurrentTopic] = useState(topicObj ? topicObj.topic : null);
+    const [currentTopicIndex, setCurrentTopicIndex] = useState(topicObj ? topicObj.session_number : 1);
+    const [progress, setProgress] = useState(0); 
+    const isAutoMode = false; 
+    const [topicIsCompleted, setTopicIsCompleted] = useState(false);
     
-    const [learningContext, setLearningContext] = useState(null); // { filename, topic, course, level, topic_index }
-    const { token } = useSelector((state) => state.user);
-    const hasFetched = useRef(false);
+    const [learningContext, setLearningContext] = useState({
+        topic: Array.isArray(currentTopic) ? currentTopic.join(', ') : currentTopic,
+        course: enrolledCourse || courseName || "Sprint Course",
+        level: enrolledLevel || "A1",
+        topic_index: currentTopicIndex
+    });
 
     useEffect(() => {
-        if (hasFetched.current) return;
-        hasFetched.current = true;
+        if (!token) {
+            navigate('/login');
+            return;
+        }
 
-        const initLearning = async () => {
-            if (!token) {
-                 navigate('/login'); 
-                 return;
-            }
-
-            try {
-                // 1. Fetch Structure
-                // We initially try without params to get "enrolled" context.
-                // If "All" access, we might need a level from localStorage or location.
-                let level = localStorage.getItem('last_level');
-                console.log("level:", level);
-
-            
-
-                // let url = `${import.meta.env.VITE_BACKEND_URL}/course_structure`;
-                // console.log("url:", url);
-              
-
-                const res = await apiClient('/course_structure');
-                
-                // if (!res.ok) {
-                //     throw new Error("Failed to fetch structure");
-                // } // apiClient handles errors roughly but returns response. res.ok is available since apiClient returns fetch response (after interceptor)
-
-
-                const data = await res.json();
-         
-                console.log("data:", data);
-                
-                const structure = data.structure || [] // Modified backend returns {structure: []}
-                setTopics(structure)
-                console.log("structure:", structure);
-
-                // Use the user's current_topic_index to find the topic
-                const userData = data.user_data || {}; // Assuming user_data is part of the response
-                const currentIdx = userData.current_topic_index || 0;
-                
-                // Check if course is completed
-                if (structure.length > 0 && currentIdx >= structure.length) {
-                    setCourseFinished(true); // Need to define this state
-                    setLoading(false);
-                    return;
-                }
-
-                const currentTopicObj = structure.find(t => t.index === currentIdx) || structure[0]
-                
-                let resolvedTopic = null;
-                if (currentTopicObj) {
-                    resolvedTopic = currentTopicObj.topic;
-                    setCurrentTopic(resolvedTopic)
-                    setCurrentTopicIndex(currentTopicObj.index)
-                    setTopicIsCompleted(currentTopicObj.is_completed || false)
-                }
-
-                if (!resolvedTopic) {
-                     alert("No active topic found for your course level.");
-                     return;
-                }
-
-                // 3. Set Context
-                setLearningContext({
-                    topic: resolvedTopic, 
-                    course: userData.enrolled_course,
-                    level: userData.enrolled_level,
-                    topic_index: currentTopicIndex
-                });
-                
-                // Persist level for reload (Optional, but keeping for consistency)
-                if (userData.enrolled_level) localStorage.setItem('last_level', userData.enrolled_level);
-
-
-
-            } catch (err) {
-                console.error("Init Error", err);
-                // navigate('/courses');
-            }
-        };
-
-        initLearning();
-    }, [token, location.state, navigate, currentTopic]); // Added currentTopic to dependencies
-
-
-
-
-
+        // If accessed directly without selecting a course, redirect to Selection
+        if (!activeSprintId || !topicObj) {
+             navigate('/learn');
+             return;
+        }
+    }, [token, navigate, activeSprintId, topicObj]);
 
   // Start Stream function (called initially and on 'Contine')
   const startStream = (targetSection = null, customLoadingMessage = "Lextorah AI is explaining...") => {
@@ -155,7 +82,7 @@ const Learn = () => {
     }
 
     const BASE_URL = import.meta.env.VITE_BACKEND_URL;
-    let url = `${BASE_URL}/classroom/next/${user_id}?topic=${encodeURIComponent(currentTopic)}`;
+    let url = `${BASE_URL}/classroom/next/${user_id}?topic=${encodeURIComponent(currentTopic)}&sprint_id=${activeSprintId}`;
     if (targetSection !== null) {
         url += `&section=${targetSection}`;
     }
@@ -296,6 +223,7 @@ const Learn = () => {
                       body: JSON.stringify({
                           course: learningContext.course,
                           level: learningContext.level,
+                          course_code: courseCode,
                           topic: learningContext.topic,
                           material_content: fullContentRef.current || "No content generated.",
                       })
@@ -318,244 +246,204 @@ const Learn = () => {
 
 
   return (
-    <main className='w-full min-h-screen bg-green-50 flex flex-col font-Mada'>
-      {/* Top Header */}
-      <div className='bg-white border-b border-green-100 shadow-sm sticky top-0 z-10'>
-          <div className='max-w-6xl mx-auto px-4 py-4 flex items-center justify-between'>
-              <div className='flex items-center gap-3'>
-                  <div className='w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600'>
-                      <BookOpen size={20} />
-                  </div>
-                  <div>
-                      <h1 className='text-xl font-bold text-slate-800 line-clamp-1 break-all'>{learningContext?.topic || "Loading..."}</h1>
-                      <p className='text-sm text-slate-500'>Learning Module</p>
-                  </div>
-
+    <main className='w-full h-screen bg-slate-50 flex flex-col font-Mada overflow-hidden'>
+      
+      {/* Top Navigation Header */}
+      <div className='h-20 border-b border-slate-200 bg-white px-6 md:px-8 flex items-center justify-between z-10 shrink-0 shadow-sm'>
+          <div className='flex items-center gap-4'>
+              <div className='w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 shrink-0'>
+                  <BookOpen size={24} />
               </div>
-              <button onClick={handleClose} className='p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors'>
-                  <X size={24}/>
-              </button>
+              <div>
+                  <h1 className='text-xl md:text-2xl font-bold text-slate-800 tracking-tight'>
+                      {currentTopic ? (Array.isArray(currentTopic) ? currentTopic.join(', ') : currentTopic) : "Interactive Lesson"}
+                  </h1>
+                  {courseCode && (
+                      <span className='inline-block mt-0.5 px-2.5 py-0.5 bg-green-50 text-green-700 text-xs font-bold rounded-lg border border-green-200 uppercase tracking-wider'>
+                          {courseCode}
+                      </span>
+                  )}
+              </div>
           </div>
+          
+          <button 
+              onClick={handleClose} 
+              className='p-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-500 hover:text-slate-800 transition-all font-bold group flex items-center gap-2'
+          >
+              <span className="hidden sm:inline">Exit Lesson</span>
+              <X size={20} className="group-hover:rotate-90 transition-transform"/>
+          </button>
+      </div>
 
-          {/* New "Box of Available Options" / Top Navigation */}
-          {!quizData && sections.length > 0 && (
-              <div className='max-w-6xl mx-auto px-4 pb-0 overflow-x-auto no-scrollbar'>
-                  <div className='flex space-x-4 py-4'>
-                      {sections.map((section, idx) => (
-                          <button
-                              key={section.index}
-                              onClick={() => handleSectionClick(section)}
-                              className={`
-                                  flex-shrink-0 px-6 py-3 rounded-xl border-2 font-medium transition-all duration-200
-                                  flex flex-col items-start gap-1 min-w-[200px] text-left
-                                  ${activeSection === section.index 
-                                      ? 'bg-green-600 border-green-600 text-white shadow-lg scale-105' 
-                                      : 'bg-white border-green-100 text-slate-600 hover:border-green-300 hover:bg-green-50'}
-                              `}
+      <div className='flex-1 flex flex-col min-h-0 bg-slate-50 relative'>
+          <div className='flex-1 flex flex-col h-full overflow-hidden p-4 md:p-8'>
+               <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col min-h-0">
+              {courseFinished ? (
+                  <div className='bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-slate-200 text-center m-auto'>
+                      <div className='w-24 h-24 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-green-600 border border-green-100'>
+                          <Award size={48} />
+                      </div>
+                      <h2 className='text-3xl font-bold text-slate-900 mb-4'>Lesson Completed! 🎉</h2>
+                      <p className='text-slate-600 text-lg mb-8 max-w-md mx-auto'>
+                          Congratulations! You have successfully completed all modules for this topic. Let's keep learning!
+                      </p>
+                      <div className='flex flex-col sm:flex-row gap-4 justify-center'>
+                          <button 
+                              onClick={() => navigate('/dashboard')}
+                              className='bg-white text-slate-700 border-2 border-slate-200 px-8 py-3 rounded-xl font-bold hover:bg-slate-50 transition-all'
                           >
-                              <span className={`text-xs uppercase tracking-wider ${activeSection === section.index ? 'text-green-200' : 'text-slate-400'}`}>Page {section.index}</span>
-                              {/* <span className='truncate w-full'>{section.title}</span> */}
+                              Return to Dashboard
                           </button>
-                      ))}
+                      </div>
                   </div>
-              </div>
-          )}
-      </div>
+              ) : quizData ? (
+                  <div className='w-full h-full overflow-y-auto custom-scrollbar pr-2 pb-4'>
+                      {!showResults ? (
+                          <div className='bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-slate-200'>
+                                <div className='mb-8 flex items-center justify-between border-b border-slate-100 pb-4'>
+                                  <h2 className='text-2xl font-bold text-slate-900'>Quiz Time!</h2>
+                                  <span className='bg-amber-50 text-amber-600 text-xs font-bold px-3 py-1 rounded-full border border-amber-200'>Do not refresh</span>
+                              </div>
+                              <div className='mb-4 text-green-600 font-bold text-sm tracking-wide uppercase'>Question {currentQuestionIndex + 1} of {quizData.length}</div>
+                              
+                              <h3 className='text-xl md:text-2xl font-semibold text-slate-800 mb-8 leading-snug'>
+                                  {quizData[currentQuestionIndex].question}
+                              </h3>
 
-      {courseFinished ? (
-          <div className='flex-1 max-w-4xl w-full mx-auto p-6 md:p-8 flex items-center justify-center'>
-              <div className='bg-white p-12 rounded-2xl shadow-xl border border-green-100 text-center'>
-                  <div className='w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600'>
-                      <Award size={48} />
+                              <div className='space-y-3'>
+                                  {quizData[currentQuestionIndex].options?.map((option, idx) => (
+                                      <div 
+                                         key={idx}
+                                         onClick={() => handleAnswerSelect(option)}
+                                         className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                                             selectedAnswer === option 
+                                             ? 'bg-green-50 border-green-500 text-green-900 shadow-md transform scale-[1.01]' 
+                                             : 'bg-white border-slate-200 hover:border-green-300 hover:bg-slate-50'
+                                         }`}
+                                      >
+                                          {option}
+                                      </div>
+                                  ))}
+                              </div>
+
+                              <div className='mt-10 flex justify-end pt-6 border-t border-slate-100'>
+                                  <button 
+                                     onClick={handleNextQuestion}
+                                     disabled={!selectedAnswer}
+                                     className='bg-green-600 text-white px-10 py-3.5 rounded-xl font-bold disabled:opacity-50 hover:bg-green-700 transition-all shadow-lg shadow-green-200 disabled:shadow-none'
+                                  >
+                                      {currentQuestionIndex === quizData.length - 1 ? 'Submit Answers' : 'Next Question'}
+                                  </button>
+                              </div>
+                          </div>
+                      ) : (
+                          <div className='bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-slate-200 text-center'>
+                              <div className='w-20 h-20 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-green-600 border border-green-100'>
+                                 <LoaderCircleIcon size={40} />
+                              </div>
+                              <h2 className='text-3xl font-bold text-slate-900 mb-2'>Quiz Completed!</h2>
+                              
+                              <div className='my-8 p-8 bg-slate-50 rounded-3xl border border-slate-200 w-full max-w-sm mx-auto'>
+                                  <div className='text-6xl font-black text-green-600 mb-2 tracking-tight'>
+                                      {Math.round((score / quizData.length) * 100)}%
+                                  </div>
+                                  <p className='text-slate-600 font-medium'>
+                                      You scored <span className='text-slate-900 font-bold'>{score}</span> out of {quizData.length}
+                                  </p>
+                              </div>
+
+                              <div className='flex flex-col gap-6 text-left w-full max-w-2xl mx-auto'>
+                                  <div className="bg-white p-6 rounded-2xl border border-slate-200 max-h-[50vh] overflow-y-auto custom-scrollbar shadow-inner">
+                                      <h3 className="font-bold text-slate-800 mb-6 sticky top-0 bg-white pb-4 border-b border-slate-100 uppercase tracking-widest text-xs">Review Details</h3>
+                                      {quizData.map((q, idx) => {
+                                          const userAnswer = userAnswers[idx];
+                                          const isCorrect = userAnswer && userAnswer[0] === q.answer;
+                                          
+                                          return (
+                                              <div key={idx} className="mb-8 border-b border-slate-100 pb-8 last:border-0 last:pb-0">
+                                                  <p className="font-semibold text-slate-900 mb-4 text-lg"><span className="text-slate-400 mr-2">{idx + 1}.</span> {q.question}</p>
+                                                  
+                                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+                                                       <div className={`p-4 rounded-xl border ${isCorrect ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
+                                                           <span className="block text-xs font-bold tracking-wider opacity-70 mb-2">YOUR ANSWER</span>
+                                                           {userAnswer || "No Answer"}
+                                                       </div>
+                                                       <div className="p-4 rounded-xl border bg-slate-50 border-slate-200 text-slate-700">
+                                                           <span className="block text-xs font-bold tracking-wider opacity-70 mb-2">CORRECT ANSWER</span>
+                                                           {q.options.find(o => o.startsWith(q.answer)) || q.answer}
+                                                       </div>
+                                                  </div>
+
+                                                  {q.explanation && (
+                                                      <div className="bg-sky-50 border border-sky-100 p-4 rounded-xl text-sm text-sky-900">
+                                                          <span className="font-bold mr-2 text-sky-700">💡 Explanation:</span>
+                                                          {q.explanation}
+                                                      </div>
+                                                  )}
+                                              </div>
+                                          );
+                                      })}
+                                  </div>
+                                  
+                                  <button 
+                                     onClick={handleClose}
+                                     className='bg-slate-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl mt-2 mx-auto w-full max-w-xs'
+                                  >
+                                      Finish Lesson
+                                  </button>
+                              </div>
+                          </div>
+                      )}
                   </div>
-                  <h2 className='text-3xl font-bold text-green-800 mb-4'>Course Completed! 🎉</h2>
-                  <p className='text-slate-600 text-lg mb-8'>
-                      Congratulations! You have successfully completed all modules in this course.
-                  </p>
-                  <div className='flex gap-4 justify-center'>
-                      <button 
-                          onClick={() => navigate('/dashboard')}
-                          className='bg-slate-900 text-white px-8 py-3 rounded-xl font-semibold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl'
-                      >
-                          Return to Dashboard
-                      </button>
-                      <button 
-                          onClick={() => navigate('/courses')}
-                          className='bg-green-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-green-700 transition-all shadow-lg hover:shadow-xl'
-                      >
-                          View Transcript
-                      </button>
+              ) : loading ? (
+                  <div className='flex flex-col items-center justify-center h-full gap-5'>
+                      <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center">
+                          <LoaderCircleIcon className='w-8 h-8 text-green-600 animate-spin'/>
+                      </div>
+                      <p className='text-slate-500 font-medium animate-pulse'>{loadingMessage}</p>
                   </div>
+              ) : ( 
+                  <div className='flex-grow flex flex-col min-h-0 py-4'>
+                      {!currentTopic ? (
+                          <div className="h-full flex flex-col items-center justify-center text-slate-400">
+                              <div className="w-20 h-20 bg-white shadow-sm rounded-full flex items-center justify-center mb-6 border border-slate-200">
+                                  <BookOpen className="w-8 h-8 text-slate-300" />
+                              </div>
+                              <h3 className="text-xl font-bold text-slate-700 mb-2">Select a Topic</h3>
+                              <p className="text-center max-w-sm">Choose a lesson from the left sidebar to begin your class.</p>
+                          </div>
+                      ) : (
+                          <>
+                              <div className="absolute top-4 right-4 z-20">
+                                  <button 
+                                    onClick={handleNext}
+                                    className={`px-6 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white shadow-md`}
+                                  >
+                                    Continue Explanation <ChevronRight className="w-4 h-4" />
+                                  </button>
+                              </div>
+
+                              <AnimatePresence mode='wait'>
+                                  <motion.div
+                                      key={activeSection}
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      exit={{ opacity: 0, y: -10 }}
+                                      transition={{ duration: 0.3 }}
+                                      className='bg-white p-8 md:p-12 rounded-3xl border border-slate-200 shadow-sm flex-1 min-h-0 overflow-y-auto custom-scrollbar custom-markdown'
+                                  >
+                                      <div className="prose prose-lg prose-slate max-w-none text-slate-700 prose-headings:text-slate-900 marker:text-green-500 prose-a:text-green-600">
+                                          {data ? <ReactMarkdown>{String(data).replace(/\n/g, '  \n')}</ReactMarkdown> : <div className="text-slate-400 italic">No content rendered yet. Click continue to resume the lesson stream.</div>}
+                                      </div>
+                                  </motion.div>
+                              </AnimatePresence>
+                          </>
+                      )}
+                  </div>
+              )}
               </div>
           </div>
-      ) : (
-      <div className='flex-1 max-w-4xl w-full mx-auto p-6 md:p-8'>
-      {
-        quizData ? (
-             <div className='w-full'>
-                 {!showResults ? (
-                     <div className='bg-white p-8 rounded-2xl shadow-xl border border-green-100'>
-                           <div className='mb-6 flex items-center justify-between'>
-                             <h2 className='text-2xl font-bold text-green-800 mb-6'>Quiz Time!</h2>
-                             <h1 className='mb-6 text-red-500 text-center'>Do not refresh this page</h1>
-                         </div>
-                         <div className='mb-4 text-slate-500'>Question {currentQuestionIndex + 1} of {quizData.length}</div>
-                         
-                         <h3 className='text-xl font-medium text-slate-800 mb-6'>
-                             {quizData[currentQuestionIndex].question}
-                         </h3>
-
-                         <div className='space-y-3'>
-                             {quizData[currentQuestionIndex].options?.map((option, idx) => (
-                                 <div 
-                                    key={idx}
-                                    onClick={() => handleAnswerSelect(option)}
-                                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                                        selectedAnswer === option 
-                                        ? 'bg-green-50 border-green-500 text-green-900 shadow-md' 
-                                        : 'bg-white border-slate-100 hover:border-green-200 hover:bg-slate-50'
-                                    }`}
-                                 >
-                                     {option}
-                                 </div>
-                             ))}
-                         </div>
-
-                         <div className='mt-8 flex justify-end'>
-                             <button 
-                                onClick={handleNextQuestion}
-                                disabled={!selectedAnswer}
-                                className='bg-green-600 text-white px-8 py-3 rounded-xl font-semibold disabled:opacity-50 hover:bg-green-700 transition-colors shadow-lg hover:shadow-xl active:scale-95'
-                             >
-                                 {currentQuestionIndex === quizData.length - 1 ? 'Finish Quiz' : 'Next Question'}
-                             </button>
-                         </div>
-                     </div>
-                 ) : (
-                     <div className='bg-white p-12 rounded-2xl shadow-xl border border-green-100 text-center'>
-                         <div className='w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600'>
-                            <LoaderCircleIcon size={40} />
-                         </div>
-                         <h2 className='text-3xl font-bold text-green-800 mb-4'>Quiz Completed!</h2>
-                         <div className='text-6xl font-bold text-green-600 mb-6'>
-                             {Math.round((score / quizData.length) * 100)}%
-                         </div>
-                         <p className='text-slate-600 text-lg mb-8'>
-                             You answered <span className='font-bold text-slate-900'>{score}</span> out of {quizData.length} questions correctly.
-                         </p>
-
-                          <div className='flex flex-col gap-4 text-left w-full'>
-                              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                                  <h3 className="font-bold text-slate-800 mb-4 sticky top-0 bg-slate-50 pb-2 border-b border-slate-200">Review Your Answers</h3>
-                                  {quizData.map((q, idx) => {
-                                      const userAnswer = userAnswers[idx];
-                                      // Check if userAnswer matches current q.answer. q.answer is usually just the letter "A", "B" etc or full string?
-                                      // The previous logic checked `selectedAnswer[0] === currentQuestion.answer`.
-                                      // So `userAnswer` is likely an array or string.
-                                      const isCorrect = userAnswer && userAnswer[0] === q.answer;
-                                      
-                                      return (
-                                          <div key={idx} className="mb-8 border-b border-slate-200 pb-6 last:border-0 last:pb-0">
-                                              <p className="font-medium text-slate-900 mb-3"><span className="text-slate-400 mr-2">{idx + 1}.</span> {q.question}</p>
-                                              
-                                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-3">
-                                                   <div className={`p-3 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
-                                                       <span className="block text-xs font-bold opacity-70 mb-1">YOUR ANSWER</span>
-                                                       {userAnswer || "No Answer"}
-                                                   </div>
-                                                   <div className="p-3 rounded-lg border bg-slate-50 border-slate-200 text-slate-700">
-                                                       <span className="block text-xs font-bold opacity-70 mb-1">CORRECT ANSWER</span>
-                                                       {/* Find option starting with the specific letter answer */}
-                                                       {q.options.find(o => o.startsWith(q.answer)) || q.answer}
-                                                   </div>
-                                              </div>
-
-                                              {q.explanation && (
-                                                  <div className="bg-yellow-50 border border-yellow-100 p-4 rounded-xl text-sm text-yellow-900">
-                                                      <span className="font-bold mr-2">💡 Explanation:</span>
-                                                      {q.explanation}
-                                                  </div>
-                                              )}
-                                          </div>
-                                      );
-                                  })}
-                              </div>
-                              
-                              <button 
-                                 onClick={handleClose}
-                                 className='bg-slate-900 text-white px-10 py-4 rounded-xl font-semibold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl mt-4 self-center'
-                              >
-                                  Back to Dashboard
-                              </button>
-                          </div>
-                     </div>
-                 )}
-             </div>
-        ) :
-
-        loading ? (
-        <div className='flex flex-col items-center justify-center h-64 gap-4'>
-          <LoaderCircleIcon className='w-10 h-10 text-green-600 animate-spin'/>
-          <p className='text-green-800 font-medium'>{loadingMessage}</p>
-        </div>
-
-        ) : ( 
-        <div className='w-full space-y-6'>
-            
-           
-
-            <AnimatePresence mode='wait'>
-                <motion.div
-                    key={activeSection}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
-                    className='bg-white p-8 md:p-12 rounded-2xl border border-green-100 shadow-sm'
-                >
-                    <div className="prose prose-lg prose-green max-w-none text-slate-700">
-                        <ReactMarkdown>{String(data)}</ReactMarkdown>
-                    </div>
-                </motion.div>
-            </AnimatePresence>
-
-            <div className='flex items-center justify-between pt-4'>
-              <button 
-                className='flex items-center gap-2 text-green-700 hover:text-green-800 px-6 py-3 rounded-xl hover:bg-green-50 transition-colors font-medium' 
-                onClick={()=>navigate('/ask')}
-              >
-                <MessageCircle size={20}/>
-                <span>Ask AI Tutor</span>
-              </button>
-
-              <button 
-                className='flex items-center gap-2 bg-slate-900 text-white px-8 py-3 rounded-xl hover:bg-slate-800 transition-all shadow-lg hover:shadow-slate-200 hover:-translate-y-0.5' 
-                onClick={handleNext}
-              >
-                <span>Continue</span>
-                <ChevronRight size={18} />
-              </button>
-            </div>
-
-             <div className='bg-blue-50 border border-blue-200 rounded-2xl p-6 flex items-center justify-between cursor-pointer hover:bg-blue-100 transition-colors group'>
-                <div className='flex items-center gap-4'>
-                    <div className='w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform'>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-play-circle"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                    </div>
-                    <div>
-                        <h3 className='text-lg font-bold text-blue-900'>Media Repository</h3>
-                        <p className='text-blue-700 text-sm'>View video & audio materials for this lesson</p>
-                    </div>
-                </div>
-                <div className='text-blue-400 group-hover:translate-x-1 transition-transform'>
-                    <ChevronRight size={24} />
-                </div>
-            </div>
-        </div>
-        )
-      }
       </div>
-      )}
     </main>
   );
 }

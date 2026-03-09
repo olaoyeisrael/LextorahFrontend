@@ -15,6 +15,7 @@ import progress from '../assets/progress.png'
 import practice from '../assets/practice.png'
 
 import educationtech from '../assets/EducationTechnology.png'
+import mobileHero from '../assets/mobileHero.jpg'
 
 
 import logo from '../assets/logo.png'
@@ -22,6 +23,7 @@ import Footer from '../components/Footer'
 
 
 const Home = () => {
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [heroTextIndex, setHeroTextIndex] = useState(0);
     const heroTexts = [
         <React.Fragment>Master any subject with <span className="text-green-500 gradient-to-r from-yellow-500 to-green-600">Lextorah AI Tutor</span></React.Fragment>,
@@ -34,6 +36,14 @@ const Home = () => {
         }, 5000);
         return () => clearInterval(interval);
     }, []);
+
+    useEffect(() => {
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const isMobile = windowWidth <= 768;
 
     const fadeInUp = {
         hidden: { opacity: 0, y: 20 },
@@ -58,11 +68,11 @@ const Home = () => {
       
       {/* Hero Section */}
       <div 
-        className="pt-[480px] md:pt-0 pb-12 md:pb-22 px-4 md:px- mx-auto flex flex-col items-start justify-center md:items-start text-left bg-cover bg-center min-h-[600px] md:min-h-[900px] w-full"
-        style={{ backgroundImage: `url(${heroBg})` }}
+        className="pt-[400px] md:pt-0 pb-12 md:pb-22 px-4 md:px-12 lg:px-20 mx-auto flex flex-col items-start justify-center md:items-start text-left bg-cover bg-center min-h-[600px] md:min-h-[900px] w-full transition-all duration-300"
+        style={{ backgroundImage: `url(${isMobile ? mobileHero : heroBg})` }}
       >
-        <div className="max-w-3xl mx-auto md:mx-0 flex flex-col items-center text-left md:pl-0">
-        <div className="min-h-[140px] md:min-h-[180px] flex items-center justify-center mb-6 w-full">
+        <div className="max-w-3xl mx-auto md:mx-0 flex flex-col items-center md:items-start text-center md:text-left w-full">
+        <div className="min-h-[140px] md:min-h-[180px] flex items-center justify-center md:justify-start mb-6 w-full">
             <AnimatePresence mode="wait">
                 <motion.h1 
                     key={heroTextIndex}
@@ -70,7 +80,7 @@ const Home = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.8 }}
-                    className="text-5xl md:text-7xl font-bold text-white tracking-tight text-center"
+                    className="text-5xl md:text-7xl font-bold text-white tracking-tight text-center md:text-left"
                 >
                     {heroTexts[heroTextIndex]}
                 </motion.h1>
@@ -80,7 +90,7 @@ const Home = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-xl md:text-2xl text-white mb-10 max-w-3xl leading-relaxed text-center"
+            className="text-xl md:text-2xl text-white mb-10 max-w-3xl leading-relaxed text-center md:text-left"
         >
             Experience personalized learning with voice interaction, step-by-step guidance, and instant feedback.
         </motion.p>
@@ -88,7 +98,7 @@ const Home = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start w-full md:w-auto"
         >
             <a href="https://www.lextorah-elearning.com/elearning/register" className="px-8 py-4 bg-[#00C950] hover:bg-green-700 text-white text-lg font-bold rounded-4xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">
                 Get Started for Free

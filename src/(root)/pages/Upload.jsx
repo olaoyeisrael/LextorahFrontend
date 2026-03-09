@@ -198,7 +198,7 @@ const Upload = () => {
                     >
                         <option value="">Select Topic</option>
                         {topics.map((t) => (
-                            <option key={t.id || t._id} value={t.topic}>{t.topic}</option>
+                            <option key={t.id || t._id} value={Array.isArray(t.topic) ? t.topic.join(', ') : t.topic}>{Array.isArray(t.topic) ? t.topic.join(', ') : t.topic}</option>
                         ))}
                     </select>
                 )}

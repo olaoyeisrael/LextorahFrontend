@@ -139,7 +139,7 @@ const StudentPerformance = () => {
                                         <td className="px-6 py-4 font-medium text-slate-900">{item.student_name || 'Unknown'}</td>
                                         <td className="px-6 py-4 capitalize">{item.course_title}</td>
                                         <td className="px-6 py-4 capitalize">{item.level || '-'}</td>
-                                        <td className="px-6 py-4">{item.topic}</td>
+                                        <td className="px-6 py-4">{Array.isArray(item.topic) ? item.topic.join(', ') : item.topic}</td>
                                         <td className="px-6 py-4 font-bold">
                                             {item.score} / {item.total}
                                         </td>
@@ -225,7 +225,7 @@ const StudentPerformance = () => {
                                     </div>
                                     <div className="flex justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors">
                                         <span className="text-slate-500 font-medium">Topic</span>
-                                        <span className="font-bold text-slate-900 text-right">{selectedResult.topic}</span>
+                                        <span className="font-bold text-slate-900 text-right">{Array.isArray(selectedResult.topic) ? selectedResult.topic.join(', ') : selectedResult.topic}</span>
                                     </div>
                                     <div className="flex justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors">
                                         <span className="text-slate-500 font-medium">Date Taken</span>

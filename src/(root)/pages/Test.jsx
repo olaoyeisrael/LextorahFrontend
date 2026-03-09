@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useQuery } from '@tanstack/react-query';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, CheckCircle2, XCircle, Timer, Award, MoveRight, Loader2, Lock } from 'lucide-react';
@@ -14,32 +16,43 @@ const Test = () => {
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [topics, setTopics] = useState([]);
   const [testMaterial, setTestMaterial] = useState(null);
+  const { studentSprints } = useSelector((state) => state.user);
+  const activeSprintId = studentSprints && studentSprints.length > 0 ? studentSprints[0].id : null;
 
+  // Fetch Syllabus Topics via React Query for actual available Sprint topics
+  const { data: topics = [], isLoading: loadingTopics, error: fetchError } = useQuery({
+      queryKey: ['testTopics', activeSprintId],
+      queryFn: async () => {
+          if (!activeSprintId) return [];
+          const response = await apiClient(`/curriculum/sprint/${activeSprintId}`);
+          if (response.ok) {
+              const data = await response.json();
+              return data.curriculum || [];
+          }
+          return [];
+      },
+      enabled: !!activeSprintId,
+  });
 
-  useEffect(() => {
+  // Fetch User Progress for Locking Logic
+  const { data: progressData, isLoading: loadingProgress } = useQuery({
+      queryKey: ['userProgress', activeSprintId],
+      queryFn: async () => {
+          const activeSprint = studentSprints?.find(s => s.id === activeSprintId);
+          const courseCode = activeSprint?.course_code || '';
+          const res = await apiClient(`/progress?course_code=${encodeURIComponent(courseCode)}`);
+          if (res.ok) return await res.json();
+          return null;
+      },
+      enabled: !!activeSprintId
+  });
 
-    const token = localStorage.getItem('token');
-    const getCourses = async () => {
-      try {
+  const completedTopics = progressData?.completed_topics || [];
 
-        const res = await apiClient('/course_structure');
-
-        const data = await res.json();
-        console.log(data.structure);
-        setTopics(data.structure);
-      } catch (error) {
-          console.error("Failed to fetch topics:", error);
-      } finally {
-          setLoading(false);
-      }
-    }
-    getCourses();
-    
-}, []);
+  const loadingState = loadingTopics || loadingProgress || loading;
 
 
   const startTest = async () => {
@@ -150,7 +163,7 @@ const Test = () => {
                 method: 'POST',
 
                 body: JSON.stringify({
-                    topic: testMaterial.topic,
+                    topic: Array.isArray(testMaterial.topic) ? testMaterial.topic.join(', ') : testMaterial.topic,
                     course_title: (enrolledCourse || "General").toLowerCase(),
                     level: (enrolledLevel || "A1").toLowerCase(),
                     score: score,
@@ -203,7 +216,7 @@ const Test = () => {
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Test Course</label>
                    
-                   {loading ? (
+                   {loadingState ? (
                        <div className="flex flex-col items-center justify-center p-12 text-slate-400">
                            <Loader2 className="w-8 h-8 animate-spin mb-2 text-green-600" />
                            <p>Loading test...</p>
@@ -211,7 +224,8 @@ const Test = () => {
                    ) : topics.length > 0 ? (
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                            {topics.map((t, idx) => {
-                              const isLocked = !t.is_completed;
+                              const topicStr = Array.isArray(t.topic) ? t.topic.join(', ') : t.topic || '';
+                              const isLocked = !completedTopics.includes(topicStr);
                               return (
                                <div 
                                 key={idx} 
@@ -219,7 +233,7 @@ const Test = () => {
                                     if(!isLocked) {
                                       setTestMaterial({
                                           material: t.cloud_url,
-                                          topic: t.topic,
+                                          topic: topicStr,
                                           week: t.week
                                       });
                                     } else {
@@ -239,7 +253,7 @@ const Test = () => {
                                            {isLocked ? <Lock className="w-4 h-4" /> : idx + 1}
                                        </div>
                                        <div>
-                                           <h3 className={`font-bold ${isLocked ? 'text-slate-500' : 'text-slate-900'}`}>{t.topic}</h3>
+                                           <h3 className={`font-bold ${isLocked ? 'text-slate-500' : 'text-slate-900'}`}>{topicStr}</h3>
                                            <p className="text-xs text-slate-500">{t.week || `Module ${idx+1}`}</p>
                                        </div>
                                    </div>
@@ -275,10 +289,10 @@ const Test = () => {
 
                 <button
                   onClick={startTest}
-                  disabled={loading}
+                  disabled={loadingState || !testMaterial}
                   className="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-green-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <>Start Test <MoveRight className="w-5 h-5" /></>}
+                  {loadingState ? <Loader2 className="w-6 h-6 animate-spin" /> : <>Start Test <MoveRight className="w-5 h-5" /></>}
                 </button>
               </motion.div>
             )}

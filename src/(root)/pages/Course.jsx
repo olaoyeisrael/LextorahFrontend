@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useQuery } from '@tanstack/react-query';
 import { FileText, Download, BookOpen, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -8,48 +9,52 @@ import { apiClient } from '../../utils/api';
 
 
 const Course = () => {
-    const { token } = useSelector((state) => state.user);
+    const { token, studentSprints } = useSelector((state) => state.user);
     const [progress, setProgress] = useState(null);
     const [transcripts, setTranscripts] = useState([]);
-    const [topics, setTopics] = useState([]);
-    const [loading, setLoading] = useState(true);
+    
+    // We'll calculate loading state based on transcripts plus react query
+    const [transcriptsLoading, setTranscriptsLoading] = useState(true);
     const [selectedTopic, setSelectedTopic] = useState(null);
+
+    const activeSprintId = studentSprints && studentSprints.length > 0 ? studentSprints[0].id : null;
+
+    // Fetch Syllabus Topics via React Query
+    const { data: topics = [], isLoading: topicsLoading } = useQuery({
+        queryKey: ['courseTopics', activeSprintId],
+        queryFn: async () => {
+            if (!activeSprintId) return [];
+            const response = await apiClient(`/curriculum/sprint/${activeSprintId}`);
+            if (response.ok) {
+                const data = await response.json();
+                return data.curriculum || [];
+            }
+            return [];
+        },
+        enabled: !!activeSprintId,
+    });
 
     useEffect(() => {
         const fetchCourseData = async () => {
             if (!token) return;
             try {
-                // Fetch Progress
-                // const progRes = await apiClient('/progress');
-                // if (progRes.ok) {
-                //     const data = await progRes.json();
-                //     setProgress(data);
-                // }
-
                 // Fetch Transcripts
                 const transRes = await apiClient('/transcripts');
                 if (transRes.ok) {
                     const data = await transRes.json();
-                    console.log("Transcripts: ",data.transcripts);
+                    console.log("Transcripts: ", data.transcripts);
                     setTranscripts(data.transcripts || []);
                 }
-                
-                // Fetch Structure
-                const structRes = await apiClient('/course_structure');
-                if (structRes.ok) {
-                    const data = await structRes.json();
-                    setTopics(data.structure || []);
-                    console.log(data.structure);
-                }
-
             } catch (err) {
                 console.error("Error fetching course data", err);
             } finally {
-                setLoading(false);
+                setTranscriptsLoading(false);
             }
         };
         fetchCourseData();
     }, [token]);
+
+    const loading = transcriptsLoading || (activeSprintId ? topicsLoading : false);
 
     const handleDownload = async (id, filename) => {
         try {
@@ -69,12 +74,25 @@ const Course = () => {
         }
     };
     
-    // Filter transcripts for selected topic
-    // Matches if transcript topic contains the module topic string (simple match)
+    // Matches if transcript topic string equals or contains the selected topic
+    const getTopicString = (t) => Array.isArray(t) ? t.join(', ') : t || "";
+    
     const filteredTranscripts = selectedTopic 
-        ? transcripts.filter(t => t.topic && t.topic.toLowerCase().includes(selectedTopic.topic.toLowerCase()))
+        ? transcripts.filter(t => {
+            if (!t.topic) return false;
+            
+            const transcriptTopicStr = getTopicString(t.topic).toLowerCase();
+            
+            // If the syllabus topic is an array, check if any of its parts are cleanly inside the transcript string
+            if (Array.isArray(selectedTopic.topic)) {
+                return selectedTopic.topic.some(part => transcriptTopicStr.includes(part.toLowerCase()));
+            } else {
+                return transcriptTopicStr.includes(getTopicString(selectedTopic.topic).toLowerCase());
+            }
+        })
         : [];
     console.log("Filtered Transcripts: ", filteredTranscripts);
+   
 
     if (loading) {
         return (
@@ -143,7 +161,7 @@ const Course = () => {
                                 )}
                             </div>
                         </div>
-                        <h3 className="font-bold text-slate-900 text-lg mb-1">{item.topic}</h3>
+                        <h3 className="font-bold text-slate-900 text-lg mb-1">{getTopicString(item.topic) || "Untitled Topic"}</h3>
                         <p className="text-sm text-slate-500">
                              Click to view progress & transcripts
                         </p>
@@ -160,7 +178,7 @@ const Course = () => {
                 >
                     <div className="flex justify-between items-center mb-6">
                         <div>
-                             <h2 className="text-xl font-bold text-slate-900">{selectedTopic.topic}</h2>
+                             <h2 className="text-xl font-bold text-slate-900">{getTopicString(selectedTopic.topic) || "Untitled Topic"}</h2>
                              <p className="text-slate-500 text-sm">Transcripts & Resources</p>
                         </div>
                         <button onClick={() => setSelectedTopic(null)} className="md:hidden p-2 bg-slate-100 rounded-full">
@@ -181,7 +199,7 @@ const Course = () => {
                                             <p className="text-xs text-slate-500">{new Date(t.date).toLocaleDateString()}</p>
                                         </div>
                                         <button 
-                                            onClick={() => handleDownload(t.id, `${t.topic}.pdf`)}
+                                            onClick={() => handleDownload(t.id, `${getTopicString(t.topic)}.pdf`)}
                                             className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1"
                                         >
                                             <Download className="w-3 h-3" /> PDF

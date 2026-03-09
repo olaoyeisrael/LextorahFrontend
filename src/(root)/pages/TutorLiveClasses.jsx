@@ -1,5 +1,6 @@
-import { Circle } from 'lucide-react'
-import React from 'react'
+import { Circle, BookOpen } from 'lucide-react'
+import React, { useState } from 'react'
+import SprintSyllabusForm from '../../components/SprintSyllabusForm'
 
 const TutorLiveClass = [{
     course: "German",
@@ -27,15 +28,69 @@ const TutorLiveClass = [{
 }
 ]
 
+// Hardcoding the JSON payload for testing the syllabus form
+const dummySprintData = {
+    "id": 2,
+    "course_code": "FRE/A1/WD/177",
+    "course_level": "A1",
+    "tutor_id": "9092",
+    "name": "French A1 Standard",
+    "start_date": "2026-03-04",
+    "end_date": "2026-05-01",
+    "duration_weeks": "8",
+    "status": "active",
+    "schedules": [
+        {
+            "id": 2,
+            "sprint_id": "2",
+            "day_of_week": "Monday",
+            "start_time": "09:00:00",
+            "end_time": "11:00:00",
+            "mode": "Physical",
+            "slot_label": null,
+        },
+        {
+            "id": 3,
+            "sprint_id": "2",
+            "day_of_week": "Wednesday",
+            "start_time": "09:00:00",
+            "end_time": "11:00:00",
+            "mode": "Physical",
+            "slot_label": null,
+        },
+        {
+            "id": 4,
+            "sprint_id": "2",
+            "day_of_week": "Friday",
+            "start_time": "09:00:00",
+            "end_time": "11:00:00",
+            "mode": "Physical",
+            "slot_label": null,
+        }
+    ]
+}
+
 function TutorLiveClasses() {
+  const [showSyllabusForm, setShowSyllabusForm] = useState(false);
+
   return (
-    <section>
-        <div className='mb-6'>
-        <h1 className="text-2xl font-InterBold">Live Classes</h1>
-        <p className='text-[#65758B] font-Inter'>Manage and join your live sessions</p>
+    <section className="max-w-6xl mx-auto">
+        <div className='mb-6 flex justify-between items-start'>
+            <div>
+                <h1 className="text-2xl font-InterBold">Live Classes</h1>
+                <p className='text-[#65758B] font-Inter'>Manage your live sessions </p>
+            </div>
+            {/* <button 
+                onClick={() => setShowSyllabusForm(!showSyllabusForm)}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+                <BookOpen className="w-4 h-4" />
+                {showSyllabusForm ? 'Back to Classes' : 'Edit Sprint Syllabus (Demo)'}
+            </button> */}
         </div>
        
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-[#E1E7EF]">
+         
+             <div className="bg-white p-6 rounded-xl shadow-sm border border-[#E1E7EF]">
                 <h2 className="text-xl font-InterBold mb-6">Upcoming Classes</h2>
                 <table className="w-full table-auto">
                     <thead >
@@ -55,7 +110,7 @@ function TutorLiveClasses() {
                                 <td className="py-3">{cls.level}</td>
                                 <td className="py-3">{cls.Date}</td>
                                 <td className="py-3">{cls.Time} </td>
-                                <td className="py-3">{cls.Topic}</td>
+                                <td className="py-3">{Array.isArray(cls.Topic) ? cls.Topic.join(', ') : cls.Topic}</td>
                                 {cls.status === "Live" ? (
                                     <td className="py-3">
                                         <button className="px-2.5 py-0.5 bg-red-100 text-red-600 rounded-full transition-colors items-center flex gap-1 border border-[#DC282833]">
@@ -75,23 +130,11 @@ function TutorLiveClasses() {
                                 
                             </tr>
                         ))}
-                        {/* Example row */}
-                        {/* <tr className="border-b">
-                            <td className="py-3">Algebra 101</td>
-                            <td className="py-3">Beginner</td>
-                            <td className="py-3">25</td>
-                            <td className="py-3">2 Alerts</td>
-                            <td className="py-3">
-                                <button className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md transition-colors">
-                                    Join Class
-                                </button>
-                            </td>
-                        </tr>
-                        More rows can be added here */}
                     </tbody>
                 </table>
                 
             </div>
+        
   
     </section>
   )

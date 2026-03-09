@@ -242,7 +242,7 @@ const LiveClasses = () => {
                               
                               <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-1">
-                                      <h3 className="font-bold text-slate-900">{cls.topic}</h3>
+                                      <h3 className="font-bold text-slate-900">{Array.isArray(cls.topic) ? cls.topic.join(', ') : cls.topic}</h3>
                                       <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-bold rounded uppercase">{cls.course} {cls.level}</span>
                                   </div>
                                   

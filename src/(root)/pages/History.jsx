@@ -51,9 +51,9 @@ const History = () => {
 
   const getTitle = (item) => {
       switch(item.type) {
-          case 'course_completion': return `Course Completed: ${item.course} ${item.level}`;
-          case 'topic_completion': return `Topic Completed: ${item.topic}`;
-          case 'live_class': return `Live Class Attended: ${item.topic}`;
+          case 'course_completion': return `Course Completed: ${item.course_code || `${item.course} ${item.level}`}`;
+          case 'topic_completion': return `Topic Completed: ${Array.isArray(item.topic) ? item.topic.join(', ') : item.topic}`;
+          case 'live_class': return `Live Class Attended: ${Array.isArray(item.topic) ? item.topic.join(', ') : item.topic}`;
           default: return 'Activity';
       }
   };
@@ -108,7 +108,7 @@ const History = () => {
                      <div className="flex items-center gap-2 text-sm text-slate-500">
                          <Calendar className="w-3 h-3" />
                          {formatDate(item.date)}
-                         {item.course && <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded textxs font-bold uppercase">{item.course} {item.level}</span>}
+                          {(item.course_code || item.course) && <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs font-bold uppercase">{item.course_code }</span>}
                      </div>
                  </div>
 

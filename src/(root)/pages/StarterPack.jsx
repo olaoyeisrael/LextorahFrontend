@@ -1,4 +1,5 @@
-
+import React, { useState } from 'react';
+import { apiClient } from '../../utils/api';
 import { useForm } from '@tanstack/react-form';
 import { motion } from 'framer-motion';
 import { z } from 'zod';
@@ -50,6 +51,9 @@ const formSchema = z.object({
 });
 
 const StarterPackAccessRequest = () => {
+  const [submitStatus, setSubmitStatus] = useState(null); // null | 'success' | 'error'
+  const [submitMessage, setSubmitMessage] = useState('');
+
   const form = useForm({
     defaultValues: {
       institutionName: '',
@@ -70,11 +74,26 @@ const StarterPackAccessRequest = () => {
     onSubmit: async ({ value }) => {
       try {
         const validatedData = formSchema.parse(value);
-        console.log('Form submitted:', validatedData);
-        alert('Form submitted successfully!');
+        const res = await apiClient('/starterpack', {
+          method: 'POST',
+          body: JSON.stringify(validatedData),
+        });
+        const json = await res.json();
+        if (res.ok) {
+          setSubmitStatus('success');
+          setSubmitMessage(json.msg || 'Your request has been submitted successfully!');
+          form.reset();
+        } else {
+          setSubmitStatus('error');
+          setSubmitMessage(json.detail || 'Something went wrong. Please try again.');
+        }
       } catch (error) {
         if (error instanceof z.ZodError) {
-          console.error('Validation errors:', error.issues);
+          setSubmitStatus('error');
+          setSubmitMessage('Please fill in all required fields correctly.');
+        } else {
+          setSubmitStatus('error');
+          setSubmitMessage('Network error. Please check your connection and try again.');
         }
       }
     },
@@ -1008,6 +1027,16 @@ const StarterPackAccessRequest = () => {
               </form.Subscribe>
             </motion.div>
           </form>
+          {submitStatus && (
+            <div className={`mt-6 p-4 rounded-xl text-center font-medium ${
+              submitStatus === 'success'
+                ? 'bg-teal-50 text-teal-700 border border-teal-200'
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              {submitMessage}
+            </div>
+          )}
+
         </motion.div>
 
         {/* What Happens Next Section - Outside form container */}

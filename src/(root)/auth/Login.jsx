@@ -61,6 +61,8 @@ const Login = () => {
             user_id: decoded.id || '',
             enrolledCourse: (decoded.enrolled_course || '').toLowerCase(),
             enrolledLevel: (decoded.enrolled_level || '').toLowerCase(),
+            managedSprints: data.user?.managed_sprints || [],
+            studentSprints: data.user?.sprints || [],
         }));
         setLoading(false)
         navigate('/dashboard')

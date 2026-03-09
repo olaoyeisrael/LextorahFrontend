@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { isAdmin, getToken } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
-import { Plus, BookOpen, Loader2, Trash2, FileText } from 'lucide-react';
+import { Plus, BookOpen, Loader2, Trash2, FileText, Edit2, X, Check } from 'lucide-react';
 import { COURSE_GROUPS, getLevelsForCourse } from '../../utils/courseData';
 
 import { apiClient } from '../../utils/api';
@@ -27,12 +27,14 @@ const Curriculum = () => {
         level: 'A1',
     });
     
-    // Dynamic Topics List
-    const [topicList, setTopicList] = useState(['']);
-
-
+    // Dynamic Topics List - Now supporting Course Code
+    const [topicList, setTopicList] = useState([{ topic: '', course_code: '' }]);
 
     const [message, setMessage] = useState('');
+    
+    // Edit Modal State
+    const [editingItem, setEditingItem] = useState(null);
+    const [editForm, setEditForm] = useState({ topic: '', course_code: '' });
 
     // Fetch Curriculum
     const fetchCurriculum = async () => {
@@ -63,14 +65,18 @@ const Curriculum = () => {
         }
     };
 
-    const handleTopicChange = (index, value) => {
+    const handleTopicChange = (index, field, value) => {
         const list = [...topicList];
-        list[index] = value;
+        if (typeof list[index] === 'string') {
+            // Fallback for legacy state
+            list[index] = { topic: list[index], course_code: '' };
+        }
+        list[index][field] = value;
         setTopicList(list);
     };
 
     const addTopicField = () => {
-        setTopicList([...topicList, '']);
+        setTopicList([...topicList, { topic: '', course_code: '' }]);
     };
 
     const removeTopicField = (index) => {
@@ -100,7 +106,8 @@ const Curriculum = () => {
             level: form.level,
             // Week is deprecated, we could send None or derived
             week: idx + 1, // sending pseudo-week/module number if needed
-            topic: t,
+            topic: typeof t === 'string' ? t : t.topic,
+            course_code: typeof t === 'string' ? "" : (t.course_code || ""),
             description: null
         })).filter(t => t.topic.trim() !== ""); // Filter empty
 
@@ -119,7 +126,7 @@ const Curriculum = () => {
             if (res.ok) {
                 const data = await res.json();
                 setMessage(data.msg || 'Topics added successfully!');
-                setTopicList(['']); // Reset list
+                setTopicList([{ topic: '', course_code: '' }]); // Reset list
                 fetchCurriculum(); // Refresh
             } else {
 
@@ -146,6 +153,40 @@ const Curriculum = () => {
             }
         } catch (err) {
             console.error(err);
+        }
+    };
+
+    const handleEditClick = (item) => {
+        setEditingItem(item._id || item.id);
+        setEditForm({
+            topic: item.topic || '',
+            course_code: item.course_code || ''
+        });
+    };
+
+    const handleCancelEdit = () => {
+        setEditingItem(null);
+        setEditForm({ topic: '', course_code: '' });
+    };
+
+    const handleSaveEdit = async (id) => {
+        try {
+            const res = await apiClient(`/curriculum/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    topic: editForm.topic,
+                    course_code: editForm.course_code
+                })
+            });
+
+            if (res.ok) {
+                setEditingItem(null);
+                fetchCurriculum();
+            } else {
+                alert("Failed to update topic");
+            }
+        } catch (err) {
+            console.error("Error updating curriculum", err);
         }
     };
 
@@ -201,14 +242,21 @@ const Curriculum = () => {
                                         <div className="w-24 text-sm font-bold text-slate-500 flex-shrink-0">
                                             Module {idx + 1}
                                         </div>
-                                        <div className="flex-1">
+                                        <div className="flex-1 space-y-2">
                                             <input 
                                                 type="text" 
                                                 placeholder="Topic Name" 
-                                                value={t} 
-                                                onChange={(e) => handleTopicChange(idx, e.target.value)}
+                                                value={typeof t === 'string' ? t : (Array.isArray(t.topic) ? t.topic.join(', ') : t.topic)} 
+                                                onChange={(e) => handleTopicChange(idx, 'topic', e.target.value)}
                                                 className="w-full p-2 border border-slate-200 rounded-lg focus:ring-green-500 focus:border-green-500 text-sm"
                                                 required
+                                            />
+                                            <input 
+                                                type="text" 
+                                                placeholder="Course Code (e.g. GER-101) - Optional" 
+                                                value={typeof t === 'string' ? '' : (t.course_code || '')} 
+                                                onChange={(e) => handleTopicChange(idx, 'course_code', e.target.value)}
+                                                className="w-full p-2 border border-slate-200 rounded-lg focus:ring-green-500 focus:border-green-500 text-sm"
                                             />
                                         </div>
                                         {topicList.length > 1 && (
@@ -290,36 +338,95 @@ const Curriculum = () => {
                             </div>
                         ) : (
                             <div className="space-y-3">
-                                {items.map((item) => (
-                                    <div key={item.id} className="bg-white border border-slate-100 p-4 rounded-xl flex items-center justify-between hover:shadow-md transition-shadow group">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-10 bg-green-100 text-green-700 rounded-lg flex items-center justify-center font-bold text-sm">
-                                                Mod {item.index != null ? item.index + 1 : "?"}
+                                {items.map((item) => {
+                                    const isEditing = editingItem === (item._id || item.id);
+                                    
+                                    return (
+                                        <div key={item.id} className="bg-white border border-slate-100 p-4 rounded-xl flex items-center justify-between hover:shadow-md transition-shadow group">
+                                            <div className="flex items-center gap-4 flex-1">
+                                                <div className="w-12 h-10 bg-green-100 text-green-700 rounded-lg flex items-center justify-center font-bold text-sm shrink-0">
+                                                    Mod {item.index != null ? item.index + 1 : "?"}
+                                                </div>
+                                                
+                                                {isEditing ? (
+                                                    <div className="flex-1 flex gap-2">
+                                                        <input 
+                                                            type="text" 
+                                                            value={Array.isArray(editForm.topic) ? editForm.topic.join(', ') : editForm.topic} 
+                                                            onChange={e => setEditForm({...editForm, topic: e.target.value})}
+                                                            className="flex-1 p-2 border border-blue-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                                            placeholder="Topic Name"
+                                                        />
+                                                        <input 
+                                                            type="text" 
+                                                            value={editForm.course_code} 
+                                                            onChange={e => setEditForm({...editForm, course_code: e.target.value})}
+                                                            className="w-1/3 p-2 border border-blue-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                                            placeholder="Course Code"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                        <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                                                            {Array.isArray(item.topic) ? item.topic.join(', ') : item.topic}
+                                                            {item.course_code && (
+                                                                <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium border border-slate-200">
+                                                                    {item.course_code}
+                                                                </span>
+                                                            )}
+                                                            {item.material_filename && (
+                                                                <div 
+                                                                    title={`Material: ${item.material_filename}`}
+                                                                    className="text-blue-500 bg-blue-50 p-1 rounded hover:bg-blue-100 transition-colors cursor-help"
+                                                                >
+                                                                    <FileText size={16} />
+                                                                </div>
+                                                            )}
+                                                        </h3>
+                                                    </div>
+                                                )}
                                             </div>
-                                            <div>
-                                                <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                                                    {item.topic}
-                                                    {item.material_filename && (
-                                                        <div 
-                                                            title={`Material: ${item.material_filename}`}
-                                                            className="text-blue-500 bg-blue-50 p-1 rounded hover:bg-blue-100 transition-colors cursor-hel"
+
+                                            <div className="flex items-center gap-1 ml-4 shrink-0 transition-opacity">
+                                                {isEditing ? (
+                                                    <>
+                                                        <button 
+                                                            onClick={handleCancelEdit}
+                                                            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"
+                                                            title="Cancel"
                                                         >
-                                                            <FileText size={16} />
-                                                        </div>
-                                                    )}
-                                                </h3>
+                                                            <X size={18} />
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleSaveEdit(item._id || item.id)}
+                                                            className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 rounded"
+                                                            title="Save"
+                                                        >
+                                                            <Check size={18} />
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <button 
+                                                            onClick={() => handleEditClick(item)}
+                                                            className="p-1.5 text-slate-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 rounded focus:opacity-100"
+                                                            title="Edit Topic"
+                                                        >
+                                                            <Edit2 size={18} />
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleDeleteTopic(item._id || item.id)}
+                                                            className="p-1.5 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 rounded focus:opacity-100"
+                                                            title="Delete Topic"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
-
-                                        <button 
-                                            onClick={() => handleDeleteTopic(item._id || item.id)}
-                                            className="text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            title="Delete Topic"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>

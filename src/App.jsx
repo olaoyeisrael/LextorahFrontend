@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router-dom'
 // import Ask from './(root)/pages/Ask'
 // import Learn from './(root)/pages/Learn'
 import RootLayer from './(root)/RootLayer'
+import ScrollToAnchor from './components/ScrollToAnchor'
 // import LearnersPage from './(root)/pages/Learners'
 // import TeachersPage from './(root)/pages/Teachers'
 // import Upload from './(root)/pages/Upload'
@@ -21,6 +22,7 @@ import RootLayer from './(root)/RootLayer'
 const DashboardLayout = lazy(() => import('./(root)/DashboardLayout'))
 const Home = lazy(() => import('./(root)/Home'))
 const Ask = lazy(() => import('./(root)/pages/Ask'))
+const LearnSelection = lazy(() => import('./(root)/pages/LearnSelection'))
 const Learn = lazy(() => import('./(root)/pages/Learn'))
 const Upload = lazy(() => import('./(root)/pages/Upload'))
 const Course = lazy(() => import('./(root)/pages/Course'))
@@ -59,6 +61,7 @@ const ExamPrep = lazy(() => import('./(root)/pages/ExamPrep'))
 const TutorLiveClasses = lazy(() => import('./(root)/pages/TutorLiveClasses'))
 const Notification = lazy(() => import('./(root)/pages/Notification'))
 const AIReport = lazy(() => import('./(root)/pages/Aialert'))
+const AssignTopics = lazy(() => import('./(root)/pages/AssignTopic'))
 
 
 
@@ -76,7 +79,7 @@ function App() {
 
   return (
     <main>
-
+      <ScrollToAnchor />
       <Suspense fallback={<div style={{minHeight: "100vh"}}/>}>
       <Routes >
       <Route element={<RootLayer/>}>
@@ -111,7 +114,8 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path='/upload' element={<Upload/>}/>
           <Route path="/ask" element={<Ask />} />
-          <Route path="/learn" element={<Learn />} />
+          <Route path="/learn" element={<LearnSelection />} />
+          <Route path="/lesson" element={<Learn />} />
           <Route path="/courses" element={<Course />} />
           <Route path="/test" element={<Test />} />
           <Route path="/history" element={<History />} />
@@ -124,6 +128,7 @@ function App() {
           <Route path="/tutor-live-classes" element={<TutorLiveClasses />} />
           <Route path="/notifications" element={<Notification />} />
           <Route path="/ai-report" element={<AIReport />} />
+          <Route path='/assign-topics' element={<AssignTopics/>} />
 
 
         </Route>

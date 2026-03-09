@@ -9,6 +9,8 @@ const initialState = {
   role: localStorage.getItem('role') || '',
   enrolledCourse: localStorage.getItem('enrolledCourse') || null,
   enrolledLevel: localStorage.getItem('enrolledLevel') || null,
+  managedSprints: JSON.parse(localStorage.getItem('managedSprints')) || [],
+  studentSprints: JSON.parse(localStorage.getItem('studentSprints')) || [],
 };
 
 const userSlice = createSlice({
@@ -24,6 +26,8 @@ const userSlice = createSlice({
       state.role = action.payload.role;
       state.enrolledCourse = action.payload.enrolledCourse;
       state.enrolledLevel = action.payload.enrolledLevel;
+      state.managedSprints = action.payload.managedSprints || [];
+      state.studentSprints = action.payload.studentSprints || [];
       
       // Persist to localStorage
       localStorage.setItem('firstName', state.firstName);
@@ -33,6 +37,8 @@ const userSlice = createSlice({
       localStorage.setItem('role', state.role);
       if (state.enrolledCourse) localStorage.setItem('enrolledCourse', state.enrolledCourse);
       if (state.enrolledLevel) localStorage.setItem('enrolledLevel', state.enrolledLevel);
+      localStorage.setItem('managedSprints', JSON.stringify(state.managedSprints));
+      localStorage.setItem('studentSprints', JSON.stringify(state.studentSprints));
     },
     updateEnrollment: (state, action) => {
         state.enrolledCourse = action.payload.course;
@@ -55,6 +61,8 @@ const userSlice = createSlice({
       state.role = '';
       state.enrolledCourse = null;
       state.enrolledLevel = null;
+      state.managedSprints = [];
+      state.studentSprints = [];
 
       localStorage.removeItem('firstName');
       localStorage.removeItem('lastName');
@@ -63,6 +71,8 @@ const userSlice = createSlice({
       localStorage.removeItem('role');
       localStorage.removeItem('enrolledCourse');
       localStorage.removeItem('enrolledLevel');
+      localStorage.removeItem('managedSprints');
+      localStorage.removeItem('studentSprints');
     },
   },
 });

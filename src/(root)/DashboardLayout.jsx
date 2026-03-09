@@ -4,11 +4,13 @@ import Sidebar from '../components/Sidebar';
 import { Menu, Bell, ChevronDown } from 'lucide-react';
 import msLexi from '../assets/msLexi.png';
 import { useSelector } from 'react-redux';
+import { isAdmin, isTutor } from '../utils/auth';
 
 const DashboardLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const firstName = useSelector((state) => state.user?.firstName);
     const lastName = useSelector((state) => state.user?.lastName);
+  
 
     return (
         <div className="h-screen flex bg-green-50 overflow-hidden">
@@ -35,6 +37,8 @@ const DashboardLayout = () => {
                 <header className="hidden md:flex bg-white items-center justify-between p-4 px-8 border-b border-gray-100 shrink-0 h-20">
                     <div>
                         <h1 className="text-sm font-bold text-slate-800">Welcome back, {firstName || 'Lex'} 👋</h1>
+                        {!isAdmin() && !isTutor() && (
+                            <p className='text-[#65758B] font-Inter'>Let's continue learning today</p>)}
                        
                     </div>
                     <div className="flex items-center gap-6">
@@ -52,7 +56,7 @@ const DashboardLayout = () => {
                 </header>
 
 
-                <div className="flex-1 overflow-auto bg-[#F8FAFC]">
+                <div id="main-content" className="flex-1 overflow-auto bg-[#F8FAFC]">
                     <div className="p-4 md:p-8">
                         <Outlet />
                     </div>

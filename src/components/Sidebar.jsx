@@ -29,6 +29,7 @@ const tutorLinks = [
     { icon: Video, label: 'Upload Materials', path: '/upload' },
     { icon: ClipboardList, label: 'AI Alerts', path: '/ai-report' },
     { icon: CheckCircle, label: 'Student Performance', path: '/student-performance' },
+    { icon: CheckCircle, label: 'Assign Topic', path: '/assign-topics' },
 ];
 
 
@@ -61,8 +62,8 @@ const Sidebar = ({ isOpen, onClose }) => {
       )}
 
       <aside className={`
-        w-64 border-r border-green-100 flex-col h-full 
-        fixed md:static inset-y-0 left-0 z-50 transition-transform duration-300 ease-in-out
+        w-64 border-r border-green-100 flex flex-col h-full 
+        fixed md:static inset-y-0 left-0 z-50 transition-transform duration-300 ease-in-out 
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} ${role === 'admin' ? 'bg-[#061B4A]' : role === 'tutor' ? 'bg-[#0D9488]' : 'bg-green-50'}
       `}>
         <div className="p-6">
@@ -98,7 +99,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             </nav>
         </div>
 
-        <div className="p-4 mt-auto">
+        <div className=" p-4 mt-auto ">
             <button onClick={handleLogout} className={`flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 hover:bg-red-50 transition-colors text-sm font-semibold ${role === 'admin' ? 'text-white' : role === 'tutor' ? 'text-white' : ''}`}>
               <LogOut className="w-5 h-5" />
               Logout

@@ -40,15 +40,15 @@ export default function ContactForm({
     message: "",
   });
 
+  const [submitStatus, setSubmitStatus] = useState<null | 'success' | 'error'>(null);
+  const [submitMessage, setSubmitMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [charCount, setCharCount] = useState(0);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-
     if (name === "message") {
       if (value.length <= fields.message.maxLength) {
         setFormData({ ...formData, [name]: value });
@@ -59,12 +59,34 @@ export default function ContactForm({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log("Form submitted:", formData);
-    alert("Thank you for your message! We will get back to you soon.");
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+    try {
+      const res = await fetch('http://localhost:8000/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const json = await res.json();
+      if (res.ok) {
+        setSubmitStatus('success');
+        setSubmitMessage(json.msg || 'Your message has been sent!');
+        setFormData({ fullName: '', email: '', phone: '', areaOfInterest: '', message: '' });
+        setCharCount(0);
+      } else {
+        setSubmitStatus('error');
+        setSubmitMessage(json.detail || 'Something went wrong. Please try again.');
+      }
+    } catch {
+      setSubmitStatus('error');
+      setSubmitMessage('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   return (
     <section className={styles.section}>
@@ -174,24 +196,34 @@ export default function ContactForm({
             </div>
           </div>
 
-          <button type="submit" className={styles.submitButton}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m22 2-7 20-4-9-9-4Z" />
-              <path d="M22 2 11 13" />
-            </svg>
-            {submitButton}
+          <button type="submit" disabled={isSubmitting} className={styles.submitButton}>
+            {isSubmitting ? 'Sending...' : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m22 2-7 20-4-9-9-4Z" />
+                  <path d="M22 2 11 13" />
+                </svg>
+                {submitButton}
+              </>
+            )}
           </button>
+
+          {submitStatus && (
+            <div style={{
+              marginTop: '16px',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              fontWeight: 500,
+              textAlign: 'center',
+              backgroundColor: submitStatus === 'success' ? '#f0fdf4' : '#fef2f2',
+              color: submitStatus === 'success' ? '#15803d' : '#b91c1c',
+              border: `1px solid ${submitStatus === 'success' ? '#bbf7d0' : '#fecaca'}`,
+            }}>
+              {submitMessage}
+            </div>
+          )}
         </form>
+
       </div>
     </section>
   );
