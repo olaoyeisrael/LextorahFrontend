@@ -18,9 +18,9 @@ const NavBar = () => {
   return (
     <nav className='lg:px-20 px-6 py-4 flex justify-between items-center fixed top-0 left-0 right-0 bg-[#FFFFFF] backdrop-blur-md z-50 border-b border-green-100'>
         {/* Logo */}
-        <div className="flex items-center gap-2">
+        <Link to='/' className="flex items-center gap-2">
             <img src={logo} alt="logo" className='h-8 w-auto object-contain' />
-        </div>
+        </Link>
        
         <div className='items-center gap-8 hidden lg:flex'>
             <NavLink to='/#aitutor' className="relative text-slate-600 hover:text-[#0D9488] font-medium transition-colors after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-[#0D9488] after:transition-transform after:duration-300 hover:after:origin-bottom-left hover:after:scale-x-100">

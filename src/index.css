@@ -92,6 +92,10 @@
   font-family: Inter;
   src: url('../src/assets/fonts/Inter_18pt-Regular.ttf');
 }
+@font-face {
+  font-family: JakartaSemibold;
+  src: url('../src/assets/fonts/PlusJakartaSans-SemiBold.ttf');
+}
 
 
 @theme{
@@ -103,6 +107,7 @@
   --font-MadaMedium: MadaMedium, 'sans-serif'; 
   --font-InterBold: InterBold, 'sans-serif'; 
   --font-Inter: Inter, 'sans-serif'; 
+  --font-JakartaSemiBold: JakartaSemibold, 'sans-serif';
 };
 
 ::-webkit-scrollbar {

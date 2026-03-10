@@ -13,15 +13,16 @@ function Footer() {
                     <img src={logo} alt="" className='w-32' />
                     <h1 className='text-white font-Inter'>Empowering Learning. Guiding Progress Globally.</h1>
                     <div className='flex gap-4 '>
-                        <Instagram className='text-white'/>
-                        <Twitter className='text-white'/>
-                        <Linkedin className='text-white'/>
-                        <Facebook className='text-white'/>
+                        <Link to='https://www.instagram.com/lextorah'><Instagram className='text-white'/></Link>
+                        
+                        <Link to='https://x.com/lextorah'><Twitter className='text-white'/></Link>
+                        <Link to='https://www.linkedin.com/company/lextorah/'><Linkedin className='text-white'/> </Link>
+                        <Link to='https://web.facebook.com/lextorah?_rdc=1&_rdr#'><Facebook className='text-white'/></Link>
                     </div>
                 </div>
 
                 <div className='space-y-8 '>
-                    <Link to="/https://www.lextorah-elearning.com/elearning/register">
+                    <Link to="https://www.lextorah-elearning.com">
                     <h2 className='font-Inter text-white'>Explore Lextorah Programs.</h2>
                     </Link>
                     {/* <ul className='space-y-3'>

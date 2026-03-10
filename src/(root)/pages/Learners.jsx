@@ -70,7 +70,7 @@ export default function LearnersPage() {
         <div className="text-center px-[var(--spacing-lg)] pb-[var(--spacing-2xl)]">
           <p className="mb-8 text-[var(--text-secondary)]">Lextorah AI is here to support your learning — your effort, honesty, and curiosity make the difference</p>
           <Link
-            to="/contact"
+            to="/contact-us"
             className="inline-flex items-center justify-center px-[var(--spacing-xl)] py-[var(--spacing-md)] bg-[var(--primary)] text-[var(--white)] text-[var(--font-size-sm)] font-semibold rounded-[var(--radius-md)] transition-all hover:bg-[var(--primary-dark)] hover:text-[var(--white)]"
           >
             Still Have Questions? Contact Us

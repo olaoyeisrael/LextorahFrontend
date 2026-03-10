@@ -6,7 +6,7 @@ function Results() {
     <div className='mt-6'>
        
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-            <p className="text-slate-600">Past Test Results</p>
+            <p className="text-[#0F172A] font-JakartaSemiBold">Past Test Results</p>
             {Result.length > 0 ? Result.map((result, index) => (
                 <div key={index} className="flex justify-between items-center mt-4 p-4 border border-slate-100 rounded-lg bg-[#F1F5F980]">
                     <div>

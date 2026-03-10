@@ -40,7 +40,7 @@ function Assessment() {
                         <School className="w-8 h-8 text-blue-500" />
                     </div>
                 </div>
-                <Link  className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl text-center transition-colors">
+                <Link  className="w-full py-3 bg-[#C8A2C8] hover:bg-[#B666D2] text-white font-bold rounded-xl text-center transition-colors">
                     Start Assignment
                 </Link>
             </motion.div>
@@ -57,7 +57,7 @@ function Assessment() {
                         <GraduationCap className="w-8 h-8 text-blue-500" />
                     </div>
                 </div>
-                <Link to="/exam-prep" className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-xl text-center transition-colors">
+                <Link to="/exam-prep" className="w-full py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl text-center transition-colors">
                     Start Exam Prep
                 </Link>
             </motion.div>

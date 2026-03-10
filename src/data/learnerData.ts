@@ -188,6 +188,6 @@ export const learnerCtaSection = {
   buttons: [
     { label: "Try Ms. Lexi® Now", href: "/chat", variant: "primary" },
     { label: "Request School Access", href: "/request-access", variant: "secondary" },
-    { label: "Explore Lextorah Programs", href: "/programs", variant: "outline" },
+    { label: "Explore Lextorah Programs", href: "https://www.lextorah-elearning.com", variant: "outline" },
   ],
 };

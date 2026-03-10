@@ -8,6 +8,8 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { updateEnrollment } from '../../store/userSlice';
 import Schedule from '../../components/Schedule';
+import { StudentDashboard } from '../../components/StudentsDashboard/UpcomingClass';
+import { TodaysClass } from '../../components/StudentsDashboard/TodayClass';
 
 import { apiClient } from '../../utils/api';
 
@@ -149,7 +151,7 @@ return (
         <div className="mb-8 mt-6 grid md:grid-cols-4 gap-4">
             <TutorDashboard 
                 title="My Classes" 
-                value= '3'
+                value= '1'
                 icon={BookOpen} 
                 color="blue-700"
             />
@@ -351,8 +353,9 @@ return (
         </div>
 
         <div className='mb-8 mt-6 grid md:grid-cols-2 gap-4'>
-            <StudentDashboard title="Student Dashboard" data={mappedCourses} />
-            <StudentDashboard title="Upcoming Schedule" data={mappedSchedule} />
+            <TodaysClass />
+            <StudentDashboard  />
+            {/* <StudentDashboard title="Upcoming Schedule" data={mappedSchedule} /> */}
         
             
         </div>
@@ -478,47 +481,7 @@ const QuickActionCard = ({ title, description, icon: Icon, color, link }) => {
     )
 }
 
-const StudentDashboard = ({title, data }) => {
-  return (
-    <div className="bg-white p-6 rounded-xl shadow-sm">
-        <div className='flex gap-2 items-center'>
-            <Calendar1 className="w-8 h-8 text-blue-500 mb-4" />
-             <h2 className="text-xl font-medium text-slate-900 mb-2">{title}</h2>
 
-        </div>
-        
-        {data.length === 0 ? (
-            <div className="text-center py-20 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                <Clock className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-500 font-medium">No classes scheduled for today.</p>
-                <p className="text-sm text-slate-400">Check back later or explore other sections.</p>
-                
-                </div>) :
-                ( 
-                    data.map((course, index) => (
-                        <div key={index} className=" bg-[#F1F5F980] rounded-xl p-4 mb-4 flex items-center justify-between">
-                            <div className='flex items-center gap-2'>
-                                <div className='bg-[#3C83F61A] p-2.5 w-fit mb-1 rounded-xl'>
-                                <Clock4 className="w-5 h-5 text-[#3C83F6] " />  
-                                </div>
-                                <div>
-                                <h3 className="font-medium font-Inter ">{course.title}</h3>
-                                {/* <div className='flex  items-center justify-center'> */}
-                                <p className="text-slate-600 text-sm">{course.time}</p>
-                                <p className="text-slate-600 text-sm">{course.tutor}</p>
-                                </div>
-                                {/* </div> */}
-                            </div>
-                            <Link to="" className="px-4 py-2 bg-[#3C83F6] hover:bg-[#2A6BCF] text-white rounded-lg text-sm font-bold transition-colors">
-                                Join
-                            </Link>
-                        </div>
-                    ))
-                )
-        }
-    </div>
-  )
-}
   
 
 

@@ -62,6 +62,7 @@ const TutorLiveClasses = lazy(() => import('./(root)/pages/TutorLiveClasses'))
 const Notification = lazy(() => import('./(root)/pages/Notification'))
 const AIReport = lazy(() => import('./(root)/pages/Aialert'))
 const AssignTopics = lazy(() => import('./(root)/pages/AssignTopic'))
+const SchedulePage = lazy(()=> import('./(root)/pages/SchedulePage')) 
 
 
 
@@ -129,6 +130,7 @@ function App() {
           <Route path="/notifications" element={<Notification />} />
           <Route path="/ai-report" element={<AIReport />} />
           <Route path='/assign-topics' element={<AssignTopics/>} />
+          <Route path='/upcoming-schedule' element={<SchedulePage/>}/>
 
 
         </Route>

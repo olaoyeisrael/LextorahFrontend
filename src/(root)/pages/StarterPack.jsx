@@ -100,7 +100,7 @@ const StarterPackAccessRequest = () => {
   });
 
   return (
-    <div className='min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8'>
+    <div className='min-h-screen bg-white py-20 px-4 sm:px-6 lg:px-8'>
       <div className='max-w-212 mx-auto'>
         {/* Title and Subtitle outside container */}
         <motion.div

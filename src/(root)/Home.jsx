@@ -553,7 +553,7 @@ education with AI-powered support</p>
                         <a href="/institution" className="inline-block px-10 py-5 bg-transparent border-2 border-white text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-white/25 text-lg hover:bg-white hover:text-[#0D9488]">
                             Request Institutional Info
                         </a>
-                        <a href="#features" className="inline-block px-10 py-5 bg-transparent border-2 border-white text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-white/25 text-lg hover:bg-white hover:text-[#0D9488]">
+                        <a href="https://www.lextorah-elearning.com/" className="inline-block px-10 py-5 bg-transparent border-2 border-white text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-white/25 text-lg hover:bg-white hover:text-[#0D9488]">
                             Explore Lextorah Programs
                         </a>
                     </div>  

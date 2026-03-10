@@ -84,13 +84,19 @@ const Sidebar = ({ isOpen, onClose }) => {
                   key={link.path}
                   to={link.path}
                   onClick={onClose} // Close sidebar on mobile when link clicked
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold ${
-                      isActive && role === 'admin' ? 'bg-[#3C83F6] text-white' : isActive && role === 'tutor' ? 'bg-blue-700 text-white' : isActive
-                        ? 'bg-[#22C55E] text-white shadow-md shadow-green-200'
-                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-                    } ${role === 'admin' && !isActive ? 'hover:bg-blue-800' : role === 'tutor' && !isActive ? 'hover:bg-teal-700' : ''}`
-                  }
+                  className={({ isActive }) => {
+                    const activeClass =
+                      role === 'admin' ? 'bg-[#3C83F6] text-white' :
+                      role === 'tutor' ? 'bg-blue-700 text-white' :
+                      'bg-[#22C55E] text-white shadow-md shadow-green-200';
+
+                    const inactiveClass =
+                      role === 'admin' ? 'text-white hover:bg-blue-800' :
+                      role === 'tutor' ? 'text-white hover:bg-teal-700' :
+                      'text-slate-500 hover:text-slate-900 hover:bg-slate-100';
+
+                    return `flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold ${isActive ? activeClass : inactiveClass}`;
+                  }}
                 >
                   <link.icon className="w-5 h-5" />
                   {link.label}
@@ -99,8 +105,8 @@ const Sidebar = ({ isOpen, onClose }) => {
             </nav>
         </div>
 
-        <div className=" p-4 mt-auto ">
-            <button onClick={handleLogout} className={`flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 hover:bg-red-50 transition-colors text-sm font-semibold ${role === 'admin' ? 'text-white' : role === 'tutor' ? 'text-white' : ''}`}>
+        <div className=" p-6 mt-auto ">
+            <button onClick={handleLogout} className={`flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 hover:bg-red-50 transition-colors text-sm font-semibold `}>
               <LogOut className="w-5 h-5" />
               Logout
             </button>
