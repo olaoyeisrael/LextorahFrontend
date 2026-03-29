@@ -322,6 +322,8 @@ const GetStartedAndFAQ = () => {
               </motion.button>
             </Link>
 
+            <Link to='/book-demo'>
+
             <motion.button
               whileHover={{
                 scale: 1.05,
@@ -334,6 +336,7 @@ const GetStartedAndFAQ = () => {
             >
               Request a 15-Minute Demo
             </motion.button>
+            </Link>
           </motion.div>
         </div>
       </section>

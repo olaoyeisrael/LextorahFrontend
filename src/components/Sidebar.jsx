@@ -24,12 +24,13 @@ const adminLinks = [
 
 const tutorLinks = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-    { icon: CheckCircle, label: 'Live Classes', path: '/tutor-live-classes' },
+    { icon: CheckCircle, label: 'Assign Topic', path: '/assign-topics' },
     { icon: BookOpen, label: 'Curriculum', path: '/curriculum' },
     { icon: Video, label: 'Upload Materials', path: '/upload' },
+      { icon: CheckCircle, label: 'Live Classes', path: '/tutor-live-classes' },
     { icon: ClipboardList, label: 'AI Alerts', path: '/ai-report' },
     { icon: CheckCircle, label: 'Student Performance', path: '/student-performance' },
-    { icon: CheckCircle, label: 'Assign Topic', path: '/assign-topics' },
+    
 ];
 
 
@@ -75,6 +76,8 @@ const Sidebar = ({ isOpen, onClose }) => {
                </div>
             </div>
 
+            <div className='mt-16'>
+
 
 
             <nav className="flex-1 space-y-2 mt-4">
@@ -95,7 +98,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                       role === 'tutor' ? 'text-white hover:bg-teal-700' :
                       'text-slate-500 hover:text-slate-900 hover:bg-slate-100';
 
-                    return `flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold ${isActive ? activeClass : inactiveClass}`;
+                    return `flex items-center gap-3 px-4 py-3  rounded-xl transition-all text-sm font-semibold ${isActive ? activeClass : inactiveClass}`;
                   }}
                 >
                   <link.icon className="w-5 h-5" />
@@ -103,6 +106,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                 </NavLink>
               ))}
             </nav>
+            </div>
         </div>
 
         <div className=" p-6 mt-auto ">

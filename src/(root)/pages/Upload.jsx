@@ -140,11 +140,10 @@ const Upload = () => {
 
 
   return (
-    <section className='max-w-3xl mx-auto p-4 md:p-8'>
+    <section className='max-w-5xl mx-auto p-4 md:p-8'>
         <div className='bg-white rounded-3xl shadow-xl border border-green-50 p-8 md:p-12'>
 
-       
-        <h1 className='font-bold font-MadaBold  text-3xl text-[#059669] mt-3'>Upload Materials</h1>
+        <h1 className='font-bold font-Inter  text-3xl '>Upload Materials</h1>
 
         <form onSubmit={handleSubmit} className='flex flex-col gap-4 mt-6 '>
             <div className='flex gap-2 flex-col '>

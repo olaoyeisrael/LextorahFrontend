@@ -1,12 +1,50 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Bot, ChevronDown } from 'lucide-react';
 
 const alertsData = [
+    {
+        "id": 1,
+        "type" : "Urgent",
+        "message": "Chidinma Eze has attendance at 55%, below 60% threshold.",
+        "reason": "Low Attendance"
+    },
+
+     {
+        "id": 2,
+        "type" : "Warning",
+        "message": "Chidinma Eze shows consistent decline over last 3 assessments.",
+        "reason": "Declining Trend"
+    },
+
+     {
+        "id": 3,
+        "type" : "Urgent",
+        "message": "Emeka Okafor has attendance at 48%, below 60% threshold.",
+        "reason": "Low Attendance"
+    },
+     {
+        "id": 4,
+        "type" : "Warning",
+        "message": "Tunde Bakare shows consistent decline over last 3 assessments.",
+        "reason": "Declining Trend"
+    },
+    {
+        "id": 5,
+        "type" : "Warning",
+        "message": "Tunde Bakare shows consistent decline over last 3 assessments.",
+        "reason": "Declining Trend"
+    },
+    
+    
+
   
 ];
 
 const Aialert = () => {
     const [alerts, setAlerts] = useState(alertsData);
+    useEffect(()=>{
+        setAlerts(alertsData)
+    }, [])
   return (
     <div className="max-w-6xl mx-auto py-8 lg:px-4">
         {/* Header */}
@@ -54,7 +92,7 @@ const Aialert = () => {
                     </div>
                     
                     <div>
-                        <p className="text-slate-800 font-medium mb-1">{alert.message}</p>
+                        <p className="text-[#0F1729] font-Inter mb-1">{alert.message}</p>
                         <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
                             <span>{alert.reason}</span>
                             <span>•</span>

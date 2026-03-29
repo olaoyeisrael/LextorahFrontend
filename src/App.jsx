@@ -63,6 +63,7 @@ const Notification = lazy(() => import('./(root)/pages/Notification'))
 const AIReport = lazy(() => import('./(root)/pages/Aialert'))
 const AssignTopics = lazy(() => import('./(root)/pages/AssignTopic'))
 const SchedulePage = lazy(()=> import('./(root)/pages/SchedulePage')) 
+const BookDemo = lazy(()=> import('./(root)/pages/BookDemo'))
 
 
 
@@ -94,8 +95,10 @@ function App() {
         <Route path="/terms-of-use" element={<TermsOfUsePage />} />
         <Route path="/institution" element={<InstitutionPage />} />
         <Route path='/starter-pack-access-request' element={<StarterPack/>}/>
+        <Route path='/book-demo' element={<BookDemo/>}/>
           <Route path="*" element={<NotFound />} />
         </Route>
+        
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/basil-schools" element={<BasilSchoolsPage />} />
@@ -131,6 +134,7 @@ function App() {
           <Route path="/ai-report" element={<AIReport />} />
           <Route path='/assign-topics' element={<AssignTopics/>} />
           <Route path='/upcoming-schedule' element={<SchedulePage/>}/>
+          
 
 
         </Route>

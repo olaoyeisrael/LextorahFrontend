@@ -226,7 +226,7 @@ const SprintSyllabusForm = ({ sprint }) => {
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-green-600 to-green-700 p-6 text-white">
+            <div className="bg-gradient-to-r from-purple-400 to-purple-600 p-6 text-white">
                 <div className="flex justify-between items-start">
                     <div>
                         <h2 className="text-2xl font-bold mb-1 flex items-center gap-2">

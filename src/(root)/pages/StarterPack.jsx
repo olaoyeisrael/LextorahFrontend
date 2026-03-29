@@ -266,11 +266,12 @@ const StarterPackAccessRequest = () => {
                       <Select
                         value={field.state.value}
                         onValueChange={field.handleChange}
+                        className="bg-red-500"
                       >
                         <SelectTrigger className='mt-2 w-full py-5'>
                           <SelectValue placeholder='Select Country' />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white z-[100] shadow-lg border border-gray-200">
                           <SelectItem value='US'>United States</SelectItem>
                           <SelectItem value='UK'>United Kingdom</SelectItem>
                           <SelectItem value='CA'>Canada</SelectItem>

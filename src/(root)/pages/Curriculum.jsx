@@ -3,6 +3,8 @@ import { isAdmin, getToken } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
 import { Plus, BookOpen, Loader2, Trash2, FileText, Edit2, X, Check } from 'lucide-react';
 import { COURSE_GROUPS, getLevelsForCourse } from '../../utils/courseData';
+import { useSelector } from 'react-redux';
+import { isTutor } from '../../utils/auth';
 
 import { apiClient } from '../../utils/api';
 
@@ -16,6 +18,13 @@ const Curriculum = () => {
         //     navigate('/');
         // }
     }, [navigate]);
+
+    const userState = useSelector((state) => state.user);
+    const managedSprints = userState?.managedSprints?.length > 0 
+        ? userState.managedSprints 
+        : (userState?.user?.managed_sprints || []);
+    
+    const tutorCourseCodes = managedSprints.map(s => s.course_code).filter(Boolean);
 
     // State
     const [loading, setLoading] = useState(false);
@@ -332,13 +341,13 @@ const Curriculum = () => {
                             <div className="flex justify-center items-center h-40">
                                 <Loader2 className="w-8 h-8 text-green-600 animate-spin" />
                             </div>
-                        ) : items.length === 0 ? (
+                        ) : items.filter(item => (!isTutor() || isAdmin()) ? true : tutorCourseCodes.includes(item.course_code)).length === 0 ? (
                             <div className="text-center text-slate-500 py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
                                 No topics found for this course/level. Start adding some!
                             </div>
                         ) : (
                             <div className="space-y-3">
-                                {items.map((item) => {
+                                {items.filter(item => (!isTutor() || isAdmin()) ? true : tutorCourseCodes.includes(item.course_code)).map((item) => {
                                     const isEditing = editingItem === (item._id || item.id);
                                     
                                     return (

@@ -381,7 +381,7 @@ return (
                     description="Challenge your knowledge"
                     icon={MonitorCheck}
                     color="yellow-500"
-                    link="/assessment"
+                    link="/test"
                 />
                 <StudentQuickActionCard
                     title="Exam Preparation"
