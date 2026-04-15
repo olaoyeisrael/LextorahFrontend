@@ -40,7 +40,7 @@ function Assessment() {
                         <School className="w-8 h-8 text-blue-500" />
                     </div>
                 </div>
-                <Link  className="w-full py-3 bg-[#C8A2C8] hover:bg-[#B666D2] text-white font-bold rounded-xl text-center transition-colors">
+                <Link to="/assignment"  className="w-full py-3 bg-[#C8A2C8] hover:bg-[#B666D2] text-white font-bold rounded-xl text-center transition-colors">
                     Start Assignment
                 </Link>
             </motion.div>

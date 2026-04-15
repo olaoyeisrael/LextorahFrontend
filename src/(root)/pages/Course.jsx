@@ -1,23 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useQuery } from '@tanstack/react-query';
-import { FileText, Download, BookOpen, CheckCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { FileText, Download, BookOpen, CheckCircle, ChevronRight, ArrowLeft } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 
 import { apiClient } from '../../utils/api';
 
 
 const Course = () => {
-    const { token, studentSprints } = useSelector((state) => state.user);
-    const [progress, setProgress] = useState(null);
+    const { token, studentSprints, managedSprints } = useSelector((state) => state.user);
     const [transcripts, setTranscripts] = useState([]);
     
-    // We'll calculate loading state based on transcripts plus react query
     const [transcriptsLoading, setTranscriptsLoading] = useState(true);
     const [selectedTopic, setSelectedTopic] = useState(null);
 
-    const activeSprintId = studentSprints && studentSprints.length > 0 ? studentSprints[0].id : null;
+    // Combine all sprints
+    const allSprints = [...(managedSprints || []), ...(studentSprints || [])];
+    
+    const [selectedSprint, setSelectedSprint] = useState(null);
+    const activeSprintId = selectedSprint?.id || null;
+
+    // Auto-select if only one sprint
+    useEffect(() => {
+        if (allSprints.length === 1 && !selectedSprint) {
+            setSelectedSprint(allSprints[0]);
+        }
+    }, [allSprints.length]);
 
     // Fetch Syllabus Topics via React Query
     const { data: topics = [], isLoading: topicsLoading } = useQuery({
@@ -38,7 +47,6 @@ const Course = () => {
         const fetchCourseData = async () => {
             if (!token) return;
             try {
-                // Fetch Transcripts
                 const transRes = await apiClient('/transcripts');
                 if (transRes.ok) {
                     const data = await transRes.json();
@@ -74,16 +82,12 @@ const Course = () => {
         }
     };
     
-    // Matches if transcript topic string equals or contains the selected topic
     const getTopicString = (t) => Array.isArray(t) ? t.join(', ') : t || "";
     
     const filteredTranscripts = selectedTopic 
         ? transcripts.filter(t => {
             if (!t.topic) return false;
-            
             const transcriptTopicStr = getTopicString(t.topic).toLowerCase();
-            
-            // If the syllabus topic is an array, check if any of its parts are cleanly inside the transcript string
             if (Array.isArray(selectedTopic.topic)) {
                 return selectedTopic.topic.some(part => transcriptTopicStr.includes(part.toLowerCase()));
             } else {
@@ -91,16 +95,13 @@ const Course = () => {
             }
         })
         : [];
-    console.log("Filtered Transcripts: ", filteredTranscripts);
-   
 
-    if (loading) {
+    if (loading && selectedSprint) {
         return (
             <div className="flex items-center justify-center h-64">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
             </div>
         );
-        
     }
 
     return (
@@ -110,112 +111,167 @@ const Course = () => {
                 <p className="text-slate-600">Track your progress and review course materials.</p>
             </header>
 
-            {/* Overall Progress */}
-            {/* {progress && progress.course !== "None" && (
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-8 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-                    <div className="relative z-10">
-                        <h2 className="text-xl font-bold text-slate-900 mb-4">{progress.course} Progress</h2>
-                        <div className="w-full bg-slate-100 rounded-full h-2.5 mb-2">
-                             <motion.div 
-                                 initial={{ width: 0 }}
-                                 animate={{ width: `${progress.progress}%` }}
-                                 className="bg-green-500 h-2.5 rounded-full" 
-                             />
-                        </div>
-                        <p className="text-sm text-slate-500 text-right">{progress.progress}% Complete</p>
-                    </div>
-                </div>
-            )} */}
-
-            {/* Modules Grid */}
-            <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-indigo-500" />
-                Curriculum Modules
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                { topics && topics.length > 0 ? topics.map((item, idx) => (
-                    <motion.div 
-                        key={idx}
-                        whileHover={{ scale: 1.02 }}
-                        onClick={() => setSelectedTopic(item)}
-                        className={`p-5 rounded-2xl border cursor-pointer transition-all ${
-                            selectedTopic?.topic === item.topic 
-                            ? 'bg-indigo-50 border-indigo-200 ring-2 ring-indigo-100' 
-                            : 'bg-white border-slate-100 hover:border-indigo-100 hover:shadow-md'
-                        }`}
+            <AnimatePresence mode="wait">
+                {/* ─── SPRINT SELECTION ─── */}
+                {!selectedSprint && (
+                    <motion.div
+                        key="sprint-select"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
                     >
-                        <div className="flex justify-between items-start mb-3">
-                            <span className="text-xs font-bold text-indigo-500 uppercase tracking-wider bg-indigo-50 px-2 py-1 rounded-md">
-                                {item.week || `Module ${idx + 1}`}
-                            </span>
-                            <div className="flex gap-2">
-                                {item.is_completed && (
-                                     <span className="bg-green-100 text-green-600 px-2 py-0.5 rounded text-xs font-bold border border-green-200">Done</span>
-                                )}
-                                {item.has_material ? (
-                                    <CheckCircle className={`w-4 h-4 ${item.is_completed ? 'text-green-500' : 'text-slate-400'}`} />
-                                ) : (
-                                    <span className="w-2 h-2 rounded-full bg-slate-300" />
-                                )}
-                            </div>
-                        </div>
-                        <h3 className="font-bold text-slate-900 text-lg mb-1">{getTopicString(item.topic) || "Untitled Topic"}</h3>
-                        <p className="text-sm text-slate-500">
-                             Click to view progress & transcripts
-                        </p>
-                    </motion.div>
-                )) : <p className="text-slate-500">No topics found</p>}
-            </div>
+                        <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <BookOpen className="w-5 h-5 text-indigo-500" />
+                            Select Your Course
+                        </h2>
 
-            {/* Topic Detail Modal/Section */}
-            {selectedTopic && (
-                <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 fixed inset-x-4 bottom-4 md:static md:mb-8 z-50 md:z-auto"
-                >
-                    <div className="flex justify-between items-center mb-6">
-                        <div>
-                             <h2 className="text-xl font-bold text-slate-900">{getTopicString(selectedTopic.topic) || "Untitled Topic"}</h2>
-                             <p className="text-slate-500 text-sm">Transcripts & Resources</p>
-                        </div>
-                        <button onClick={() => setSelectedTopic(null)} className="md:hidden p-2 bg-slate-100 rounded-full">
-                            ✕
-                        </button>
-                    </div>
-
-                    <div className="space-y-4">
-                        <h3 className="font-bold text-slate-700 flex items-center gap-2">
-                            <FileText className="w-4 h-4" /> Transcripts
-                        </h3>
-                        {filteredTranscripts.length > 0 ? (
-                            <div className="divide-y divide-slate-100 border border-slate-100 rounded-xl">
-                                {filteredTranscripts.map((t, i) => (
-                                    <div key={i} className="p-4 flex items-center justify-between hover:bg-slate-50">
-                                        <div>
-                                            <p className="font-medium text-slate-900 text-sm">Lesson Transcript</p>
-                                            <p className="text-xs text-slate-500">{new Date(t.date).toLocaleDateString()}</p>
-                                        </div>
-                                        <button 
-                                            onClick={() => handleDownload(t.id, `${getTopicString(t.topic)}.pdf`)}
-                                            className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1"
-                                        >
-                                            <Download className="w-3 h-3" /> PDF
-                                        </button>
-                                    </div>
-                                ))}
+                        {allSprints.length === 0 ? (
+                            <div className="p-6 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-center">
+                                You are not enrolled in any course.
                             </div>
                         ) : (
-                            <div className="p-6 text-center bg-slate-50 rounded-xl text-slate-500 text-sm">
-                                No transcripts found for this topic.
+                            <div className="grid grid-cols-1 gap-4">
+                                {allSprints.map((sprint, idx) => (
+                                    <button
+                                        key={sprint.id || idx}
+                                        onClick={() => setSelectedSprint(sprint)}
+                                        className="w-full p-5 border-2 rounded-xl flex items-center justify-between transition-all cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 bg-white border-slate-200 text-left group"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                                                <BookOpen className="w-6 h-6 text-indigo-700" />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-slate-900 group-hover:text-indigo-700 transition-colors">{sprint.name || sprint.course_code}</h3>
+                                                <p className="text-xs text-slate-500">{sprint.course_code} • {sprint.course_level || ''}</p>
+                                            </div>
+                                        </div>
+                                        <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+                                    </button>
+                                ))}
                             </div>
                         )}
-                    </div>
-                </motion.div>
-            )}
+                    </motion.div>
+                )}
 
+                {/* ─── COURSE CONTENT ─── */}
+                {selectedSprint && (
+                    <motion.div
+                        key="course-content"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                    >
+                        {/* Back button */}
+                        {allSprints.length > 1 && (
+                            <button
+                                onClick={() => { setSelectedSprint(null); setSelectedTopic(null); }}
+                                className="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-indigo-600 transition-colors mb-4"
+                            >
+                                <ArrowLeft className="w-4 h-4" /> Back to courses
+                            </button>
+                        )}
+
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                <BookOpen className="w-5 h-5 text-indigo-700" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-slate-900">{selectedSprint.name || selectedSprint.course_code}</h3>
+                                <p className="text-xs text-slate-500">{selectedSprint.course_code}</p>
+                            </div>
+                        </div>
+
+                        {/* Modules Grid */}
+                        <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <BookOpen className="w-5 h-5 text-indigo-500" />
+                            Curriculum Modules
+                        </h2>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                            { topics && topics.length > 0 ? topics.map((item, idx) => (
+                                <motion.div 
+                                    key={idx}
+                                    whileHover={{ scale: 1.02 }}
+                                    onClick={() => setSelectedTopic(item)}
+                                    className={`p-5 rounded-2xl border cursor-pointer transition-all ${
+                                        selectedTopic?.topic === item.topic 
+                                        ? 'bg-indigo-50 border-indigo-200 ring-2 ring-indigo-100' 
+                                        : 'bg-white border-slate-100 hover:border-indigo-100 hover:shadow-md'
+                                    }`}
+                                >
+                                    <div className="flex justify-between items-start mb-3">
+                                        <span className="text-xs font-bold text-indigo-500 uppercase tracking-wider bg-indigo-50 px-2 py-1 rounded-md">
+                                            {item.week || `Module ${idx + 1}`}
+                                        </span>
+                                        <div className="flex gap-2">
+                                            {item.is_completed && (
+                                                 <span className="bg-green-100 text-green-600 px-2 py-0.5 rounded text-xs font-bold border border-green-200">Done</span>
+                                            )}
+                                            {item.has_material ? (
+                                                <CheckCircle className={`w-4 h-4 ${item.is_completed ? 'text-green-500' : 'text-slate-400'}`} />
+                                            ) : (
+                                                <span className="w-2 h-2 rounded-full bg-slate-300" />
+                                            )}
+                                        </div>
+                                    </div>
+                                    <h3 className="font-bold text-slate-900 text-lg mb-1">{getTopicString(item.topic) || "Untitled Topic"}</h3>
+                                    <p className="text-sm text-slate-500">
+                                         Click to view progress & transcripts
+                                    </p>
+                                </motion.div>
+                            )) : <p className="text-slate-500">No topics found</p>}
+                        </div>
+
+                        {/* Topic Detail */}
+                        {selectedTopic && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 fixed inset-x-4 bottom-4 md:static md:mb-8 z-50 md:z-auto"
+                            >
+                                <div className="flex justify-between items-center mb-6">
+                                    <div>
+                                         <h2 className="text-xl font-bold text-slate-900">{getTopicString(selectedTopic.topic) || "Untitled Topic"}</h2>
+                                         <p className="text-slate-500 text-sm">Transcripts & Resources</p>
+                                    </div>
+                                    <button onClick={() => setSelectedTopic(null)} className="md:hidden p-2 bg-slate-100 rounded-full">
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <h3 className="font-bold text-slate-700 flex items-center gap-2">
+                                        <FileText className="w-4 h-4" /> Transcripts
+                                    </h3>
+                                    {filteredTranscripts.length > 0 ? (
+                                        <div className="divide-y divide-slate-100 border border-slate-100 rounded-xl">
+                                            {filteredTranscripts.map((t, i) => (
+                                                <div key={i} className="p-4 flex items-center justify-between hover:bg-slate-50">
+                                                    <div>
+                                                        <p className="font-medium text-slate-900 text-sm">Lesson Transcript</p>
+                                                        <p className="text-xs text-slate-500">{new Date(t.date).toLocaleDateString()}</p>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => handleDownload(t.id, `${getTopicString(t.topic)}.pdf`)}
+                                                        className="text-indigo-600 hover:text-indigo-700 text-sm font-medium flex items-center gap-1"
+                                                    >
+                                                        <Download className="w-3 h-3" /> PDF
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="p-6 text-center bg-slate-50 rounded-xl text-slate-500 text-sm">
+                                            No transcripts found for this topic.
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

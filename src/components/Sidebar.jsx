@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom'; // Assuming react-router-dom is used
-import { LayoutDashboard, BookOpen, History, Settings, LogOut, MonitorCheck, Video, CheckCircle, Calendar, ClipboardList, GraduationCap } from 'lucide-react';
+import { LayoutDashboard, BookOpen, History, Settings, LogOut, MonitorCheck, Video, CheckCircle, Calendar, ClipboardList, GraduationCap, HelpCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import msLexi from '../assets/msLexi.png';
@@ -10,6 +10,9 @@ const studentLinks = [
   { icon: BookOpen, label: 'My Courses', path: '/courses' },
   { icon: MonitorCheck, label: 'Assessments', path: '/assessment' },
   { icon: History, label: 'Course History', path: '/history' },
+  { icon: BookOpen, label: 'Assignments', path: '/assignment' },
+  { icon: GraduationCap, label: 'Exam Prep', path: '/exam-prep' },
+  { icon: HelpCircle, label: 'Tutorials', path: '/how-to-use' },
   // { icon: History, label: 'Course Room', path: '/classroom' },
   // { icon: Settings, label: 'Settings', path: '/settings' },
 ];
@@ -26,10 +29,12 @@ const tutorLinks = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: CheckCircle, label: 'Assign Topic', path: '/assign-topics' },
     { icon: BookOpen, label: 'Curriculum', path: '/curriculum' },
+    { icon: BookOpen, label: 'Assignments', path: '/assignment' },
     { icon: Video, label: 'Upload Materials', path: '/upload' },
       { icon: CheckCircle, label: 'Live Classes', path: '/tutor-live-classes' },
     { icon: ClipboardList, label: 'AI Alerts', path: '/ai-report' },
     { icon: CheckCircle, label: 'Student Performance', path: '/student-performance' },
+    { icon: GraduationCap, label: 'Exam Prep', path: '/exam-prep' },
     
 ];
 

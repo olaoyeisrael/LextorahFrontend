@@ -64,6 +64,11 @@ const AIReport = lazy(() => import('./(root)/pages/Aialert'))
 const AssignTopics = lazy(() => import('./(root)/pages/AssignTopic'))
 const SchedulePage = lazy(()=> import('./(root)/pages/SchedulePage')) 
 const BookDemo = lazy(()=> import('./(root)/pages/BookDemo'))
+const Assignment = lazy(() => import('./(root)/pages/Assignment'))
+const PracticeQuestion = lazy(() => import('./(root)/pages/PracticeQuestion'))
+const Mock = lazy(() => import('./(root)/pages/Mock'))
+const HowToUse = lazy(() => import('./(root)/pages/HowToUse'))
+
 
 
 
@@ -95,6 +100,7 @@ function App() {
         <Route path="/terms-of-use" element={<TermsOfUsePage />} />
         <Route path="/institution" element={<InstitutionPage />} />
         <Route path='/starter-pack-access-request' element={<StarterPack/>}/>
+        
         <Route path='/book-demo' element={<BookDemo/>}/>
           <Route path="*" element={<NotFound />} />
         </Route>
@@ -134,7 +140,10 @@ function App() {
           <Route path="/ai-report" element={<AIReport />} />
           <Route path='/assign-topics' element={<AssignTopics/>} />
           <Route path='/upcoming-schedule' element={<SchedulePage/>}/>
-          
+          <Route path='/practice-questions' element={<PracticeQuestion/>}/>
+          <Route path='/mock-exams' element={<Mock/>}/>
+          <Route path='/assignment' element={<Assignment />} />
+          <Route path='/how-to-use' element={<HowToUse />} />
 
 
         </Route>

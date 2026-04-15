@@ -51,7 +51,11 @@ const Login = () => {
         }
         
         // Dispatch to Redux using decoded token data
-        // Trying common claim names. User said token contains it.
+        // Tutors have managed_sprints, students have sprints — merge both
+        const allSprints = [...(data.user?.managed_sprints || []), ...(data.user?.sprints || [])];
+        const extractedCourseCodes = allSprints.map(sprint => sprint.course_code).filter(Boolean);
+        console.log("🔥 DEBUG: Extracted Course Codes =>", extractedCourseCodes);
+
         dispatch(setUser({
             firstName: decoded.first_name || decoded.firstname || '', 
             lastName: decoded.last_name || decoded.lastName || '',
@@ -62,6 +66,7 @@ const Login = () => {
             enrolledCourse: (decoded.enrolled_course || '').toLowerCase(),
             enrolledLevel: (decoded.enrolled_level || '').toLowerCase(),
             managedSprints: data.user?.managed_sprints || [],
+            managedCourseCodes: extractedCourseCodes,
             studentSprints: data.user?.sprints || [],
         }));
         setLoading(false)

@@ -3,14 +3,14 @@ import { useSelector } from 'react-redux';
 import { useQuery } from '@tanstack/react-query';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, CheckCircle2, XCircle, Timer, Award, MoveRight, Loader2, Lock } from 'lucide-react';
+import { ChevronRight, CheckCircle2, XCircle, Timer, Award, MoveRight, Loader2, Lock, ArrowLeft, BookOpen } from 'lucide-react';
 
 
 import { apiClient } from '../../utils/api';
 
 
 const Test = () => {
-  const [step, setStep] = useState('setup'); // setup, taking, result
+  const [step, setStep] = useState('sprint-select'); // sprint-select, setup, taking, result
   const enrolledCourse = localStorage.getItem('enrolledCourse')
   const enrolledLevel = localStorage.getItem('enrolledLevel')
   const [questions, setQuestions] = useState([]);
@@ -19,14 +19,30 @@ const Test = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [testMaterial, setTestMaterial] = useState(null);
-  const { studentSprints } = useSelector((state) => state.user);
-  const activeSprintId = studentSprints && studentSprints.length > 0 ? studentSprints[0].id : null;
+  const { studentSprints, managedSprints } = useSelector((state) => state.user);
+
+  // Combine all available sprints
+  const allSprints = [...(managedSprints || []), ...(studentSprints || [])];
+
+  const [selectedSprint, setSelectedSprint] = useState(null);
+  const activeSprintId = selectedSprint?.id || null;
+
+  console.log("All Sprints:", allSprints);
+
+  // Auto-select if only one sprint available
+  useEffect(() => {
+    if (allSprints.length === 1 && !selectedSprint) {
+      setSelectedSprint(allSprints[0]);
+      setStep('setup');
+    }
+  }, [allSprints.length]);
 
   // Fetch Syllabus Topics via React Query for actual available Sprint topics
   const { data: topics = [], isLoading: loadingTopics, error: fetchError } = useQuery({
       queryKey: ['testTopics', activeSprintId],
       queryFn: async () => {
           if (!activeSprintId) return [];
+          console.log("Fetching topics for sprint ID:", activeSprintId);
           const response = await apiClient(`/curriculum/sprint/${activeSprintId}`);
           if (response.ok) {
               const data = await response.json();
@@ -35,14 +51,14 @@ const Test = () => {
           return [];
       },
       enabled: !!activeSprintId,
+
   });
 
   // Fetch User Progress for Locking Logic
   const { data: progressData, isLoading: loadingProgress } = useQuery({
       queryKey: ['userProgress', activeSprintId],
       queryFn: async () => {
-          const activeSprint = studentSprints?.find(s => s.id === activeSprintId);
-          const courseCode = activeSprint?.course_code || '';
+          const courseCode = selectedSprint?.course_code || '';
           const res = await apiClient(`/progress?course_code=${encodeURIComponent(courseCode)}`);
           if (res.ok) return await res.json();
           return null;
@@ -56,18 +72,7 @@ const Test = () => {
 
 
   const startTest = async () => {
-    // if (!config.topic) {
-    //     setError('Please enter a topic to start.');
-    //     return;
-    // }
-    // Topic is optional now, defaulting to General Course if empty
- 
-
     setLoading(true);
-
-
-
-
     setError('');
     console.log("testMaterial: ",testMaterial)
     try {
@@ -189,6 +194,14 @@ const Test = () => {
     setCurrentQuestion(0);
     setAnswers({});
     setError('');
+    setTestMaterial(null);
+  };
+
+  const goBackToSprintSelect = () => {
+    setStep('sprint-select');
+    setSelectedSprint(null);
+    setTestMaterial(null);
+    setError('');
   };
 
   return (
@@ -205,6 +218,53 @@ const Test = () => {
 
         <div className="relative z-10">
           <AnimatePresence mode="wait">
+
+            {/* ─── SPRINT SELECTION SCREEN ─── */}
+            {step === 'sprint-select' && (
+              <motion.div
+                key="sprint-select"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-6 max-w-lg mx-auto"
+              >
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-4">Select Your Course</label>
+                  
+                  {allSprints.length === 0 ? (
+                    <div className="p-6 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-center">
+                      You are not enrolled in any course.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                      {allSprints.map((sprint, idx) => (
+                        <button
+                          key={sprint.id || idx}
+                          onClick={() => {
+                            setSelectedSprint(sprint);
+                            setStep('setup');
+                          }}
+                          className="w-full p-5 border-2 rounded-xl flex items-center justify-between transition-all cursor-pointer hover:bg-green-50 hover:border-green-300 bg-white border-slate-200 text-left group"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                              <BookOpen className="w-6 h-6 text-green-700" />
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-slate-900 group-hover:text-green-700 transition-colors">{sprint.name || sprint.course_code}</h3>
+                              <p className="text-xs text-slate-500">{sprint.course_code} • {sprint.course_level || ''}</p>
+                            </div>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-green-600 transition-colors" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* ─── TOPIC SELECTION (SETUP) ─── */}
             {step === 'setup' && (
               <motion.div
                 key="setup"
@@ -213,8 +273,28 @@ const Test = () => {
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-6 max-w-lg mx-auto"
               >
+                {/* Back button to sprint selection */}
+                {allSprints.length > 1 && (
+                  <button
+                    onClick={goBackToSprintSelect}
+                    className="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-green-600 transition-colors mb-2"
+                  >
+                    <ArrowLeft className="w-4 h-4" /> Back to courses
+                  </button>
+                )}
+
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <BookOpen className="w-5 h-5 text-green-700" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900">{selectedSprint?.name || selectedSprint?.course_code}</h3>
+                    <p className="text-xs text-slate-500">{selectedSprint?.course_code}</p>
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Test Course</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Select a Topic</label>
                    
                    {loadingState ? (
                        <div className="flex flex-col items-center justify-center p-12 text-slate-400">
@@ -263,23 +343,10 @@ const Test = () => {
                        </div>
                    ) : (
                        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-                           You are not enrolled in any course.
+                           No topics found for this course.
                        </div>
                    )}
                 </div>
-
-                {/* <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Topic (Optional)</label>
-                  <input
-                    type="text"
-                    value={config.topic}
-                    onChange={(e) => setConfig({ ...config, topic: e.target.value })}
-                    placeholder="e.g., Verbs, Greetings (Leave empty for general)"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none transition-all"
-                  />
-                  <p className="text-xs text-slate-400 mt-1">Focus on a specific area or leave blank for a general test.</p>
-                </div> */}
-
 
                 {error && (
                     <div className="p-4 rounded-lg bg-red-50 text-red-600 text-sm flex items-center gap-2">
