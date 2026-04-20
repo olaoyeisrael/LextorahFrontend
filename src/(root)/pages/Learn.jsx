@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 
 import ReactMarkdown from "react-markdown";
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, MessageCircle, Loader, LoaderCircleIcon, BookOpen, ChevronRight, Award } from 'lucide-react';
+import { X, MessageCircle, Loader, LoaderCircleIcon, BookOpen, ChevronRight, ChevronLeft, Award, Volume2, Square } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 const Learn = () => {
@@ -32,6 +32,8 @@ const Learn = () => {
     const [sections, setSections] = useState([]);
     const [activeSection, setActiveSection] = useState(1); // Use index as ID now
     const [courseFinished, setCourseFinished] = useState(false);
+    const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+    const audioRef = useRef(null);
 
     
     // Missing States
@@ -150,10 +152,50 @@ const Learn = () => {
         wsRef.current.close();
         wsRef.current = null;
       }
+      if (audioRef.current) {
+          audioRef.current.pause();
+      }
     };
   }, [currentTopic, user_id]); // Auto-start the stream when topic resolves
 
+  const playAudio = async () => {
+      if (!data) return;
+      setIsPlayingAudio(true);
+      try {
+          const res = await apiClient('/getAudio', {
+              method: 'POST',
+              body: JSON.stringify({ input: String(data).replace(/[#*_`]/g, '') })
+          });
+          if (res.ok) {
+              const blob = await res.blob();
+              const url = URL.createObjectURL(blob);
+              audioRef.current = new Audio(url);
+              audioRef.current.onended = () => setIsPlayingAudio(false);
+              audioRef.current.play();
+          } else {
+              setIsPlayingAudio(false);
+          }
+      } catch (e) {
+          console.error("Audio error:", e);
+          setIsPlayingAudio(false);
+      }
+  };
+
+  const stopAudio = () => {
+      if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+      }
+      setIsPlayingAudio(false);
+  };
+
+  const handlePrevious = () => {
+     stopAudio();
+     startStream(activeSection - 1, "Fetching previous card...");
+  };
+
   const handleNext = () => {
+     stopAudio();
      // Check if we are at the very end of sections
      let msg = "Agent is explaining...";
      if (sections.length > 0 && activeSection >= sections.length) {
@@ -163,6 +205,7 @@ const Learn = () => {
   };
 
   const handleClose = () => {
+    stopAudio();
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
@@ -203,9 +246,11 @@ const Learn = () => {
                       body: JSON.stringify({
                           course_title: learningContext.course,
                           level: learningContext.level,
+                          course_code: courseCode,
                           topic: learningContext.topic,
                           score: finalScore,
                           total: quizData.length,
+                          type: "lesson_quiz",
                           details: Object.entries(newAnswers).map(([idx, ans]) => ({
                               question: quizData[idx].question,
                               answer: ans,
@@ -414,29 +459,64 @@ const Learn = () => {
                           </div>
                       ) : (
                           <>
-                              <div className="absolute top-4 right-4 z-20">
-                                  <button 
-                                    onClick={handleNext}
-                                    className={`px-6 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white shadow-md`}
-                                  >
-                                    Continue Explanation <ChevronRight className="w-4 h-4" />
-                                  </button>
-                              </div>
+                              <div className="flex-1 flex items-center justify-center min-h-0 w-full py-4">
+                                  <AnimatePresence mode='wait'>
+                                      <motion.div
+                                          key={activeSection}
+                                          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                                          exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                                          transition={{ duration: 0.4, type: "spring", bounce: 0.3 }}
+                                          className='bg-white p-8 md:p-10 rounded-[2rem] border border-green-100 shadow-xl shadow-slate-200/50 max-w-4xl w-full flex flex-col relative mx-auto'
+                                          style={{ minHeight: '65vh', maxHeight: '100%' }}
+                                      >
+                                          {/* Header with speaker */}
+                                          <div className="flex justify-between items-center mb-8 pb-6 border-b border-slate-100 shrink-0">
+                                              <span className="text-green-600 font-bold uppercase tracking-widest text-sm bg-green-50 px-4 py-2 rounded-xl">
+                                                  {activeSection} {sections.length > 0 && `of ${sections.length}`}
+                                              </span>
+                                              <button 
+                                                  onClick={isPlayingAudio ? stopAudio : playAudio}
+                                                  disabled={!data || loading}
+                                                  className={`p-3 rounded-full transition-all flex items-center gap-2 font-bold ${isPlayingAudio ? 'bg-amber-100 text-amber-700 animate-pulse shadow-inner' : 'bg-green-50 hover:bg-green-100 text-green-700 hover:scale-105'}`}
+                                                  title="Listen to this card"
+                                              >
+                                                  {isPlayingAudio ? (
+                                                      <><Square className="w-5 h-5 fill-current" /> Stop Playing</>
+                                                  ) : (
+                                                      <><Volume2 className="w-5 h-5" /> Play Audio</>
+                                                  )}
+                                              </button>
+                                          </div>
+                                          
+                                          {/* Content */}
+                                          <div className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 text-center sm:text-left">
+                                              <div className="prose prose-lg md:prose-xl prose-slate mx-auto text-slate-700 prose-headings:text-slate-900 marker:text-green-500 prose-a:text-green-600 prose-strong:text-green-800 tracking-tight leading-relaxed">
+                                                  {data ? <ReactMarkdown>{String(data).replace(/\n/g, '  \n')}</ReactMarkdown> : <div className="text-slate-400 italic mt-10 text-center">Waiting for AI tutor...</div>}
+                                              </div>
+                                          </div>
 
-                              <AnimatePresence mode='wait'>
-                                  <motion.div
-                                      key={activeSection}
-                                      initial={{ opacity: 0, y: 10 }}
-                                      animate={{ opacity: 1, y: 0 }}
-                                      exit={{ opacity: 0, y: -10 }}
-                                      transition={{ duration: 0.3 }}
-                                      className='bg-white p-8 md:p-12 rounded-3xl border border-slate-200 shadow-sm flex-1 min-h-0 overflow-y-auto custom-scrollbar custom-markdown'
-                                  >
-                                      <div className="prose prose-lg prose-slate max-w-none text-slate-700 prose-headings:text-slate-900 marker:text-green-500 prose-a:text-green-600">
-                                          {data ? <ReactMarkdown>{String(data).replace(/\n/g, '  \n')}</ReactMarkdown> : <div className="text-slate-400 italic">No content rendered yet. Click continue to resume the lesson stream.</div>}
-                                      </div>
-                                  </motion.div>
-                              </AnimatePresence>
+                                          {/* Footer Navigation */}
+                                          <div className="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center shrink-0">
+                                              <button 
+                                                  onClick={handlePrevious}
+                                                  disabled={activeSection <= 1 || loading}
+                                                  className="px-6 py-3.5 rounded-xl font-bold transition-all flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
+                                              >
+                                                  <ChevronLeft className="w-5 h-5" /> Previous Card
+                                              </button>
+                                              
+                                              <button 
+                                                  onClick={handleNext}
+                                                  disabled={loading}
+                                                  className="px-8 py-3.5 rounded-xl font-bold transition-all flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
+                                              >
+                                                  {sections.length > 0 && activeSection >= sections.length ? 'Take the Quiz' : 'Next Card'} <ChevronRight className="w-5 h-5" />
+                                              </button>
+                                          </div>
+                                      </motion.div>
+                                  </AnimatePresence>
+                              </div>
                           </>
                       )}
                   </div>

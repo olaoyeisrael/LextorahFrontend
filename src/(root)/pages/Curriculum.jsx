@@ -25,15 +25,23 @@ const Curriculum = () => {
         : (userState?.user?.managed_sprints || []);
     
     const tutorCourseCodes = managedSprints.map(s => s.course_code).filter(Boolean);
+    const hasManagedSprints = managedSprints.length > 0;
+
+    // Build unique course codes from managed sprints
+    const sprintCourseCodes = [...new Set(managedSprints.map(s => s.course_code || '').filter(Boolean))];
+
+    // Defaults
+    const defaultCourse = hasManagedSprints && sprintCourseCodes.length > 0 ? sprintCourseCodes[0] : 'German';
+    const defaultLevel = hasManagedSprints ? '' : 'A1';
 
     // State
     const [loading, setLoading] = useState(false);
     const [items, setItems] = useState([]);
-    const [filters, setFilters] = useState({ course: 'German', level: 'A1' });
+    const [filters, setFilters] = useState({ course: defaultCourse, level: defaultLevel });
     
     const [form, setForm] = useState({
-        course: 'German',
-        level: 'A1',
+        course: defaultCourse,
+        level: defaultLevel,
     });
     
     // Dynamic Topics List - Now supporting Course Code
@@ -49,7 +57,11 @@ const Curriculum = () => {
     const fetchCurriculum = async () => {
         setLoading(true);
         try {
-            const res = await apiClient(`/curriculum?course=${filters.course}&level=${filters.level}`);
+            // Tutors filter by course_code, others by course+level
+            const queryStr = hasManagedSprints
+                ? `/curriculum?course_code=${encodeURIComponent(filters.course)}`
+                : `/curriculum?course=${encodeURIComponent(filters.course)}&level=${encodeURIComponent(filters.level)}`;
+            const res = await apiClient(queryStr);
             const data = await res.json();
             if (data.curriculum) {
                 setItems(data.curriculum);
@@ -97,8 +109,12 @@ const Curriculum = () => {
 
     const handleFilterChange = (e) => {
         if (e.target.name === 'course') {
-            const levels = getLevelsForCourse(e.target.value);
-            setFilters({ ...filters, course: e.target.value, level: levels[0] || '' });
+            if (hasManagedSprints) {
+                setFilters({ ...filters, course: e.target.value, level: '' });
+            } else {
+                const levels = getLevelsForCourse(e.target.value);
+                setFilters({ ...filters, course: e.target.value, level: levels[0] || '' });
+            }
         } else {
             setFilters({ ...filters, [e.target.name]: e.target.value });
         }
@@ -220,15 +236,22 @@ const Curriculum = () => {
                                 name="course" value={form.course} onChange={handleChange} 
                                 className="w-full p-2 border border-slate-200 rounded-lg focus:ring-green-500 focus:border-green-500" 
                             >
-                                {COURSE_GROUPS.map((group, idx) => (
-                                    <optgroup key={idx} label={group.groupName}>
-                                        {group.courses.map(course => (
-                                            <option key={course} value={course}>{course}</option>
-                                        ))}
-                                    </optgroup>
-                                ))}
+                                {hasManagedSprints ? (
+                                    sprintCourseCodes.map(code => (
+                                        <option key={code} value={code}>{code}</option>
+                                    ))
+                                ) : (
+                                    COURSE_GROUPS.map((group, idx) => (
+                                        <optgroup key={idx} label={group.groupName}>
+                                            {group.courses.map(course => (
+                                                <option key={course} value={course}>{course}</option>
+                                            ))}
+                                        </optgroup>
+                                    ))
+                                )}
                             </select>
                         </div>
+                        {!hasManagedSprints && (
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Level</label>
@@ -242,6 +265,7 @@ const Curriculum = () => {
                                 </select>
                             </div>
                         </div>
+                        )}
 
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">Modules & Topics</label>
@@ -318,22 +342,28 @@ const Curriculum = () => {
                                     name="course" value={filters.course} onChange={handleFilterChange} 
                                     className="p-2 border border-slate-200 rounded-lg text-sm"
                                 >
-                                    {COURSE_GROUPS.map((group, idx) => (
-                                        <optgroup key={idx} label={group.groupName}>
-                                            {group.courses.map(course => (
-                                                <option key={course} value={course}>{course}</option>
-                                            ))}
-                                        </optgroup>
-                                    ))}
+                                    {hasManagedSprints ? (
+                                        sprintCourseCodes.map(code => (
+                                            <option key={code} value={code}>{code}</option>
+                                        ))
+                                    ) : (
+                                        COURSE_GROUPS.map((group, idx) => (
+                                            <optgroup key={idx} label={group.groupName}>
+                                                {group.courses.map(course => (
+                                                    <option key={course} value={course}>{course}</option>
+                                                ))}
+                                            </optgroup>
+                                        ))
+                                    )}
                                 </select>
-                                <select 
+                                {!hasManagedSprints && (<select 
                                     name="level" value={filters.level} onChange={handleFilterChange}
                                     className="p-2 border border-slate-200 rounded-lg text-sm"
                                 >
                                     {getLevelsForCourse(filters.course).map(level => (
                                         <option key={level} value={level}>{level}</option>
                                     ))}
-                                </select>
+                                </select>)}
                             </div>
                         </div>
 
@@ -341,13 +371,13 @@ const Curriculum = () => {
                             <div className="flex justify-center items-center h-40">
                                 <Loader2 className="w-8 h-8 text-green-600 animate-spin" />
                             </div>
-                        ) : items.filter(item => (!isTutor() || isAdmin()) ? true : tutorCourseCodes.includes(item.course_code)).length === 0 ? (
+                        ) : items.length === 0 ? (
                             <div className="text-center text-slate-500 py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
                                 No topics found for this course/level. Start adding some!
                             </div>
                         ) : (
                             <div className="space-y-3">
-                                {items.filter(item => (!isTutor() || isAdmin()) ? true : tutorCourseCodes.includes(item.course_code)).map((item) => {
+                                {items.map((item) => {
                                     const isEditing = editingItem === (item._id || item.id);
                                     
                                     return (

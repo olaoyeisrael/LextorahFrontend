@@ -278,7 +278,7 @@ return (
                  title="Live Classes"
                  icon={Video}
                  color="green-500"
-                 link="/live-classes-admin" // adjust link if needed for tutor
+                 link="/tutor-live-classes" 
              />
              <QuickActionCard
                  title="Student Performance"

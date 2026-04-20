@@ -4,11 +4,17 @@ import { BarChart, Search, FileText, Eye, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { COURSE_GROUPS, getLevelsForCourse } from '../../utils/courseData';
-
 import { apiClient } from '../../utils/api';
+import { isAdmin } from '../../utils/auth';
 
 const StudentPerformance = () => {
-    const { token } = useSelector((state) => state.user);
+    const { token, managedSprints: rawManagedSprints } = useSelector((state) => state.user);
+    const managedSprints = rawManagedSprints || [];
+    
+    // Only apply sprint restrictions if the user is NOT an admin
+    const hasManagedSprints = managedSprints.length > 0 && !isAdmin();
+    
+    const sprintCourseCodes = [...new Set(managedSprints.map(s => s.course_code || '').filter(Boolean))];
     const [performanceData, setPerformanceData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedResult, setSelectedResult] = useState(null);
@@ -17,7 +23,13 @@ const StudentPerformance = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await apiClient('/student_performance');
+                // If tutor, send all managed course codes to the backend up front
+                let url = '/student_performance';
+                if (!isAdmin() && sprintCourseCodes.length > 0) {
+                    url += `?course_code=${encodeURIComponent(sprintCourseCodes.join(','))}`;
+                }
+
+                const res = await apiClient(url);
                 if (res.ok) {
                     const data = await res.json();
                     setPerformanceData(data.performance || []);
@@ -41,17 +53,22 @@ const StudentPerformance = () => {
     };
 
     const filteredData = performanceData.filter(item => {
-        // DEBUG: Check values
-        // console.log("Item:", item.course_title, item.level, "Filter:", filters.course, filters.level);
-        
-        const itemCourse = item.course_title ? item.course_title.toLowerCase().trim() : '';
         const filterCourse = filters.course ? filters.course.toLowerCase().trim() : '';
-        
-        const itemLevel = item.level ? item.level.toLowerCase().trim() : '';
         const filterLevel = filters.level ? filters.level.toLowerCase().trim() : '';
 
-        const matchesCourse = filterCourse ? itemCourse === filterCourse : true;
-        const matchesLevel = filterLevel ? itemLevel === filterLevel : true;
+        let matchesCourse = true;
+        if (filterCourse) {
+            if (hasManagedSprints) {
+                // Tutor mode: filter selected a course_code, match against item.course_code
+                const itemCode = item.course_code ? item.course_code.toLowerCase().trim() : '';
+                matchesCourse = itemCode === filterCourse;
+            } else {
+                // Admin/default: match against course_title
+                const itemCourse = item.course_title ? item.course_title.toLowerCase().trim() : '';
+                matchesCourse = itemCourse === filterCourse;
+            }
+        }
+        const matchesLevel = filterLevel ? (item.level || '').toLowerCase().trim() === filterLevel : true;
         
         return matchesCourse && matchesLevel;
     });
@@ -74,14 +91,21 @@ const StudentPerformance = () => {
                     className="p-2 border border-slate-200 rounded-lg text-sm min-w-[200px] focus:ring-green-500 focus:border-green-500 outline-none"
                 >
                     <option value="">All Courses</option>
-                    {COURSE_GROUPS.map((group, idx) => (
-                        <optgroup key={idx} label={group.groupName}>
-                            {group.courses.map(course => (
-                                <option key={course} value={course}>{course}</option>
-                            ))}
-                        </optgroup>
-                    ))}
+                    {hasManagedSprints ? (
+                        sprintCourseCodes.map(code => (
+                            <option key={code} value={code}>{code}</option>
+                        ))
+                    ) : (
+                        COURSE_GROUPS.map((group, idx) => (
+                            <optgroup key={idx} label={group.groupName}>
+                                {group.courses.map(course => (
+                                    <option key={course} value={course}>{course}</option>
+                                ))}
+                            </optgroup>
+                        ))
+                    )}
                 </select>
+                {!hasManagedSprints && (
                 <select 
                     name="level" 
                     value={filters.level} 
@@ -94,6 +118,7 @@ const StudentPerformance = () => {
                         <option key={level} value={level}>{level}</option>
                     ))}
                 </select>
+                )}
                 {(filters.course || filters.level) && (
                     <button 
                         onClick={() => setFilters({ course: '', level: '' })}
@@ -112,6 +137,7 @@ const StudentPerformance = () => {
                                 <th className="px-6 py-4">Student</th>
                                 <th className="px-6 py-4">Course</th>
                                 <th className="px-6 py-4">Level</th>
+                                <th className="px-6 py-4">Course Code</th>
                                 <th className="px-6 py-4">Topic</th>
                                 <th className="px-6 py-4">Score</th>
                                 <th className="px-6 py-4">Date</th>
@@ -139,6 +165,7 @@ const StudentPerformance = () => {
                                         <td className="px-6 py-4 font-medium text-slate-900">{item.student_name || 'Unknown'}</td>
                                         <td className="px-6 py-4 capitalize">{item.course_title}</td>
                                         <td className="px-6 py-4 capitalize">{item.level || '-'}</td>
+                                        <td className="px-6 py-4 font-mono text-xs font-bold text-green-700 bg-green-50 rounded px-2">{item.course_code || '-'}</td>
                                         <td className="px-6 py-4">{Array.isArray(item.topic) ? item.topic.join(', ') : item.topic}</td>
                                         <td className="px-6 py-4 font-bold">
                                             {item.score} / {item.total}

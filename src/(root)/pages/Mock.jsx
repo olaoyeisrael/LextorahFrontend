@@ -11,27 +11,26 @@ function Mock() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchQuestions();
-  }, [managedCourseCodes]);
+  const [selectedCourse, setSelectedCourse] = useState('');
+  const [hasStarted, setHasStarted] = useState(false);
 
-  const fetchQuestions = async () => {
+  // We don't auto-fetch anymore. We wait for user to select a course.
+
+  const handleStart = async () => {
+    if (!selectedCourse) {
+      setError('Please select a course first.');
+      return;
+    }
+    setHasStarted(true);
     setLoading(true);
     setError('');
     try {
-      const codes = managedCourseCodes?.join(',') || '';
-      if (!codes) {
-        setError('No course codes found. Please ensure you are enrolled in a course.');
-        setLoading(false);
-        return;
-      }
-      const response = await apiClient(`/exam-questions/mock?course_code=${encodeURIComponent(codes)}`);
+      const response = await apiClient(`/exam-questions/mock?course_code=${encodeURIComponent(selectedCourse)}`);
       const data = await response.json();
-      if (data.questions) {
+      if (data.questions && data.questions.length > 0) {
         setQuestions(data.questions);
-      }
-      if (data.questions?.length === 0) {
-        setError('No mock exam questions available yet.');
+      } else {
+        setError('No mock exam questions available for this course yet.');
       }
     } catch (err) {
       setError('Failed to load questions.');
@@ -41,12 +40,11 @@ function Mock() {
   };
 
   const handleComplete = async ({ answers, timeTaken }) => {
-    const codes = managedCourseCodes?.join(',') || '';
     const response = await apiClient('/exam-results', {
       method: 'POST',
       body: JSON.stringify({
         student_id: user_id,
-        course_code: codes,
+        course_code: selectedCourse,
         mode: 'mock',
         answers: answers
       })
@@ -54,6 +52,37 @@ function Mock() {
     const data = await response.json();
     return data;
   };
+
+  if (!hasStarted) {
+    return (
+      <div className="max-w-xl mx-auto py-20 px-6">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 text-center">
+          <BookOpen className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">Timed Mock Exam</h2>
+          <p className="text-slate-500 mb-6">Select a course to start your 30-minute test.</p>
+          
+          <select 
+            value={selectedCourse}
+            onChange={(e) => { setSelectedCourse(e.target.value); setError(''); }}
+            className="w-full p-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 mb-4 bg-slate-50"
+          >
+            <option value="">-- Choose Course --</option>
+            {managedCourseCodes?.map(code => (
+              <option key={code} value={code}>{code}</option>
+            ))}
+          </select>
+          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+          <button 
+            onClick={handleStart}
+            disabled={!selectedCourse}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-colors disabled:opacity-50"
+          >
+            Start Timed Exam
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -68,8 +97,8 @@ function Mock() {
       <div className="max-w-2xl mx-auto py-20 text-center">
         <BookOpen className="w-16 h-16 text-slate-300 mx-auto mb-4" />
         <p className="text-lg font-semibold text-slate-500">{error}</p>
-        <button onClick={fetchQuestions} className="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-colors">
-          Retry
+        <button onClick={() => { setHasStarted(false); setError(''); }} className="mt-6 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-6 rounded-xl transition-colors">
+          Go Back
         </button>
       </div>
     );
@@ -80,8 +109,8 @@ function Mock() {
       <QuestionPlayer
         questions={questions}
         timed={true}
-        timeLimit={1800}
-        title="Timed Mock Exam"
+        timeLimit={60}
+        title={`Timed Mock Exam — ${selectedCourse}`}
         onComplete={handleComplete}
       />
     </div>

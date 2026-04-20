@@ -9,10 +9,9 @@ const studentLinks = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: BookOpen, label: 'My Courses', path: '/courses' },
   { icon: MonitorCheck, label: 'Assessments', path: '/assessment' },
-  { icon: History, label: 'Course History', path: '/history' },
   { icon: BookOpen, label: 'Assignments', path: '/assignment' },
-  { icon: GraduationCap, label: 'Exam Prep', path: '/exam-prep' },
-  { icon: HelpCircle, label: 'Tutorials', path: '/how-to-use' },
+  { icon: History, label: 'Course History', path: '/history' },
+  { icon: HelpCircle, label: 'How to Use', path: '/how-to-use' },
   // { icon: History, label: 'Course Room', path: '/classroom' },
   // { icon: Settings, label: 'Settings', path: '/settings' },
 ];
@@ -35,6 +34,7 @@ const tutorLinks = [
     { icon: ClipboardList, label: 'AI Alerts', path: '/ai-report' },
     { icon: CheckCircle, label: 'Student Performance', path: '/student-performance' },
     { icon: GraduationCap, label: 'Exam Prep', path: '/exam-prep' },
+      { icon: HelpCircle, label: 'How to Use', path: '/how-to-use' },
     
 ];
 

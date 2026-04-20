@@ -201,9 +201,9 @@ const Course = () => {
                                     }`}
                                 >
                                     <div className="flex justify-between items-start mb-3">
-                                        <span className="text-xs font-bold text-indigo-500 uppercase tracking-wider bg-indigo-50 px-2 py-1 rounded-md">
-                                            {item.week || `Module ${idx + 1}`}
-                                        </span>
+                                        {/* <span className="text-xs font-bold text-indigo-500 uppercase tracking-wider bg-indigo-50 px-2 py-1 rounded-md">
+                                            {item.week || `Module ${idx + 1}`} 
+                                        </span> */}
                                         <div className="flex gap-2">
                                             {item.is_completed && (
                                                  <span className="bg-green-100 text-green-600 px-2 py-0.5 rounded text-xs font-bold border border-green-200">Done</span>

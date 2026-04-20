@@ -11,27 +11,26 @@ function PracticeQuestion() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchQuestions();
-  }, [managedCourseCodes]);
+  const [selectedCourse, setSelectedCourse] = useState('');
+  const [hasStarted, setHasStarted] = useState(false);
 
-  const fetchQuestions = async () => {
+  // We don't fetch automatically anymore. We wait for user to select a course.
+
+  const handleStart = async () => {
+    if (!selectedCourse) {
+      setError('Please select a course first.');
+      return;
+    }
+    setHasStarted(true);
     setLoading(true);
     setError('');
     try {
-      const codes = managedCourseCodes?.join(',') || '';
-      if (!codes) {
-        setError('No course codes found. Please ensure you are enrolled in a course.');
-        setLoading(false);
-        return;
-      }
-      const response = await apiClient(`/exam-questions/practice?course_code=${encodeURIComponent(codes)}`);
+      const response = await apiClient(`/exam-questions/practice?course_code=${encodeURIComponent(selectedCourse)}`);
       const data = await response.json();
-      if (data.questions) {
+      if (data.questions && data.questions.length > 0) {
         setQuestions(data.questions);
-      }
-      if (data.questions?.length === 0) {
-        setError('No practice questions available yet.');
+      } else {
+        setError('No practice questions available for this course yet.');
       }
     } catch (err) {
       setError('Failed to load questions.');
@@ -41,12 +40,11 @@ function PracticeQuestion() {
   };
 
   const handleComplete = async ({ answers, timeTaken }) => {
-    const codes = managedCourseCodes?.join(',') || '';
     const response = await apiClient('/exam-results', {
       method: 'POST',
       body: JSON.stringify({
         student_id: user_id,
-        course_code: codes,
+        course_code: selectedCourse,
         mode: 'practice',
         answers: answers
       })
@@ -54,6 +52,37 @@ function PracticeQuestion() {
     const data = await response.json();
     return data;
   };
+
+  if (!hasStarted) {
+    return (
+      <div className="max-w-xl mx-auto py-20 px-6">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 text-center">
+          <BookOpen className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">Practice Mode</h2>
+          <p className="text-slate-500 mb-6">Select a course to fetch 10 random practice questions.</p>
+          
+          <select 
+            value={selectedCourse}
+            onChange={(e) => { setSelectedCourse(e.target.value); setError(''); }}
+            className="w-full p-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 mb-4 bg-slate-50"
+          >
+            <option value="">-- Choose Course --</option>
+            {managedCourseCodes?.map(code => (
+              <option key={code} value={code}>{code}</option>
+            ))}
+          </select>
+          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+          <button 
+            onClick={handleStart}
+            disabled={!selectedCourse}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-colors disabled:opacity-50"
+          >
+            Load Practice Questions
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -68,8 +97,8 @@ function PracticeQuestion() {
       <div className="max-w-2xl mx-auto py-20 text-center">
         <BookOpen className="w-16 h-16 text-slate-300 mx-auto mb-4" />
         <p className="text-lg font-semibold text-slate-500">{error}</p>
-        <button onClick={fetchQuestions} className="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-colors">
-          Retry
+        <button onClick={() => { setHasStarted(false); setError(''); }} className="mt-6 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-6 rounded-xl transition-colors">
+          Go Back
         </button>
       </div>
     );
@@ -80,7 +109,7 @@ function PracticeQuestion() {
       <QuestionPlayer
         questions={questions}
         timed={false}
-        title="Practice Questions"
+        title={`Practice Questions — ${selectedCourse}`}
         onComplete={handleComplete}
       />
     </div>

@@ -8,6 +8,8 @@ function Assignment() {
   const role = useSelector((state) => state.user.role);
   const user_id = localStorage.getItem('user_id') || 'student_123';
   const managedCourseCodes = useSelector((state) => state.user.managedCourseCodes);
+  const firstName = useSelector((state) => state.user.firstName);
+  const lastName = useSelector((state) => state.user.lastName);
 
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -71,6 +73,13 @@ function Assignment() {
     e.preventDefault();
     setSubmitting(true);
     setMessage('');
+    
+    if (!questionText.trim() && !file) {
+      setMessage('You must provide either a question description or attach a document.');
+      setSubmitting(false);
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append('topic', topic);
@@ -104,9 +113,17 @@ function Assignment() {
     e.preventDefault();
     setSubmitting(true);
     setMessage('');
+    
+    if (!answerText.trim() && !answerFile) {
+        setMessage('You must provide either a written answer or an attached document.');
+        setSubmitting(false);
+        return;
+    }
+
     try {
       const formData = new FormData();
       formData.append('student_id', user_id);
+      formData.append('student_name', `${firstName || ''} ${lastName || ''}`.trim() || 'Unknown Student');
       formData.append('answer_text', answerText);
       if (answerFile) {
         formData.append('file', answerFile);
@@ -171,7 +188,7 @@ function Assignment() {
                   <label className="block text-sm font-semibold text-slate-600 mb-2">Topic</label>
                   <input type="text" value={topic} onChange={e => setTopic(e.target.value)} required
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    placeholder="e.g. Introduction to Physics" />
+                    placeholder="e.g. Introduction to French" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-600 mb-2">Course Code</label>
@@ -181,8 +198,8 @@ function Assignment() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-600 mb-2">Question Description</label>
-                <textarea value={questionText} onChange={e => setQuestionText(e.target.value)} required rows="4"
+                <label className="block text-sm font-semibold text-slate-600 mb-2">Question Description (Optional)</label>
+                <textarea value={questionText} onChange={e => setQuestionText(e.target.value)} rows="4"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none"
                   placeholder="Type the assignment questions or instructions here..." />
               </div>
@@ -264,7 +281,7 @@ function Assignment() {
                                          <div className="flex-1">
                                             <div className="flex items-center space-x-2 mb-2 text-sm text-slate-500 font-medium">
                                               <User className="w-4 h-4" />
-                                              <span>Student: {sub.student_id}</span>
+                                              <span>Student: {sub.student_name || sub.student_id}</span>
                                             </div>
                                             <p className="text-slate-700 whitespace-pre-wrap bg-slate-50 p-3 rounded-lg border border-slate-100 text-sm">{sub.answer_text}</p>
                                          </div>
@@ -283,9 +300,9 @@ function Assignment() {
                                <h4 className="font-bold text-slate-700 mb-4 border-b pb-2">Submit Your Answer</h4>
                                <form onSubmit={(e) => handleStudentSubmit(assignment._id, e)} className="space-y-5">
                                   <div>
-                                    <textarea value={answeringFor === assignment._id ? answerText : ''} onChange={e => setAnswerText(e.target.value)} required rows="4"
+                                    <textarea value={answeringFor === assignment._id ? answerText : ''} onChange={e => setAnswerText(e.target.value)} rows="4"
                                       className="w-full px-4 py-3 rounded-xl border border-slate-200  focus:ring-emerald-500 outline-none transition-all resize-none shadow-sm"
-                                      placeholder="Write your answer here..." />
+                                      placeholder="Write your answer here... (Optional if attaching a file)" />
                                   </div>
                                   <div>
                                     <label className="block text-sm font-semibold text-slate-600 mb-2">Attach File (Optional)</label>

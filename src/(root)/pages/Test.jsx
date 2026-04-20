@@ -171,8 +171,10 @@ const Test = () => {
                     topic: Array.isArray(testMaterial.topic) ? testMaterial.topic.join(', ') : testMaterial.topic,
                     course_title: (enrolledCourse || "General").toLowerCase(),
                     level: (enrolledLevel || "A1").toLowerCase(),
+                    course_code: selectedSprint?.course_code || "",
                     score: score,
                     total: questions.length,
+                    type: "sprint_test",
                     details: details
                 })
             }).then(res => res.json())
@@ -324,20 +326,20 @@ const Test = () => {
                                      isLocked 
                                      ? 'bg-slate-50 border-slate-200 cursor-not-allowed opacity-70' 
                                      : 'cursor-pointer hover:bg-green-50 hover:border-green-300 bg-white border-slate-200'
-                                 } ${testMaterial?.material === t.cloud_url ? 'bg-green-50 border-green-500 ring-2 ring-green-200' : ''}`}
+                                 } ${testMaterial?.topic === topicStr ? 'bg-green-50 border-green-500 ring-2 ring-green-200 shadow-sm' : ''}`}
                                >
                                    <div className="flex items-center gap-3">
                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                                            isLocked ? 'bg-slate-200 text-slate-500' : 'bg-green-100 text-green-700'
+                                            isLocked ? 'bg-slate-200 text-slate-500' : (testMaterial?.topic === topicStr ? 'bg-green-500 text-white shadow-sm' : 'bg-green-100 text-green-700')
                                         }`}>
                                            {isLocked ? <Lock className="w-4 h-4" /> : idx + 1}
                                        </div>
                                        <div>
                                            <h3 className={`font-bold ${isLocked ? 'text-slate-500' : 'text-slate-900'}`}>{topicStr}</h3>
-                                           <p className="text-xs text-slate-500">{t.week || `Module ${idx+1}`}</p>
+                                           {/* <p className="text-xs text-slate-500">{t.week || `Module ${idx+1}`}</p> */}
                                        </div>
                                    </div>
-                                   {testMaterial?.material === t.cloud_url && <CheckCircle2 className="w-5 h-5 text-green-600" />}
+                                   {testMaterial?.topic === topicStr && <CheckCircle2 className="w-5 h-5 text-green-600 drop-shadow-sm" />}
                                </div>
                            )})}
                        </div>

@@ -2,6 +2,8 @@ import React, { useRef, useState, useEffect } from 'react'
 import { CloudUpload, Loader, FileText, X } from 'lucide-react'
 import { isAdmin, getToken } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { motion } from 'framer-motion';
 import { COURSE_GROUPS, getLevelsForCourse } from '../../utils/courseData';
 
 
@@ -9,6 +11,10 @@ import { apiClient } from '../../utils/api';
 
 const Upload = () => {
     const navigate = useNavigate();
+    const userState = useSelector((state) => state.user);
+    const managedSprints = userState?.managedSprints || [];
+    const hasManagedSprints = managedSprints.length > 0;
+    const sprintCourseCodes = [...new Set(managedSprints.map(s => s.course_code || '').filter(Boolean))];
 
     useEffect(() => {
         // if (!isAdmin()) {
@@ -32,12 +38,15 @@ const Upload = () => {
     
     // Fetch topics when course or level changes
     useEffect(() => {
-        if (form.course_title && form.level) {
+        const shouldFetch = hasManagedSprints ? !!form.course_title : (form.course_title && form.level);
+        if (shouldFetch) {
             const fetchTopics = async () => {
                 setLoadingTopics(true);
                 try {
-                    // const token = getToken(); // handled by apiClient
-                    const res = await apiClient(`/curriculum?course=${form.course_title}&level=${form.level}`);
+                    const queryStr = hasManagedSprints
+                        ? `/curriculum?course_code=${encodeURIComponent(form.course_title)}`
+                        : `/curriculum?course=${encodeURIComponent(form.course_title)}&level=${encodeURIComponent(form.level)}`;
+                    const res = await apiClient(queryStr);
                     const data = await res.json();
                     if (data.curriculum) {
                         setTopics(data.curriculum);
@@ -54,13 +63,15 @@ const Upload = () => {
         }
     }, [form.course_title, form.level]);
 
-    // When course changes, reset level
+    // When course changes, reset level and topic
     const handleCourseChange = (e) => {
         setForm({
             ...form,
             course_title: e.target.value,
-            level: '' // Reset level when course changes
+            level: '', // Reset level when course changes
+            topic: ''  // Reset topic when course changes
         });
+        setTopics([]); // Clear old topics
     }
 
     const handleChange = (e) => {
@@ -140,13 +151,24 @@ const Upload = () => {
 
 
   return (
-    <section className='max-w-5xl mx-auto p-4 md:p-8'>
+    <motion.section 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className='max-w-5xl mx-auto p-4 md:p-8'
+    >
         <div className='bg-white rounded-3xl shadow-xl border border-green-50 p-8 md:p-12'>
 
         <h1 className='font-bold font-Inter  text-3xl '>Upload Materials</h1>
 
-        <form onSubmit={handleSubmit} className='flex flex-col gap-4 mt-6 '>
-            <div className='flex gap-2 flex-col '>
+        <motion.form 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5, staggerChildren: 0.1 }}
+            onSubmit={handleSubmit} 
+            className='flex flex-col gap-4 mt-6 '
+        >
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className='flex gap-2 flex-col '>
                 <label htmlFor="" className='text-lg font-medium text-slate-700'>Course</label>
                 <select 
                     name="course_title" 
@@ -155,17 +177,24 @@ const Upload = () => {
                     onChange={handleCourseChange}
                 >
                     <option value="">Select Course</option>
-                    {COURSE_GROUPS.map((group, idx) => (
-                        <optgroup key={idx} label={group.groupName}>
-                            {group.courses.map(course => (
-                                <option key={course} value={course}>{course}</option>
-                            ))}
-                        </optgroup>
-                    ))}
+                    {hasManagedSprints ? (
+                        sprintCourseCodes.map(code => (
+                            <option key={code} value={code}>{code}</option>
+                        ))
+                    ) : (
+                        COURSE_GROUPS.map((group, idx) => (
+                            <optgroup key={idx} label={group.groupName}>
+                                {group.courses.map(course => (
+                                    <option key={course} value={course}>{course}</option>
+                                ))}
+                            </optgroup>
+                        ))
+                    )}
                 </select>
-            </div>
+            </motion.div>
 
-            <div  className='flex gap-2 flex-col '>
+            {!hasManagedSprints && (
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className='flex gap-2 flex-col '>
                 <label htmlFor="" className='text-lg font-medium text-slate-700'>Level</label>
                 <select 
                     name="level" 
@@ -179,9 +208,10 @@ const Upload = () => {
                         <option key={level} value={level}>{level}</option>
                     ))}
                 </select>
-            </div>
+            </motion.div>
+            )}
 
-            <div  className='flex gap-2 flex-col '>
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className='flex gap-2 flex-col '>
                 <label htmlFor="" className='text-lg font-medium text-slate-700'>Topic/Module</label>
                 {loadingTopics ? (
                     <div className="flex items-center gap-2 p-3 text-slate-500 bg-slate-50 border border-slate-200 rounded-xl">
@@ -193,7 +223,7 @@ const Upload = () => {
                         value={form.topic} 
                         onChange={handleChange}
                         className='border border-slate-300 rounded-xl p-3 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all w-full bg-white'
-                        disabled={!form.course_title || !form.level || topics.length === 0}
+                        disabled={!form.course_title || (!hasManagedSprints && !form.level) || topics.length === 0}
                     >
                         <option value="">Select Topic</option>
                         {topics.map((t) => (
@@ -201,12 +231,12 @@ const Upload = () => {
                         ))}
                     </select>
                 )}
-                {topics.length === 0 && form.course_title && form.level && !loadingTopics && (
+                {topics.length === 0 && form.course_title && (hasManagedSprints || form.level) && !loadingTopics && (
                     <p className="text-xs text-amber-600">No topics found. Please add topics to the curriculum first.</p>
                 )}
-            </div>
+            </motion.div>
 
-            <div  className='flex gap-2 flex-col '>
+            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className='flex gap-2 flex-col '>
                 <label htmlFor="" className='text-lg font-medium text-slate-700'>Skill</label>
                 <input 
                     type="text" 
@@ -216,9 +246,9 @@ const Upload = () => {
                     onChange={handleChange}
                     placeholder="e.g. Listening"
                 />
-            </div>
+            </motion.div>
 
-            <div className='flex gap-2 flex-col mt-4'>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className='flex gap-2 flex-col mt-4'>
                 <label htmlFor="" className='text-lg font-medium text-slate-700'>Select File</label>
                 <input ref={fileInputRef} type="file" className='hidden' name='file' onChange={handleChange} />
                 
@@ -249,17 +279,20 @@ const Upload = () => {
                         </button>
                     </div>
                 )}
-            </div>
+            </motion.div>
 
             { loading ? <div className='flex justify-center p-3'>
                 <Loader className="animate-spin text-green-600"/>
             </div> :
-
-            <button type='submit' className='bg-[#059669] text-white text-lg font-bold p-4 w-full rounded-xl mt-4 hover:bg-[#047857] shadow-lg shadow-green-200 transition-all flex items-center justify-center gap-2'>
+            <motion.button 
+                whileHover={{ scale: 1.02 }} 
+                whileTap={{ scale: 0.98 }}
+                type='submit' 
+                className='bg-[#059669] text-white text-lg font-bold p-4 w-full rounded-xl mt-4 hover:bg-[#047857] shadow-lg shadow-green-200 transition-all flex items-center justify-center gap-2'
+            >
                 <CloudUpload className="w-5 h-5"/> Upload Material
-            </button>}
-            
-        </form>
+            </motion.button>}
+        </motion.form>
 
 
         {
@@ -271,7 +304,7 @@ const Upload = () => {
         }
          </div>
 
-    </section>
+    </motion.section>
   )
 }
 
