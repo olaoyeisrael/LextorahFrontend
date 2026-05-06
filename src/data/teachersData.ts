@@ -181,6 +181,6 @@ export const teacherCtaSection = {
     "Join educators who are teaching more effectively with Lextorah AI.",
   buttons: [
     { label: "Log In to Your Account", href: "/login", variant: "secondary" },
-    { label: "Request Institutional Access", href: "/request-access", variant: "outline" },
+    { label: "Request Institutional Access", href: "/request-institution-access", variant: "outline" },
   ],
 };

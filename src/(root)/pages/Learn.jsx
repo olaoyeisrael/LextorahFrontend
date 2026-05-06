@@ -24,7 +24,7 @@ const Learn = () => {
     const [data, setData] = useState(null);
     const user_id = localStorage.getItem('user_id');
     const wsRef = useRef(null);
-    const fullContentRef = useRef(""); // Accumulate transcript content
+    const fullContentRef = useRef({}); // Accumulate transcript content by section index
     
     
     
@@ -92,11 +92,15 @@ const Learn = () => {
     wsRef.current = eventSource;
     
     let currentExplanation = "";
+    let currentSectionIndex = targetSection || activeSection;
 
     eventSource.onmessage = (event) => {
         try {
             // Check if the stream for the current chunk is done
             if (event.data === "[DONE]") {
+                if (currentExplanation && currentSectionIndex) {
+                    fullContentRef.current[currentSectionIndex] = currentExplanation;
+                }
                 eventSource.close();
                 wsRef.current = null;
                 setLoading(false);
@@ -116,6 +120,7 @@ const Learn = () => {
                 setSections(parsed.sections);
             } else if (parsed.type === 'info') {
                 setActiveSection(parsed.section_index);
+                currentSectionIndex = parsed.section_index;
                 setLoading(false);
             } else if (parsed.type === 'explanation' && parsed.text) {
                  setData((prev) => prev ? prev + parsed.text : parsed.text);
@@ -235,8 +240,11 @@ const Learn = () => {
           setShowResults(true);
           // Mark Completion
           if (learningContext) {
-            console.log("Full Content:", fullContentRef.current);
-              try {
+              const orderedTranscript = Object.keys(fullContentRef.current).length > 0 
+                  ? Object.keys(fullContentRef.current).sort((a,b)=>Number(a)-Number(b)).map(k => fullContentRef.current[k]).join('\n\n---\n\n')
+                  : "No content generated.";
+              console.log("Full Content:", orderedTranscript);
+                try {
                   // Save Quiz Result
                   const finalScore = score + (isCorrect ? 1 : 0);
 
@@ -270,7 +278,7 @@ const Learn = () => {
                           level: learningContext.level,
                           course_code: courseCode,
                           topic: learningContext.topic,
-                          material_content: fullContentRef.current || "No content generated.",
+                          material_content: orderedTranscript,
                       })
                   });
               } catch (e) {

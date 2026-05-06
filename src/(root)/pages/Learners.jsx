@@ -30,9 +30,9 @@ export default function LearnersPage() {
         badge="For Learners & Students"
         title="Learn Better. Practise Smarter. Build Confidence."
         primaryButtonText="Try Ms. Lexi® Now"
-        primaryButtonHref="/chat"
+        primaryButtonHref="/login"
         secondaryButtonText="Request Access"
-        secondaryButtonHref="/request-access"
+        secondaryButtonHref="/request-institution-access"
         backgroundImage="/images/student-hero.png"
         align="center"
       />

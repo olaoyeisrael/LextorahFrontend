@@ -1,5 +1,6 @@
 import { useState } from "react";
 import styles from "./RequestAccessForm.module.css";
+import { apiClient } from "../../../utils/api";
 
 interface RadioOption {
   value: string;
@@ -50,6 +51,10 @@ export default function RequestAccessForm({
     consent: "",
   });
 
+  const [submitStatus, setSubmitStatus] = useState<null | 'success' | 'error'>(null);
+  const [submitMessage, setSubmitMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleInputChange = (name: string, value: string) => {
     setFormData({ ...formData, [name]: value });
   };
@@ -73,12 +78,41 @@ export default function RequestAccessForm({
     setFormData({ ...formData, [name]: checked ? "agreed" : "" });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    alert(
-      "Thank you for your request! We will review your application and get back to you soon."
-    );
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+    try {
+      const res = await apiClient('/request-institutional-access', {
+        method: 'POST',
+        body: JSON.stringify(formData),
+      });
+      const json = await res.json();
+      if (res.ok) {
+        setSubmitStatus('success');
+        setSubmitMessage(json.msg || 'Your request has been successfully submitted!');
+        setFormData({
+          accessRole: "",
+          institutionName: "",
+          institutionType: "",
+          country: "",
+          fullName: "",
+          email: "",
+          phone: "",
+          purposeOfAccess: [],
+          institutionAware: "",
+          consent: "",
+        });
+      } else {
+        setSubmitStatus('error');
+        setSubmitMessage(json.detail || 'Something went wrong. Please try again.');
+      }
+    } catch {
+      setSubmitStatus('error');
+      setSubmitMessage('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderSection = (section: FormSection) => {
@@ -266,9 +300,24 @@ export default function RequestAccessForm({
             </div>
           ))}
 
-          <button type="submit" className={styles.submitButton}>
-            {submitButton}
+          <button type="submit" disabled={isSubmitting} className={styles.submitButton}>
+            {isSubmitting ? 'Sending...' : submitButton}
           </button>
+
+          {submitStatus && (
+            <div style={{
+              marginTop: '16px',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              fontWeight: 500,
+              textAlign: 'center',
+              backgroundColor: submitStatus === 'success' ? '#f0fdf4' : '#fef2f2',
+              color: submitStatus === 'success' ? '#15803d' : '#b91c1c',
+              border: `1px solid ${submitStatus === 'success' ? '#bbf7d0' : '#fecaca'}`,
+            }}>
+              {submitMessage}
+            </div>
+          )}
         </form>
       </div>
     </section>

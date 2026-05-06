@@ -13,9 +13,9 @@ export const contactCards = [
     description: "For questions about our programmes, admissions, or services.",
     contacts: [
       { icon: "/icons/mail-2.png", type: "email", value: "admin@lextorah.com" },
-      { icon: "/icons/phone.png", type: "phone", value: "+234 913 488 9722" },
-      { icon: "/icons/whatsapp.png", type: "phone", value: "+234 903 063 8306" },
-      { icon: "/icons/period.png", type: "hours", value: "Monday – Friday\n9:00 AM – 5:00 PM (WAT)" },
+      { icon: "/icons/phone.png", type: "phone", value: "+234 903 003 6306" },
+      { icon: "/icons/whatsapp.png", type: "phone", value: "+234 903 003 6306" },
+      { icon: "/icons/period.png", type: "hours", value: "Monday – Friday\n8:00 AM – 5:00 PM (WAT)" },
     ],
   },
   {
@@ -46,7 +46,8 @@ export const contactCards = [
       {
         type: "address",
         label: "Lextorah Education",
-        value: "4th Floor, 47 Montgomery Road, Yaba,\nLagos, Nigeria",
+        // value: "4th Floor, 42 Montgomery Road, Yaba,\nLagos, Nigeria",
+        value: "42, Montgomery road, 4th floor, Adepate house, Yaba, Lagos, Nigeria",
       },
       { type: "note", value: "(Visits by appointment only)" },
     ],

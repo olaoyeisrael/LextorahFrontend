@@ -26,9 +26,8 @@ export default function ParentsPage() {
       />
 
       {/* Meet Ms Lexi Section */}
-      <div id="ms-lexi">
+      
         <MeetMsLexi />
-      </div>
 
       {/* Subjects, Languages & Exams Section */}
       <SubjectsSupported />
@@ -49,11 +48,13 @@ export default function ParentsPage() {
       </div>
 
       {/* How Ms Lexi Supports Learning */}
+      <div id="ms-lexi">
       <FAQSection
         title="How Ms Lexi® Supports Learning"
         subtitle="Quick answers about how Ms Lexi® helps students"
         faqs={msLexiFAQs}
       />
+      </div>
 
       {/* Data Protection & Privacy */}
       <DataProtection />

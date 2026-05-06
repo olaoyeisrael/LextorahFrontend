@@ -388,6 +388,7 @@ return (
                     description="Get ready for exams"
                     icon={MonitorCheck}
                     color="blue-500"
+                    link="/exam-prep"
                     
                 />
                 <StudentQuickActionCard

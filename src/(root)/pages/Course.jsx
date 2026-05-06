@@ -28,7 +28,7 @@ const Course = () => {
         }
     }, [allSprints.length]);
 
-    // Fetch Syllabus Topics via React Query
+    // Fetch Syllabus Topics 
     const { data: topics = [], isLoading: topicsLoading } = useQuery({
         queryKey: ['courseTopics', activeSprintId],
         queryFn: async () => {
@@ -87,14 +87,45 @@ const Course = () => {
     const filteredTranscripts = selectedTopic 
         ? transcripts.filter(t => {
             if (!t.topic) return false;
-            const transcriptTopicStr = getTopicString(t.topic).toLowerCase();
+
+            // Ensure the transcript belongs to the currently selected course
+            console.log("Selected Topic:", selectedTopic);
+          
+            if (selectedSprint) {
+                if (t.course_code && selectedSprint.course_code) {
+                    console.log('1')
+                    if (t.course_code !== selectedSprint.course_code) return false;
+                } else if (t.course) {
+                    console.log('2')
+                    const sprintName = (selectedSprint.name || "").toLowerCase();
+                    const sprintCode = (selectedSprint.course_code || "").toLowerCase();
+                    const tCourse = t.course.toLowerCase();
+                    const coursePrefix = tCourse.substring(0, 3);
+                    console.log({ sprintName, sprintCode, tCourse, coursePrefix });
+                    
+                    if (!sprintName.includes(tCourse) && !sprintCode.startsWith(coursePrefix)) {
+                        return false;
+                    }
+                }
+            }
+
+            const transcriptTopics = getTopicString(t.topic)
+                .split(',')
+                .map(s => s.trim().toLowerCase())
+                .filter(Boolean);
+
             if (Array.isArray(selectedTopic.topic)) {
-                return selectedTopic.topic.some(part => transcriptTopicStr.includes(part.toLowerCase()));
+                return selectedTopic.topic.some(part => {
+                    const p = part.trim().toLowerCase();
+                    return p && transcriptTopics.includes(p);
+                });
             } else {
-                return transcriptTopicStr.includes(getTopicString(selectedTopic.topic).toLowerCase());
+                const topicStr = getTopicString(selectedTopic.topic).trim().toLowerCase();
+                return topicStr && transcriptTopics.includes(topicStr);
             }
         })
         : [];
+        console.log("Filtered Transcripts =>", filteredTranscripts);
 
     if (loading && selectedSprint) {
         return (

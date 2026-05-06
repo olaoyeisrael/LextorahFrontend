@@ -68,6 +68,8 @@ const Assignment = lazy(() => import('./(root)/pages/Assignment'))
 const PracticeQuestion = lazy(() => import('./(root)/pages/PracticeQuestion'))
 const Mock = lazy(() => import('./(root)/pages/Mock'))
 const HowToUse = lazy(() => import('./(root)/pages/HowToUse'))
+const RequestInstitutionAccess = lazy(() => import('./(root)/pages/InstitutionalAccess'))
+
 
 
 
@@ -100,7 +102,7 @@ function App() {
         <Route path="/terms-of-use" element={<TermsOfUsePage />} />
         <Route path="/institution" element={<InstitutionPage />} />
         <Route path='/starter-pack-access-request' element={<StarterPack/>}/>
-        
+        <Route path='/request-institution-access' element={<RequestInstitutionAccess/>}/>
         <Route path='/book-demo' element={<BookDemo/>}/>
           <Route path="*" element={<NotFound />} />
         </Route>

@@ -172,7 +172,7 @@ export const ctaSection = {
     "If you would like to learn more about Lextorah AI, explore additional resources, or speak with an academic advisor.",
   note: "Lextorah AI is available at no cost, no strings, no credit cards — just a genuine commitment to helping your child succeed.",
   buttons: [
-    { label: "Explore Resources", href: "/resources", variant: "primary" },
+    { label: "Explore Resources", href: "https://www.lextorah-elearning.com", variant: "primary" },
     { label: "Speak with an Advisor", href: "/contact-us", variant: "secondary" },
   ],
 };

@@ -96,7 +96,7 @@
 }
 
 .radioInput:checked + .radioCustom {
-  border-color: var(--primary);
+  border-color: #0b8d7c;
 }
 
 .radioInput:checked + .radioCustom::after {
@@ -107,7 +107,7 @@
   transform: translate(-50%, -50%);
   width: 10px;
   height: 10px;
-  background: var(--primary);
+  background: #0b8d7c;
   border-radius: 50%;
 }
 
@@ -193,8 +193,8 @@
 }
 
 .checkboxInput:checked + .checkboxCustom {
-  border-color: var(--primary);
-  background: var(--primary);
+  border-color: #0b8d7c;
+  background: #0b8d7c;
 }
 
 .checkboxInput:checked + .checkboxCustom::after {
@@ -273,8 +273,8 @@
 
 .input:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-light);
+  border-color: #0b8d7c;
+  box-shadow: 0 0 0 3px rgba(11, 141, 124, 0.2);
 }
 
 .input::placeholder {
@@ -290,7 +290,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--spacing-md) var(--spacing-xl);
-  background: var(--primary);
+  background: #0b8d7c;
   color: var(--white);
   border: none;
   border-radius: var(--radius-md);
@@ -301,7 +301,7 @@
 }
 
 .submitButton:hover {
-  background: var(--primary-dark);
+  background: #086b5e;
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }

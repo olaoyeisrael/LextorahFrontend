@@ -186,8 +186,8 @@ export const learnerCtaSection = {
   description:
     "Join thousands of students who are already learning better, practising smarter, and building confidence with Lextorah AI.",
   buttons: [
-    { label: "Try Ms. Lexi® Now", href: "/chat", variant: "primary" },
-    { label: "Request School Access", href: "/request-access", variant: "secondary" },
+    { label: "Try Ms. Lexi® Now", href: "/login", variant: "primary" },
+    { label: "Request School Access", href: "/request-institution-access", variant: "secondary" },
     { label: "Explore Lextorah Programs", href: "https://www.lextorah-elearning.com", variant: "outline" },
   ],
 };

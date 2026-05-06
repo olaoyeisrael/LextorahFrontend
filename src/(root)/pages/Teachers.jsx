@@ -30,7 +30,7 @@ export default function TeachersPage() {
         title="Lextorah AI Teaching Support Hub"
         subtitle="Teach with clarity. Support students better. Reduce academic overload."
         primaryButtonText="Request Institutional Access"
-        primaryButtonHref="/request-access"
+        primaryButtonHref="/request-institution-access"
         secondaryButtonText="Log In"
         secondaryButtonHref="/login"
         backgroundImage="/images/teacher-hero.png"
