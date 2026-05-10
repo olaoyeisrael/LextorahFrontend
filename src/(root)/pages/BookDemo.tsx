@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { apiClient } from '../../utils/api';
 
 import {
   BookOpen,
@@ -54,20 +55,12 @@ function App() {
     setSubmitStatus('idle');
 
     try {
-      // const { error } = await supabase.from('demo_bookings').insert({
-      //   institution_name: formData.institutionName,
-      //   institution_type: formData.institutionType,
-      //   country: formData.country,
-      //   full_name: formData.fullName,
-      //   email: formData.email,
-      //   phone_number: formData.phoneNumber,
-      //   demo_focus: formData.demoFocus,
-      //   learner_scale: formData.learnerScale,
-      //   demo_format: formData.demoFormat,
-      //   consent: formData.consent,
-      // });
+      const res = await apiClient('/book-demo', {
+        method: 'POST',
+        body: JSON.stringify(formData),
+      });
 
-      // if (error) throw error;
+      if (!res.ok) throw new Error("Failed to submit");
 
       setSubmitStatus('success');
       setFormData({

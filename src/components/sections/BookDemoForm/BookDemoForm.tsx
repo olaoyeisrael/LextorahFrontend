@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiClient } from "../../../utils/api";
 import styles from "./BookDemoForm.module.css";
 
 interface RadioOption {
@@ -37,6 +38,10 @@ export default function BookDemoForm({
   sections,
   submitButton,
 }: BookDemoFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(null);
+  const [submitMessage, setSubmitMessage] = useState<string>("");
+
   const [formData, setFormData] = useState<Record<string, string | string[]>>({
     institutionName: "",
     institutionType: [],
@@ -73,12 +78,41 @@ export default function BookDemoForm({
     setFormData({ ...formData, [name]: checked ? "agreed" : "" });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Demo form submitted:", formData);
-    alert(
-      "Thank you for your demo request! Our team will contact you shortly to schedule your demo."
-    );
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+    try {
+      const res = await apiClient('/book-demo', {
+        method: 'POST',
+        body: JSON.stringify(formData),
+      });
+      const json = await res.json();
+      if (res.ok) {
+        setSubmitStatus('success');
+        setSubmitMessage(json.msg || 'Your request has been successfully submitted!');
+        setFormData({
+          institutionName: "",
+          institutionType: [],
+          country: "",
+          fullName: "",
+          email: "",
+          phone: "",
+          demoFocus: [],
+          learnerScale: "",
+          demoFormat: "",
+          consent: "",
+        });
+      } else {
+        setSubmitStatus('error');
+        setSubmitMessage(json.detail || 'Something went wrong. Please try again.');
+      }
+    } catch {
+      setSubmitStatus('error');
+      setSubmitMessage('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderSection = (section: FormSection) => {
@@ -237,6 +271,18 @@ export default function BookDemoForm({
   return (
     <section className={styles.section}>
       <div className={styles.container}>
+        {submitStatus && (
+          <div style={{
+            padding: '1rem',
+            marginBottom: '1.5rem',
+            borderRadius: '0.5rem',
+            backgroundColor: submitStatus === 'success' ? '#d1fae5' : '#fee2e2',
+            color: submitStatus === 'success' ? '#065f46' : '#991b1b',
+            border: `1px solid ${submitStatus === 'success' ? '#34d399' : '#f87171'}`
+          }}>
+            {submitMessage}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className={styles.form}>
           {sections.map((section) => (
             <div key={section.number} className={styles.formSection}>
@@ -267,22 +313,26 @@ export default function BookDemoForm({
             </div>
           ))}
 
-          <button type="submit" className={styles.submitButton}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m22 2-7 20-4-9-9-4Z" />
-              <path d="M22 2 11 13" />
-            </svg>
-            {submitButton}
+          <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
+            {isSubmitting ? "Submitting..." : (
+              <>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m22 2-7 20-4-9-9-4Z" />
+                  <path d="M22 2 11 13" />
+                </svg>
+                {submitButton}
+              </>
+            )}
           </button>
         </form>
       </div>
