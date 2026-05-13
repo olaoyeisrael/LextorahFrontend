@@ -100,17 +100,6 @@ function App() {
           </p>
         </div>
 
-        {submitStatus === 'success' && (
-          <div className="mb-6 bg-teal-50 border border-teal-200 text-teal-800 px-4 py-3 rounded-lg">
-            Thank you! Your demo request has been submitted successfully.
-          </div>
-        )}
-
-        {submitStatus === 'error' && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
-            There was an error submitting your request. Please try again.
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8">
@@ -348,6 +337,18 @@ function App() {
             </button>
           </div>
         </form>
+
+         {submitStatus === 'success' && (
+          <div className="mb-6 bg-teal-50 border border-teal-200 text-teal-800 px-4 py-3 rounded-lg mt-5">
+            Thank you! Your demo request has been submitted successfully.
+          </div>
+        )}
+
+        {submitStatus === 'error' && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mt-5">
+            There was an error submitting your request. Please try again.
+          </div>
+        )}
       </main>
 
      

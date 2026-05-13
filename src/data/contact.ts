@@ -13,7 +13,7 @@ export const contactCards = [
     description: "For questions about our programmes, admissions, or services.",
     contacts: [
       { icon: "/icons/mail-2.png", type: "email", value: "admin@lextorah.com" },
-      { icon: "/icons/phone.png", type: "phone", value: "+234 903 003 6306" },
+      { icon: "/icons/phone.png", type: "phone", value: "+234 913 488 9722" },
       { icon: "/icons/whatsapp.png", type: "phone", value: "+234 903 003 6306" },
       { icon: "/icons/period.png", type: "hours", value: "Monday – Friday\n8:00 AM – 5:00 PM (WAT)" },
     ],
