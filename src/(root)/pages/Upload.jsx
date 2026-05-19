@@ -4,7 +4,7 @@ import { isAdmin, getToken } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
-import { COURSE_GROUPS, getLevelsForCourse } from '../../utils/courseData';
+import { COURSE_CODES } from '../../utils/courseData';
 
 
 import { apiClient } from '../../utils/api';
@@ -36,16 +36,14 @@ const Upload = () => {
     const [topics, setTopics] = useState([]);
     const [loadingTopics, setLoadingTopics] = useState(false);
     
-    // Fetch topics when course or level changes
+    // Fetch topics when course changes
     useEffect(() => {
-        const shouldFetch = hasManagedSprints ? !!form.course_title : (form.course_title && form.level);
+        const shouldFetch = !!form.course_title;
         if (shouldFetch) {
             const fetchTopics = async () => {
                 setLoadingTopics(true);
                 try {
-                    const queryStr = hasManagedSprints
-                        ? `/curriculum?course_code=${encodeURIComponent(form.course_title)}`
-                        : `/curriculum?course=${encodeURIComponent(form.course_title)}&level=${encodeURIComponent(form.level)}`;
+                    const queryStr = `/curriculum?course_code=${encodeURIComponent(form.course_title)}`;
                     const res = await apiClient(queryStr);
                     const data = await res.json();
                     if (data.curriculum) {
@@ -63,13 +61,16 @@ const Upload = () => {
         }
     }, [form.course_title, form.level]);
 
-    // When course changes, reset level and topic
+    // When course changes, reset topic and extract level
     const handleCourseChange = (e) => {
+        const selectedCode = e.target.value;
+        const parts = selectedCode.split('/');
+        const extractedLevel = parts.length >= 2 ? parts[1] : '';
         setForm({
             ...form,
-            course_title: e.target.value,
-            level: '', // Reset level when course changes
-            topic: ''  // Reset topic when course changes
+            course_title: selectedCode,
+            level: extractedLevel, 
+            topic: ''  
         });
         setTopics([]); // Clear old topics
     }
@@ -96,7 +97,7 @@ const Upload = () => {
 
     const handleSubmit = async (e) =>{
         e.preventDefault()
-        if (!form.file || !form.course_title || !form.level || !form.topic) {
+        if (!form.file || !form.course_title || !form.topic) {
              setMes("Please fill in all fields.");
              return;
         }
@@ -182,34 +183,13 @@ const Upload = () => {
                             <option key={code} value={code}>{code}</option>
                         ))
                     ) : (
-                        COURSE_GROUPS.map((group, idx) => (
-                            <optgroup key={idx} label={group.groupName}>
-                                {group.courses.map(course => (
-                                    <option key={course} value={course}>{course}</option>
-                                ))}
-                            </optgroup>
+                        COURSE_CODES.map(code => (
+                            <option key={code} value={code}>{code}</option>
                         ))
                     )}
                 </select>
             </motion.div>
 
-            {!hasManagedSprints && (
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className='flex gap-2 flex-col '>
-                <label htmlFor="" className='text-lg font-medium text-slate-700'>Level</label>
-                <select 
-                    name="level" 
-                    className='border border-slate-300 rounded-xl p-3 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all w-full bg-white' 
-                    value={form.level} 
-                    onChange={handleChange}
-                    disabled={!form.course_title}
-                >
-                    <option value="">Select Level</option>
-                    {form.course_title && getLevelsForCourse(form.course_title).map(level => (
-                        <option key={level} value={level}>{level}</option>
-                    ))}
-                </select>
-            </motion.div>
-            )}
 
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className='flex gap-2 flex-col '>
                 <label htmlFor="" className='text-lg font-medium text-slate-700'>Topic/Module</label>
@@ -223,7 +203,7 @@ const Upload = () => {
                         value={form.topic} 
                         onChange={handleChange}
                         className='border border-slate-300 rounded-xl p-3 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all w-full bg-white'
-                        disabled={!form.course_title || (!hasManagedSprints && !form.level) || topics.length === 0}
+                        disabled={!form.course_title || topics.length === 0}
                     >
                         <option value="">Select Topic</option>
                         {topics.map((t) => (
@@ -231,7 +211,7 @@ const Upload = () => {
                         ))}
                     </select>
                 )}
-                {topics.length === 0 && form.course_title && (hasManagedSprints || form.level) && !loadingTopics && (
+                {topics.length === 0 && form.course_title && !loadingTopics && (
                     <p className="text-xs text-amber-600">No topics found. Please add topics to the curriculum first.</p>
                 )}
             </motion.div>

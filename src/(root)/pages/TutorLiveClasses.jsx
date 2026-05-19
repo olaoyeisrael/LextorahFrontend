@@ -1,6 +1,20 @@
 import { Circle, BookOpen } from 'lucide-react'
 import React, { useState } from 'react'
+import { motion } from 'framer-motion'
 import SprintSyllabusForm from '../../components/SprintSyllabusForm'
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 }
+}
 
 const TutorLiveClass = [{
     course: "German",
@@ -74,7 +88,11 @@ function TutorLiveClasses() {
   const [showSyllabusForm, setShowSyllabusForm] = useState(false);
 
   return (
-    <section className="max-w-6xl mx-auto">
+    <motion.section 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-6xl mx-auto p-4 md:p-8"
+    >
         <div className='mb-6 flex justify-between items-start'>
             <div>
                 <h1 className="text-2xl font-InterBold">Live Classes</h1>
@@ -103,9 +121,13 @@ function TutorLiveClasses() {
                             <th className="py-3">Status</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <motion.tbody
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                    >
                         {TutorLiveClass.map((cls, index) => (
-                            <tr key={index} className="border-b border-[#E1E7EF] hover:bg-gray-50 transition-colors">
+                            <motion.tr variants={itemVariants} key={index} className="border-b border-[#E1E7EF] hover:bg-gray-50 transition-colors">
                                 <td className="py-3">{cls.course}</td>
                                 <td className="py-3">{cls.level}</td>
                                 <td className="py-3">{cls.Date}</td>
@@ -128,15 +150,15 @@ function TutorLiveClasses() {
                                         </td>
                                 )}
                                 
-                            </tr>
+                            </motion.tr>
                         ))}
-                    </tbody>
+                    </motion.tbody>
                 </table>
                 
             </div>
         
   
-    </section>
+    </motion.section>
   )
 }
 

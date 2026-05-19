@@ -26,14 +26,17 @@ const adminLinks = [
 
 const tutorLinks = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-    { icon: CheckCircle, label: 'Assign Topic', path: '/assign-topics' },
-    { icon: BookOpen, label: 'Curriculum', path: '/curriculum' },
-    { icon: BookOpen, label: 'Assignments', path: '/assignment' },
+    // { icon: CheckCircle, label: 'Assign Topic', path: '/assign-topics' },
+    { icon: CheckCircle, label: 'Curriculum', path: '/tutor-curriculum' },
+    // { icon: BookOpen, label: 'Curriculum', path: '/curriculum' },
+    // { icon: BookOpen, label: 'Assignments', path: '/assignment' },
+    { icon: BookOpen, label: 'Assessments', path: '/assessments' },
     { icon: Video, label: 'Upload Materials', path: '/upload' },
-      { icon: CheckCircle, label: 'Live Classes', path: '/tutor-live-classes' },
-    { icon: ClipboardList, label: 'AI Alerts', path: '/ai-report' },
-    { icon: CheckCircle, label: 'Student Performance', path: '/student-performance' },
-    { icon: GraduationCap, label: 'Exam Prep', path: '/exam-prep' },
+      // { icon: CheckCircle, label: 'Live Classes', path: '/tutor-live-classes' },
+    // { icon: ClipboardList, label: 'AI Alerts', path: '/ai-report' },
+    { icon: ClipboardList, label: 'Analytics', path: '/analytics' },
+    // { icon: CheckCircle, label: 'Student Performance', path: '/student-performance' },
+    // { icon: GraduationCap, label: 'Exam Prep', path: '/exam-prep' },
       { icon: HelpCircle, label: 'How to Use', path: '/how-to-use' },
     
 ];

@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { apiClient } from '../../utils/api';
 import { FileUp, Send, User, CheckCircle2, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { COURSE_CODES } from '../../utils/courseData';
 
 function Assignment() {
   const role = useSelector((state) => state.user.role);
@@ -19,6 +20,7 @@ function Assignment() {
   const [courseCode, setCourseCode] = useState('');
   const [questionText, setQuestionText] = useState('');
   const [file, setFile] = useState(null);
+  const [deadline, setDeadline] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -39,15 +41,23 @@ function Assignment() {
     setLoading(true);
     try {
       let url = '/assignments';
-      // For student, pass the array of managedCourseCodes if they exist
+      const params = new URLSearchParams();
+      
       if (role === 'student' && managedCourseCodes && managedCourseCodes.length > 0) {
-         const joinedCodes = managedCourseCodes.join(',');
-         url += `?course_code=${encodeURIComponent(joinedCodes)}`;
+         params.append('course_code', managedCourseCodes.join(','));
+      } else if (role === 'tutor') {
+         params.append('tutor_id', user_id);
+      }
+      
+      const queryString = params.toString();
+      if (queryString) {
+          url += `?${queryString}`;
       }
       const response = await apiClient(url);
       const data = await response.json();
       if (data.assignments) {
         setAssignments(data.assignments);
+        console.log("Fetched assignments:", data.assignments);
       }
     } catch (error) {
       console.error("Error fetching assignments", error);
@@ -86,6 +96,9 @@ function Assignment() {
       formData.append('course_code', courseCode);
       formData.append('question_text', questionText);
       formData.append('tutor_id', user_id);
+      if (deadline) {
+        formData.append('deadline', deadline);
+      }
       if (file) {
         formData.append('file', file);
       }
@@ -97,7 +110,7 @@ function Assignment() {
       const data = await response.json();
       if (response.ok) {
         setMessage('Assignment created successfully!');
-        setTopic(''); setCourseCode(''); setQuestionText(''); setFile(null);
+        setTopic(''); setCourseCode(''); setQuestionText(''); setFile(null); setDeadline('');
         fetchAssignments();
       } else {
         setMessage(data.detail || 'Failed to create assignment.');
@@ -192,9 +205,20 @@ function Assignment() {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-600 mb-2">Course Code</label>
-                  <input type="text" value={courseCode} onChange={e => setCourseCode(e.target.value)} required
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    placeholder="e.g. FRE/A1/WD/177" />
+                  <select value={courseCode} onChange={e => setCourseCode(e.target.value)} required
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-white"
+                  >
+                    <option value="">Select Course Code</option>
+                    {role === 'admin' 
+                      ? COURSE_CODES.map(code => <option key={code} value={code}>{code}</option>)
+                      : (managedCourseCodes || []).map(code => <option key={code} value={code}>{code}</option>)
+                    }
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-600 mb-2">Submission Deadline (Optional)</label>
+                  <input type="datetime-local" value={deadline} onChange={e => setDeadline(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
                 </div>
               </div>
               <div>
@@ -241,6 +265,9 @@ function Assignment() {
                            <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">{assignment.course_code}</span>
                            <h3 className="text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{assignment.topic}</h3>
                          </div>
+                         {assignment.deadline && (
+                           <p className="text-xs font-semibold text-rose-500 mb-2">Deadline: {new Date(assignment.deadline).toLocaleString()}</p>
+                         )}
                          <p className="text-slate-500 text-sm line-clamp-2 max-w-3xl">{assignment.question_text}</p>
                        </div>
                        <div className="text-slate-400 group-hover:text-blue-500 transition-colors">
@@ -298,9 +325,14 @@ function Assignment() {
                            ) : (
                              <div className="mt-8">
                                <h4 className="font-bold text-slate-700 mb-4 border-b pb-2">Submit Your Answer</h4>
+                               {assignment.deadline && new Date() > new Date(assignment.deadline) ? (
+                                  <p className="text-rose-500 font-bold p-4 bg-rose-50 rounded-xl border border-rose-100">
+                                    The deadline for this assignment has passed. Submissions are closed.
+                                  </p>
+                               ) : (
                                <form onSubmit={(e) => handleStudentSubmit(assignment._id, e)} className="space-y-5">
                                   <div>
-                                    <textarea value={answeringFor === assignment._id ? answerText : ''} onChange={e => setAnswerText(e.target.value)} rows="4"
+                                    <textarea value={answeringFor === assignment._id ? answerText : ''} onChange={e => { setAnswerText(e.target.value); setAnsweringFor(assignment._id); }} rows="4"
                                       className="w-full px-4 py-3 rounded-xl border border-slate-200  focus:ring-emerald-500 outline-none transition-all resize-none shadow-sm"
                                       placeholder="Write your answer here... (Optional if attaching a file)" />
                                   </div>
@@ -314,6 +346,7 @@ function Assignment() {
                                     {submitting ? 'Submitting...' : <>Submit Answer <Send className="w-4 h-4 ml-2" /></>}
                                   </button>
                                </form>
+                               )}
                              </div>
                            )}
                         </motion.div>

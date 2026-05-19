@@ -69,6 +69,9 @@ const PracticeQuestion = lazy(() => import('./(root)/pages/PracticeQuestion'))
 const Mock = lazy(() => import('./(root)/pages/Mock'))
 const HowToUse = lazy(() => import('./(root)/pages/HowToUse'))
 const RequestInstitutionAccess = lazy(() => import('./(root)/pages/InstitutionalAccess'))
+const TutorCurriculum = lazy(() => import('./(root)/pages/TutorCurriculum'))
+const Assessments = lazy(() => import('./(root)/pages/Assessments'))
+const Analytics = lazy(() => import('./(root)/pages/Analytics'))
 
 
 
@@ -146,6 +149,9 @@ function App() {
           <Route path='/mock-exams' element={<Mock/>}/>
           <Route path='/assignment' element={<Assignment />} />
           <Route path='/how-to-use' element={<HowToUse />} />
+          <Route path='/tutor-curriculum' element={<TutorCurriculum />} />
+          <Route path='/assessments' element={<Assessments />} />
+          <Route path='/analytics' element={<Analytics />} />
 
 
         </Route>

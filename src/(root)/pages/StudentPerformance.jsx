@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { BarChart, Search, FileText, Eye, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { COURSE_GROUPS, getLevelsForCourse } from '../../utils/courseData';
+import { COURSE_CODES } from '../../utils/courseData';
 import { apiClient } from '../../utils/api';
 import { isAdmin } from '../../utils/auth';
 
@@ -45,8 +45,10 @@ const StudentPerformance = () => {
 
     const handleFilterChange = (e) => {
         if (e.target.name === 'course') {
-            const levels = getLevelsForCourse(e.target.value);
-            setFilters({ ...filters, course: e.target.value, level: '' });
+            const selectedCode = e.target.value;
+            const parts = selectedCode.split('/');
+            const extractedLevel = parts.length >= 2 ? parts[1] : '';
+            setFilters({ ...filters, course: selectedCode, level: extractedLevel });
         } else {
             setFilters({ ...filters, [e.target.name]: e.target.value });
         }
@@ -58,15 +60,9 @@ const StudentPerformance = () => {
 
         let matchesCourse = true;
         if (filterCourse) {
-            if (hasManagedSprints) {
-                // Tutor mode: filter selected a course_code, match against item.course_code
-                const itemCode = item.course_code ? item.course_code.toLowerCase().trim() : '';
-                matchesCourse = itemCode === filterCourse;
-            } else {
-                // Admin/default: match against course_title
-                const itemCourse = item.course_title ? item.course_title.toLowerCase().trim() : '';
-                matchesCourse = itemCourse === filterCourse;
-            }
+            const itemCode = item.course_code ? item.course_code.toLowerCase().trim() : '';
+            const itemCourse = item.course_title ? item.course_title.toLowerCase().trim() : '';
+            matchesCourse = itemCode === filterCourse || itemCourse === filterCourse;
         }
         const matchesLevel = filterLevel ? (item.level || '').toLowerCase().trim() === filterLevel : true;
         
@@ -96,29 +92,12 @@ const StudentPerformance = () => {
                             <option key={code} value={code}>{code}</option>
                         ))
                     ) : (
-                        COURSE_GROUPS.map((group, idx) => (
-                            <optgroup key={idx} label={group.groupName}>
-                                {group.courses.map(course => (
-                                    <option key={course} value={course}>{course}</option>
-                                ))}
-                            </optgroup>
+                        COURSE_CODES.map(code => (
+                            <option key={code} value={code}>{code}</option>
                         ))
                     )}
                 </select>
-                {!hasManagedSprints && (
-                <select 
-                    name="level" 
-                    value={filters.level} 
-                    onChange={handleFilterChange}
-                    disabled={!filters.course}
-                    className="p-2 border border-slate-200 rounded-lg text-sm min-w-[150px] focus:ring-green-500 focus:border-green-500 outline-none disabled:bg-slate-50 disabled:text-slate-400"
-                >
-                    <option value="">All Levels</option>
-                    {filters.course && getLevelsForCourse(filters.course).map(level => (
-                        <option key={level} value={level}>{level}</option>
-                    ))}
-                </select>
-                )}
+
                 {(filters.course || filters.level) && (
                     <button 
                         onClick={() => setFilters({ course: '', level: '' })}

@@ -1,5 +1,6 @@
 import { BookOpen, Calendar, Clock, AlertCircle } from 'lucide-react'
 import React, { useState } from 'react'
+import { motion } from 'framer-motion'
 import { useSelector } from 'react-redux'
 import SprintSyllabusForm from '../../components/SprintSyllabusForm'
 
@@ -15,7 +16,11 @@ function AssignTopic() {
     console.log(selectedSprint)
 
     return (
-        <section className="max-w-6xl mx-auto space-y-6">
+        <motion.section 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-6xl mx-auto space-y-6"
+        >
             <div className='flex justify-between items-start'>
                 <div>
                     <h1 className="text-2xl font-InterBold">Assign Topics & Syllabus</h1>
@@ -77,7 +82,7 @@ function AssignTopic() {
                 </div>
             )}
     
-        </section>
+        </motion.section>
     )
 }
 

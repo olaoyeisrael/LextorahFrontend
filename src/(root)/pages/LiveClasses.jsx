@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Calendar, Clock, Link, Save, Video, Edit2, Check, X, Trash2 } from 'lucide-react';
-import { COURSE_GROUPS, getLevelsForCourse } from '../../utils/courseData';
+import { COURSE_CODES } from '../../utils/courseData';
 
 import { apiClient } from '../../utils/api';
 
@@ -12,8 +12,8 @@ const LiveClasses = () => {
     
     // Form State
     const [formData, setFormData] = useState({
-        course: 'German',
-        level: 'A1',
+        course: COURSE_CODES[0],
+        level: '',
         week: 'Week 1',
         topic: '',
         date: '',
@@ -27,7 +27,7 @@ const LiveClasses = () => {
 
     const fetchClasses = async () => {
         try {
-            const res = await apiClient(`/live_classes?course=${formData.course.toLowerCase()}&level=${formData.level.toLowerCase()}`);
+            const res = await apiClient(`/live_classes?course=${encodeURIComponent(formData.course.toLowerCase())}&level=${encodeURIComponent(formData.level.toLowerCase())}`);
             const data = await res.json();
             setSchedule(data.live_classes || []);
         } catch (err) {
@@ -43,8 +43,10 @@ const LiveClasses = () => {
 
     const handleInputChange = (e) => {
         if (e.target.name === 'course') {
-            const levels = getLevelsForCourse(e.target.value);
-            setFormData({ ...formData, course: e.target.value, level: levels[0] || '' });
+            const selectedCode = e.target.value;
+            const parts = selectedCode.split('/');
+            const extractedLevel = parts.length >= 2 ? parts[1] : '';
+            setFormData({ ...formData, course: selectedCode, level: extractedLevel });
         } else {
             setFormData({ ...formData, [e.target.name]: e.target.value });
         }
@@ -144,30 +146,14 @@ const LiveClasses = () => {
               </h2>
               
               <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                      <div>
-                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Course</label>
-                          <select name="course" value={formData.course} onChange={handleInputChange} className="w-full p-2 rounded-lg border border-slate-200 text-sm">
-                              {COURSE_GROUPS.map((group, idx) => (
-                                  <optgroup key={idx} label={group.groupName}>
-                                      {group.courses.map(course => (
-                                          <option key={course} value={course}>{course}</option>
-                                      ))}
-                                  </optgroup>
-                              ))}
-                          </select>
-                      </div>
-                      <div>
-                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Level</label>
-                          <select name="level" value={formData.level} onChange={handleInputChange} className="w-full p-2 rounded-lg border border-slate-200 text-sm">
-                              {getLevelsForCourse(formData.course).map(level => (
-                                  <option key={level} value={level}>{level}</option>
-                              ))}
-                          </select>
-                      </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
+                  <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Course</label>
+                      <select name="course" value={formData.course} onChange={handleInputChange} className="w-full p-2 rounded-lg border border-slate-200 text-sm">
+                          {COURSE_CODES.map(code => (
+                              <option key={code} value={code}>{code}</option>
+                          ))}
+                      </select>
+                  </div>                  <div className="grid grid-cols-2 gap-4">
                        <div>
                           <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Week</label>
                           <select name="week" value={formData.week} onChange={handleInputChange} className="w-full p-2 rounded-lg border border-slate-200 text-sm">

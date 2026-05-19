@@ -171,7 +171,7 @@ return (
 
              <TutorDashboard 
                 title="Students at Risk" 
-                value= '2'
+                value= '0'
                 icon={TriangleAlert} 
                 color="red-500"
             />
@@ -258,15 +258,24 @@ return (
                         </tr>
                     </thead>
                     <tbody>
-                        {classData.map((cls, index) => (
-                            <tr key={index} className="border-b border-[#E1E7EF] transition-colors">
-                                <td className="py-3">{cls.course}</td>
-                                <td className="py-3">{cls.level}</td>
-                                <td className="py-3">{cls.students}</td>
-                                <td className="py-3">{cls.Alerts}</td>
+                        {(user?.managedSprints || user?.user?.managed_sprints || []).map((sprint, index) => {
+                            const parts = sprint.course_code?.split('/') || [];
+                            const level = sprint.course_level || parts[1] || 'N/A';
+                            const studentsCount = sprint.students?.length || 0;
+                            return (
+                                <tr key={sprint.id || index} className="border-b border-[#E1E7EF] transition-colors hover:bg-slate-50">
+                                    <td className="py-3 font-medium text-slate-800">{sprint.name}</td>
+                                    <td className="py-3 text-slate-600">{level}</td>
+                                    <td className="py-3 text-slate-600">{studentsCount}</td>
+                                    <td className="py-3 text-slate-600 text-sm"><span className="px-2 py-1 bg-green-100 text-green-700 rounded-full">No alerts</span></td>
+                                </tr>
+                            );
+                        })}
+                        {(!user?.managedSprints && !user?.user?.managed_sprints) || (user?.managedSprints?.length === 0 && user?.user?.managed_sprints?.length === 0) ? (
+                            <tr>
+                                <td colSpan="4" className="py-6 text-center text-slate-500">No classes assigned yet.</td>
                             </tr>
-                        ))}
-                    
+                        ) : null}
                     </tbody>
                 </table>
         </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { isAdmin, getToken } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
 import { Plus, BookOpen, Loader2, Trash2, FileText, Edit2, X, Check } from 'lucide-react';
-import { COURSE_GROUPS, getLevelsForCourse } from '../../utils/courseData';
+import { COURSE_CODES } from '../../utils/courseData';
 import { useSelector } from 'react-redux';
 import { isTutor } from '../../utils/auth';
 
@@ -31,7 +31,7 @@ const Curriculum = () => {
     const sprintCourseCodes = [...new Set(managedSprints.map(s => s.course_code || '').filter(Boolean))];
 
     // Defaults
-    const defaultCourse = hasManagedSprints && sprintCourseCodes.length > 0 ? sprintCourseCodes[0] : 'German';
+    const defaultCourse = hasManagedSprints && sprintCourseCodes.length > 0 ? sprintCourseCodes[0] : COURSE_CODES[0];
     const defaultLevel = hasManagedSprints ? '' : 'A1';
 
     // State
@@ -58,9 +58,7 @@ const Curriculum = () => {
         setLoading(true);
         try {
             // Tutors filter by course_code, others by course+level
-            const queryStr = hasManagedSprints
-                ? `/curriculum?course_code=${encodeURIComponent(filters.course)}`
-                : `/curriculum?course=${encodeURIComponent(filters.course)}&level=${encodeURIComponent(filters.level)}`;
+            const queryStr = `/curriculum?course_code=${encodeURIComponent(filters.course)}`;
             const res = await apiClient(queryStr);
             const data = await res.json();
             if (data.curriculum) {
@@ -79,8 +77,10 @@ const Curriculum = () => {
 
     const handleChange = (e) => {
         if (e.target.name === 'course') {
-            const levels = getLevelsForCourse(e.target.value);
-            setForm({ ...form, course: e.target.value, level: levels[0] || '' });
+            const selectedCode = e.target.value;
+            const parts = selectedCode.split('/');
+            const extractedLevel = parts.length >= 2 ? parts[1] : '';
+            setForm({ ...form, course: selectedCode, level: extractedLevel });
         } else {
             setForm({ ...form, [e.target.name]: e.target.value });
         }
@@ -109,12 +109,10 @@ const Curriculum = () => {
 
     const handleFilterChange = (e) => {
         if (e.target.name === 'course') {
-            if (hasManagedSprints) {
-                setFilters({ ...filters, course: e.target.value, level: '' });
-            } else {
-                const levels = getLevelsForCourse(e.target.value);
-                setFilters({ ...filters, course: e.target.value, level: levels[0] || '' });
-            }
+            const selectedCode = e.target.value;
+            const parts = selectedCode.split('/');
+            const extractedLevel = parts.length >= 2 ? parts[1] : '';
+            setFilters({ ...filters, course: selectedCode, level: extractedLevel });
         } else {
             setFilters({ ...filters, [e.target.name]: e.target.value });
         }
@@ -132,7 +130,7 @@ const Curriculum = () => {
             // Week is deprecated, we could send None or derived
             week: idx + 1, // sending pseudo-week/module number if needed
             topic: typeof t === 'string' ? t : t.topic,
-            course_code: typeof t === 'string' ? "" : (t.course_code || ""),
+            course_code: form.course,
             description: null
         })).filter(t => t.topic.trim() !== ""); // Filter empty
 
@@ -241,31 +239,12 @@ const Curriculum = () => {
                                         <option key={code} value={code}>{code}</option>
                                     ))
                                 ) : (
-                                    COURSE_GROUPS.map((group, idx) => (
-                                        <optgroup key={idx} label={group.groupName}>
-                                            {group.courses.map(course => (
-                                                <option key={course} value={course}>{course}</option>
-                                            ))}
-                                        </optgroup>
+                                    COURSE_CODES.map(code => (
+                                        <option key={code} value={code}>{code}</option>
                                     ))
                                 )}
                             </select>
                         </div>
-                        {!hasManagedSprints && (
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Level</label>
-                                <select
-                                    name="level" value={form.level} onChange={handleChange}
-                                    className="w-full p-2 border border-slate-200 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                >
-                                    {getLevelsForCourse(form.course).map(level => (
-                                        <option key={level} value={level}>{level}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                        )}
 
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">Modules & Topics</label>
@@ -283,13 +262,6 @@ const Curriculum = () => {
                                                 onChange={(e) => handleTopicChange(idx, 'topic', e.target.value)}
                                                 className="w-full p-2 border border-slate-200 rounded-lg focus:ring-green-500 focus:border-green-500 text-sm"
                                                 required
-                                            />
-                                            <input 
-                                                type="text" 
-                                                placeholder="Course Code (e.g. GER-101) - Optional" 
-                                                value={typeof t === 'string' ? '' : (t.course_code || '')} 
-                                                onChange={(e) => handleTopicChange(idx, 'course_code', e.target.value)}
-                                                className="w-full p-2 border border-slate-200 rounded-lg focus:ring-green-500 focus:border-green-500 text-sm"
                                             />
                                         </div>
                                         {topicList.length > 1 && (
@@ -347,23 +319,11 @@ const Curriculum = () => {
                                             <option key={code} value={code}>{code}</option>
                                         ))
                                     ) : (
-                                        COURSE_GROUPS.map((group, idx) => (
-                                            <optgroup key={idx} label={group.groupName}>
-                                                {group.courses.map(course => (
-                                                    <option key={course} value={course}>{course}</option>
-                                                ))}
-                                            </optgroup>
+                                        COURSE_CODES.map(code => (
+                                            <option key={code} value={code}>{code}</option>
                                         ))
                                     )}
                                 </select>
-                                {!hasManagedSprints && (<select 
-                                    name="level" value={filters.level} onChange={handleFilterChange}
-                                    className="p-2 border border-slate-200 rounded-lg text-sm"
-                                >
-                                    {getLevelsForCourse(filters.course).map(level => (
-                                        <option key={level} value={level}>{level}</option>
-                                    ))}
-                                </select>)}
                             </div>
                         </div>
 
@@ -395,13 +355,6 @@ const Curriculum = () => {
                                                             onChange={e => setEditForm({...editForm, topic: e.target.value})}
                                                             className="flex-1 p-2 border border-blue-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm"
                                                             placeholder="Topic Name"
-                                                        />
-                                                        <input 
-                                                            type="text" 
-                                                            value={editForm.course_code} 
-                                                            onChange={e => setEditForm({...editForm, course_code: e.target.value})}
-                                                            className="w-1/3 p-2 border border-blue-300 rounded focus:ring-blue-500 focus:border-blue-500 text-sm"
-                                                            placeholder="Course Code"
                                                         />
                                                     </div>
                                                 ) : (

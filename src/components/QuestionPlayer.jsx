@@ -179,6 +179,11 @@ function QuestionPlayer({ questions = [], timed = false, timeLimit = 1800, onCom
               {currentQuestion?.type === 'fill_in_gap' ? 'Fill in the Gap' : 'Multiple Choice'}
             </span>
           </div>
+          {currentQuestion?.instruction && (
+            <div className="mb-6 p-5 rounded-xl bg-slate-50 border border-slate-100">
+               <p className="text-slate-600 text-sm whitespace-pre-wrap leading-relaxed font-medium">{currentQuestion.instruction}</p>
+            </div>
+          )}
 
           <h3 className="text-lg font-bold text-slate-800 mb-6 leading-relaxed">{currentQuestion?.question}</h3>
 
