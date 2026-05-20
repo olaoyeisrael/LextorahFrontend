@@ -63,6 +63,7 @@ const Curriculum = () => {
             const data = await res.json();
             if (data.curriculum) {
                 setItems(data.curriculum);
+                console.log("Fetched Curriculum: ", data.curriculum);
             }
         } catch (err) {
             console.error(err);

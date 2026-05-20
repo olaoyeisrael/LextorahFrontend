@@ -43,6 +43,7 @@ const Learn = () => {
 
     // Destructure course context from LearnSelection
     const { activeSprintId, courseName, courseCode, topicObj } = location.state || {};
+    console.log("Learn Page Context:", { activeSprintId, courseName, courseCode, topicObj });
 
     const [currentTopic, setCurrentTopic] = useState(topicObj ? topicObj.topic : null);
     const [currentTopicIndex, setCurrentTopicIndex] = useState(topicObj ? topicObj.session_number : 1);
@@ -84,7 +85,7 @@ const Learn = () => {
     }
 
     const BASE_URL = import.meta.env.VITE_BACKEND_URL;
-    let url = `${BASE_URL}/classroom/next/${user_id}?topic=${encodeURIComponent(currentTopic)}&sprint_id=${activeSprintId}`;
+    let url = `${BASE_URL}/classroom/next/${user_id}?topic=${encodeURIComponent(currentTopic)}&sprint_id=${activeSprintId}&course_code=${encodeURIComponent(courseCode || '')}`;
     if (targetSection !== null) {
         url += `&section=${targetSection}`;
     }
