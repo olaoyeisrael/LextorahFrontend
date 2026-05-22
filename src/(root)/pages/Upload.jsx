@@ -4,7 +4,7 @@ import { isAdmin, getToken } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
-import { COURSE_CODES } from '../../utils/courseData';
+import { COURSE_CODES, getSubjectGroup } from '../../utils/courseData';
 
 
 import { apiClient } from '../../utils/api';
@@ -15,6 +15,19 @@ const Upload = () => {
     const managedSprints = userState?.managedSprints || [];
     const hasManagedSprints = managedSprints.length > 0;
     const sprintCourseCodes = [...new Set(managedSprints.map(s => s.course_code || '').filter(Boolean))];
+
+    // Group active codes dynamically by language/subject group
+    const codesToGroup = hasManagedSprints ? sprintCourseCodes : COURSE_CODES;
+    const groupedCodes = React.useMemo(() => {
+        return codesToGroup.reduce((acc, code) => {
+            const groupName = getSubjectGroup(code);
+            if (!acc[groupName]) {
+                acc[groupName] = [];
+            }
+            acc[groupName].push(code);
+            return acc;
+        }, {});
+    }, [codesToGroup]);
 
     useEffect(() => {
         // if (!isAdmin()) {
@@ -178,15 +191,13 @@ const Upload = () => {
                     onChange={handleCourseChange}
                 >
                     <option value="">Select Course</option>
-                    {hasManagedSprints ? (
-                        sprintCourseCodes.map(code => (
-                            <option key={code} value={code}>{code}</option>
-                        ))
-                    ) : (
-                        COURSE_CODES.map(code => (
-                            <option key={code} value={code}>{code}</option>
-                        ))
-                    )}
+                    {Object.entries(groupedCodes).map(([groupHeader, codes]) => (
+                        <optgroup key={groupHeader} label={groupHeader}>
+                            {codes.map(code => (
+                                <option key={code} value={code}>{code}</option>
+                            ))}
+                        </optgroup>
+                    ))}
                 </select>
             </motion.div>
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { isAdmin, getToken } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
 import { Plus, BookOpen, Loader2, Trash2, FileText, Edit2, X, Check } from 'lucide-react';
-import { COURSE_CODES } from '../../utils/courseData';
+import { COURSE_CODES, getSubjectGroup } from '../../utils/courseData';
 import { useSelector } from 'react-redux';
 import { isTutor } from '../../utils/auth';
 
@@ -30,6 +30,19 @@ const Curriculum = () => {
     // Build unique course codes from managed sprints
     const sprintCourseCodes = [...new Set(managedSprints.map(s => s.course_code || '').filter(Boolean))];
 
+    // Group active codes dynamically by language/subject group
+    const codesToGroup = hasManagedSprints ? sprintCourseCodes : COURSE_CODES;
+    const groupedCodes = React.useMemo(() => {
+        return codesToGroup.reduce((acc, code) => {
+            const groupName = getSubjectGroup(code);
+            if (!acc[groupName]) {
+                acc[groupName] = [];
+            }
+            acc[groupName].push(code);
+            return acc;
+        }, {});
+    }, [codesToGroup]);
+
     // Defaults
     const defaultCourse = hasManagedSprints && sprintCourseCodes.length > 0 ? sprintCourseCodes[0] : COURSE_CODES[0];
     const defaultLevel = hasManagedSprints ? '' : 'A1';
@@ -38,6 +51,7 @@ const Curriculum = () => {
     const [loading, setLoading] = useState(false);
     const [items, setItems] = useState([]);
     const [filters, setFilters] = useState({ course: defaultCourse, level: defaultLevel });
+    const [loadingButton, setLoadingButton] = useState(false);
     
     const [form, setForm] = useState({
         course: defaultCourse,
@@ -123,6 +137,7 @@ const Curriculum = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
+        setLoadingButton(true);
 
         // Prepare batch
         const batch = topicList.map((t, idx) => ({
@@ -152,13 +167,16 @@ const Curriculum = () => {
                 setMessage(data.msg || 'Topics added successfully!');
                 setTopicList([{ topic: '', course_code: '' }]); // Reset list
                 fetchCurriculum(); // Refresh
+                setLoadingButton(false);
             } else {
 
                 setMessage('Failed to add topics.');
+                setLoadingButton(false);
             }
         } catch (err) {
             console.error(err);
             setMessage('Error connecting to server.');
+            setLoadingButton(false);
         }
     };
 
@@ -235,15 +253,13 @@ const Curriculum = () => {
                                 name="course" value={form.course} onChange={handleChange} 
                                 className="w-full p-2 border border-slate-200 rounded-lg focus:ring-green-500 focus:border-green-500" 
                             >
-                                {hasManagedSprints ? (
-                                    sprintCourseCodes.map(code => (
-                                        <option key={code} value={code}>{code}</option>
-                                    ))
-                                ) : (
-                                    COURSE_CODES.map(code => (
-                                        <option key={code} value={code}>{code}</option>
-                                    ))
-                                )}
+                                {Object.entries(groupedCodes).map(([groupHeader, codes]) => (
+                                    <optgroup key={groupHeader} label={groupHeader}>
+                                        {codes.map(code => (
+                                            <option key={code} value={code}>{code}</option>
+                                        ))}
+                                    </optgroup>
+                                ))}
                             </select>
                         </div>
 
@@ -294,13 +310,18 @@ const Curriculum = () => {
                                 {message}
                             </div>
                         )}
-
+                        { loadingButton ? (
+                            <div className="flex justify-center items-center">
+                                <Loader2 className="w-6 h-6 text-green-600 animate-spin" />
+                            </div>
+                        ) :
                         <button 
                             type="submit" 
                             className="w-full bg-green-600 text-white py-2 rounded-lg font-bold hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                         >
                             <BookOpen size={20} /> Save Curriculum
                         </button>
+}
 
                     </form>
                 </div>
@@ -315,15 +336,13 @@ const Curriculum = () => {
                                     name="course" value={filters.course} onChange={handleFilterChange} 
                                     className="p-2 border border-slate-200 rounded-lg text-sm"
                                 >
-                                    {hasManagedSprints ? (
-                                        sprintCourseCodes.map(code => (
-                                            <option key={code} value={code}>{code}</option>
-                                        ))
-                                    ) : (
-                                        COURSE_CODES.map(code => (
-                                            <option key={code} value={code}>{code}</option>
-                                        ))
-                                    )}
+                                    {Object.entries(groupedCodes).map(([groupHeader, codes]) => (
+                                        <optgroup key={groupHeader} label={groupHeader}>
+                                            {codes.map(code => (
+                                                <option key={code} value={code}>{code}</option>
+                                            ))}
+                                        </optgroup>
+                                    ))}
                                 </select>
                             </div>
                         </div>

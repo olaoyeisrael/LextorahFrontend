@@ -9,7 +9,7 @@ import { apiClient } from '../utils/api';
 const SupportChat = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
-        { role: 'assistant', content: 'Hi there! How can I help you regarding Lextorah AI today?' }
+        { role: 'assistant', content: "Hello! I'm Ms. Lexi, your Lextorah AI Assistant. How can I help you today?" }
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
@@ -71,39 +71,50 @@ const SupportChat = () => {
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="fixed bottom-24 right-6 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 flex flex-col overflow-hidden max-h-[600px]"
+                        className="fixed bottom-24 right-6 w-80 md:w-[400px] bg-white rounded-3xl shadow-2xl border border-slate-100 z-50 flex flex-col overflow-hidden max-h-[600px]"
                     >
                         {/* Header */}
-                        <div className="bg-green-600 p-4 flex items-center justify-between text-white">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                                    <MessageSquare className="w-5 h-5" />
+                        <div className="bg-[#82C325] p-5 flex items-center justify-between text-white rounded-t-3xl">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-full overflow-hidden bg-white border border-white flex items-center justify-center flex-shrink-0">
+                                    <img src="/images/Ms-Lexi-AI-Tutor.png" alt="Ms. Lexi" className="w-full h-full object-cover object-top scale-125 translate-y-[2px]" />
                                 </div>
-                                <span className="font-bold">Lextorah Support</span>
+                                <div className="flex flex-col">
+                                    <span className="font-bold text-lg leading-tight">Ms. Lexi</span>
+                                    <span className="text-xs text-white/80">Lextorah AI Assistant</span>
+                                </div>
                             </div>
-                            <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-white/20 rounded-lg transition-colors">
+                            <button onClick={() => setIsOpen(false)} className="p-1.5 hover:bg-white/10 rounded-full transition-colors text-white">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
                         {/* Messages */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 h-80">
+                        <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-white min-h-[350px] max-h-[450px]">
                             {messages.map((msg, idx) => (
-                                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                <div key={idx} className={`flex items-start ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    {msg.role === 'assistant' && (
+                                        <div className="w-8 h-8 rounded-full overflow-hidden bg-white border border-slate-200 flex items-center justify-center flex-shrink-0 mr-2">
+                                            <img src="/images/Ms-Lexi-AI-Tutor.png" alt="Ms. Lexi" className="w-full h-full object-cover object-top scale-125 translate-y-[2px]" />
+                                        </div>
+                                    )}
                                     <div className={`
-                                        max-w-[80%] p-3 rounded-2xl text-sm
+                                        max-w-[75%] p-3.5 rounded-2xl text-sm font-medium leading-relaxed
                                         ${msg.role === 'user' 
-                                            ? 'bg-green-600 text-white rounded-br-none' 
-                                            : 'bg-white text-slate-700 border border-slate-200 rounded-bl-none shadow-sm'}
+                                            ? 'bg-[#82C325] text-white rounded-tr-none shadow-sm' 
+                                            : 'bg-[#F3F4F6] text-slate-800'}
                                     `}>
                                         {msg.content}
                                     </div>
                                 </div>
                             ))}
                             {loading && (
-                                <div className="flex justify-start">
-                                    <div className="bg-white p-3 rounded-2xl border border-slate-200 rounded-bl-none shadow-sm">
-                                        <Loader className="w-4 h-4 animate-spin text-green-600" />
+                                <div className="flex items-start justify-start">
+                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-white border border-slate-200 flex items-center justify-center flex-shrink-0 mr-2">
+                                        <img src="/images/Ms-Lexi-AI-Tutor.png" alt="Ms. Lexi" className="w-full h-full object-cover object-top scale-125 translate-y-[2px]" />
+                                    </div>
+                                    <div className="bg-[#F3F4F6] p-3.5 rounded-2xl text-slate-800 flex items-center">
+                                        <Loader className="w-4 h-4 animate-spin text-[#82C325]" />
                                     </div>
                                 </div>
                             )}
@@ -111,22 +122,22 @@ const SupportChat = () => {
                         </div>
 
                         {/* Input */}
-                        <div className="p-4 bg-white border-t border-slate-100">
-                            <div className="flex gap-2">
+                        <div className="p-5 bg-white border-t border-slate-100 rounded-b-3xl">
+                            <div className="flex items-center gap-3">
                                 <input
                                     type="text"
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
                                     onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                                    placeholder="Type your question..."
-                                    className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100 transition-all text-sm"
+                                    placeholder="Type your message..."
+                                    className="flex-1 px-5 py-3 bg-white border border-slate-200 rounded-full focus:outline-none focus:border-[#82C325] focus:ring-2 focus:ring-[#82C325]/10 transition-all text-sm shadow-sm"
                                 />
                                 <button 
                                     onClick={handleSend}
                                     disabled={loading || !input.trim()}
-                                    className="p-2 bg-green-600 text-white rounded-xl hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="w-12 h-12 flex items-center justify-center bg-[#82C325] hover:bg-[#72ad20] text-white rounded-full transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                                 >
-                                    <Send className="w-5 h-5" />
+                                    <Send className="w-5 h-5 fill-current" />
                                 </button>
                             </div>
                         </div>
@@ -136,7 +147,7 @@ const SupportChat = () => {
 
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-6 right-6 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all z-50 group flex items-center gap-2"
+                className="fixed bottom-6 right-6 bg-[#82C325] hover:bg-[#72ad20] text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all z-50 group flex items-center gap-2"
             >
                 {isOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-6 h-6" />}
                 <span className="font-bold hidden group-hover:block transition-all">Chat Support</span>

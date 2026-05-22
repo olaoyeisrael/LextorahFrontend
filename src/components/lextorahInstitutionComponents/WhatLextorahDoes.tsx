@@ -13,7 +13,7 @@ const WhatLextorahDoes = () => {
       title: 'For Students',
       features: [
         '24/7 academic support beyond classroom or lecture hours',
-        'One explanation until guided practice',
+        'Clear explanations and guided practice',
         'Early identification of learning gaps',
         'Stronger exam readiness and confidence',
       ],

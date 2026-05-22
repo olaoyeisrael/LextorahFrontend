@@ -43,3 +43,44 @@ export const COURSE_CODES = [
   "JAP/B2/WE/779", "JAP/B1/WE/256", "JAP/A2/WE/661", "JAP/A1/WE/245", "HIN/A2/WE/255",
   "HIN/A1/WE/451", "HIN/B1/WE/803", "HIN/B2/WE/908", "HIN/C1/WE/385", "HIN/C2/WE/805"
 ];
+
+export const SUBJECT_MAPPING = {
+  "FRE": "French Language",
+  "GER": "German Language",
+  "SPA": "Spanish Language",
+  "ENG": "English Language",
+  "CHI": "Chinese (HSK)",
+  "POR": "Portuguese Language",
+  "ITA": "Italian Language",
+  "RUS": "Russian Language",
+  "JAP": "Japanese Language",
+  "KOR": "Korean Language",
+  "YOR": "Yoruba Language",
+  "HAU": "Hausa Language",
+  "IGB": "Igbo Language",
+  "GRE": "GRE",
+  "IEL": "IELTS",
+  "TOE": "TOEFL",
+  "SAT": "SAT",
+  "TUR": "Turkish Language",
+  "HEB": "Hebrew Language",
+  "POL": "Polish Language",
+  "HIN": "Hindi Language",
+  "FIN": "Finnish Language",
+  "DUT": "Dutch Language",
+  "BUS": "Business English",
+  "EVE": "Evening Classes",
+  "OET": "OET Prep",
+  "SEL": "SELT",
+  "ESO": "ESOL",
+  "DUO": "Duolingo",
+  "PTE": "PTE",
+  "CEL": "CELPIP",
+  "GMA": "GMAT"
+};
+
+export const getSubjectGroup = (courseCode) => {
+  if (!courseCode) return "General / Other";
+  const prefix = courseCode.split('/')[0].toUpperCase();
+  return SUBJECT_MAPPING[prefix] || "General / Other";
+};
