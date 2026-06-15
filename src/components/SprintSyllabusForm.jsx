@@ -21,6 +21,11 @@ const SprintSyllabusForm = ({ sprint }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+
+   
+
+
+
     // Fetch available topics for this course code
     useEffect(() => {
         if (!sprint || !sprint.course_code) return;
@@ -42,20 +47,29 @@ const SprintSyllabusForm = ({ sprint }) => {
 
     // Initialize sessions based on sprint data
     useEffect(() => {
-        if (!sprint) return;
+        setMessage({ type: '', text: '' }); // Clear feedback message on sprint change
+
+        if (!sprint) {
+            setSessions([]);
+            return;
+        }
 
         // 1. Calculate how many total sessions
         const durationWeeks = parseInt(sprint.duration_weeks) || 0;
         const schedules = sprint.schedules || [];
-        
+        console.log("schedules: ", schedules);
         // Sort schedules by day of week roughly (Monday to Sunday)
         const daysOrder = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 7 };
         const sortedSchedules = [...schedules].sort((a, b) => daysOrder[a.day_of_week] - daysOrder[b.day_of_week]);
+        console.log("sortedSchedules: ", sortedSchedules);
 
         const sessionsPerWeek = sortedSchedules.length;
         const totalSessions = durationWeeks * sessionsPerWeek;
 
-        if (totalSessions === 0) return;
+        if (totalSessions === 0) {
+            setSessions([]);
+            return;
+        }
 
         // Parse start date, fallback to today if invalid or missing
         let sprintStartDate = new Date(sprint.start_date);
@@ -105,7 +119,7 @@ const SprintSyllabusForm = ({ sprint }) => {
                     day_of_week: schedule.day_of_week,
                     start_time: schedule.start_time,
                     end_time: schedule.end_time,
-                    topic: [], // Back to Array
+                    topic: [],
                     session_date: formattedDate
                 });
                 sessionCounter++;

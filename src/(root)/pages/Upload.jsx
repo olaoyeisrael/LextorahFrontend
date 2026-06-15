@@ -18,6 +18,7 @@ const Upload = () => {
 
     // Group active codes dynamically by language/subject group
     const codesToGroup = hasManagedSprints ? sprintCourseCodes : COURSE_CODES;
+    console.log("codesToGroup: ", codesToGroup);
     const groupedCodes = React.useMemo(() => {
         return codesToGroup.reduce((acc, code) => {
             const groupName = getSubjectGroup(code);

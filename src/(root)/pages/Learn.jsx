@@ -225,7 +225,7 @@ const Learn = () => {
 
   const handleNextQuestion = async () => {
       const currentQuestion = quizData[currentQuestionIndex];
-      const isCorrect = selectedAnswer[0] === currentQuestion.answer;
+      const isCorrect = selectedAnswer && currentQuestion.answer && selectedAnswer[0].toUpperCase() === currentQuestion.answer[0].toUpperCase();
       
       const newAnswers = { ...userAnswers, [currentQuestionIndex]: selectedAnswer };
       setUserAnswers(newAnswers);
@@ -411,7 +411,7 @@ const Learn = () => {
                                       <h3 className="font-bold text-slate-800 mb-6 sticky top-0 bg-white pb-4 border-b border-slate-100 uppercase tracking-widest text-xs">Review Details</h3>
                                       {quizData.map((q, idx) => {
                                           const userAnswer = userAnswers[idx];
-                                          const isCorrect = userAnswer && userAnswer[0] === q.answer;
+                                          const isCorrect = userAnswer && q.answer && userAnswer[0].toUpperCase() === q.answer[0].toUpperCase();
                                           
                                           return (
                                               <div key={idx} className="mb-8 border-b border-slate-100 pb-8 last:border-0 last:pb-0">

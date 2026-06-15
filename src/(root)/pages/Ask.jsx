@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import {Mic, Send, Volume2, Bot, User, Loader, Play, Pause} from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
 import msLexi from '../../assets/msLexi.png'
 
 import { apiClient } from '../../utils/api';
@@ -260,8 +261,16 @@ const Ask = () => {
               <div className={`${m.sender === 'user' ? 'bg-green-600 text-white text-right' : 'bg-white text-left'} w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 m-2`}>
                 {m.sender === 'user' ? <User className="w-6 h-6" /> : <img src={msLexi} className="w-10 h-10 rounded-full" />}
               </div>
-              <div className={`${m.sender === 'user' ? 'bg-green-600 text-white text-right rounded-tr-none' : 'bg-white text-left rounded-tl-none border border-green-100'} max-w-[80%] p-4 rounded-lg shadow-sm`}>
-                <div className="text-sm">{m.text}</div>
+              <div className={`${m.sender === 'user' ? 'bg-green-600 text-white text-right rounded-tr-none' : 'bg-white text-slate-800 text-left rounded-tl-none border border-green-100'} max-w-[80%] p-4 rounded-lg shadow-sm`}>
+                <div className="text-sm leading-relaxed">
+                  {m.sender === 'user' ? (
+                    m.text
+                  ) : (
+                    <div className="markdown-content space-y-2">
+                      <ReactMarkdown>{String(m.text).replace(/\n/g, '  \n')}</ReactMarkdown>
+                    </div>
+                  )}
+                </div>
                 {/* <div className="text-xs text-gray-500 mt-1">{m.sender === 'user' ? 'You' : ' Ai Tutor'}</div> */}
                 {
                   m.sender === 'Lextorah Ai' && (

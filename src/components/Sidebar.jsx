@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom'; // Assuming react-router-dom is used
-import { LayoutDashboard, BookOpen, History, Settings, LogOut, MonitorCheck, Video, CheckCircle, Calendar, ClipboardList, GraduationCap, HelpCircle } from 'lucide-react';
+import { LayoutDashboard, BookOpen, History, Settings, LogOut, MonitorCheck, Video, CheckCircle, Calendar, ClipboardList, GraduationCap, HelpCircle, PlusCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import msLexi from '../assets/msLexi.png';
@@ -22,6 +22,7 @@ const adminLinks = [
     { icon: BookOpen, label: 'Curriculum', path: '/curriculum' },
     { icon: CheckCircle, label: 'Student Performance', path: '/student-performance' },
     { icon: Video, label: 'Live Classes', path: '/live-classes-admin' },
+    { icon: PlusCircle, label: 'Add Course', path: '/add-course' },
 ];
 
 const tutorLinks = [

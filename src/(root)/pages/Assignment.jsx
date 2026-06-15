@@ -33,6 +33,13 @@ function Assignment() {
   const [answerFile, setAnswerFile] = useState(null);
   const [answeringFor, setAnsweringFor] = useState(null); // ID of assignment being answered
 
+  // Grading State
+  const [editingSubmission, setEditingSubmission] = useState(null);
+  const [gradeScore, setGradeScore] = useState('');
+  const [gradeMaxPoints, setGradeMaxPoints] = useState('');
+  const [gradeFeedback, setGradeFeedback] = useState('');
+  const [gradingSubmitting, setGradingSubmitting] = useState(false);
+
   useEffect(() => {
     fetchAssignments();
   }, [role, managedCourseCodes]);
@@ -160,14 +167,54 @@ function Assignment() {
     }
   };
 
+  const handleGradeSubmit = async (submissionId, assignmentId, e) => {
+    e.preventDefault();
+    setGradingSubmitting(true);
+    try {
+      const response = await apiClient(`/api/submissions/${submissionId}/grade`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          score: parseFloat(gradeScore),
+          max_points: parseFloat(gradeMaxPoints),
+          feedback: gradeFeedback,
+          status: 'graded'
+        })
+      });
+      
+      if (response.ok) {
+        setEditingSubmission(null);
+        setGradeScore('');
+        setGradeFeedback('');
+        
+        // Fetch fresh submissions
+        const res = await apiClient(`/assignments/${assignmentId}/submissions`);
+        const data = await res.json();
+        if (data.submissions) {
+          setSubmissions(prev => ({...prev, [assignmentId]: data.submissions}));
+        }
+        setMessage('Submission graded successfully!');
+      } else {
+        const data = await response.json();
+        alert(data.detail || 'Failed to submit grade.');
+      }
+    } catch (error) {
+      console.error('Failed to submit grade', error);
+      alert('Error connecting to the server.');
+    } finally {
+      setGradingSubmitting(false);
+    }
+  };
+
   const toggleAccordion = (assignmentId) => {
     if (expandedAssignment === assignmentId) {
       setExpandedAssignment(null);
     } else {
       setExpandedAssignment(assignmentId);
-      if (role === 'tutor' || role === 'admin') {
-         loadSubmissions(assignmentId);
-      } else {
+      loadSubmissions(assignmentId); // Load submissions for both tutors, admins, and students
+      if (role !== 'tutor' && role !== 'admin') {
          setAnsweringFor(assignmentId);
          setMessage(''); // clear message on new open
       }
@@ -304,13 +351,104 @@ function Assignment() {
                                 ) : (
                                   <div className="space-y-4">
                                     {submissions[assignment._id].map(sub => (
-                                      <div key={sub._id} className="p-4 border border-slate-200 rounded-xl bg-white shadow-sm flex flex-col md:flex-row gap-4 justify-between items-start">
-                                         <div className="flex-1">
+                                      <div key={sub._id} className="p-4 border border-slate-200 rounded-xl bg-white shadow-sm flex flex-col md:flex-row gap-4 justify-between items-start w-full">
+                                         <div className="flex-1 w-full">
                                             <div className="flex items-center space-x-2 mb-2 text-sm text-slate-500 font-medium">
                                               <User className="w-4 h-4" />
                                               <span>Student: {sub.student_name || sub.student_id}</span>
                                             </div>
-                                            <p className="text-slate-700 whitespace-pre-wrap bg-slate-50 p-3 rounded-lg border border-slate-100 text-sm">{sub.answer_text}</p>
+                                            <p className="text-slate-700 whitespace-pre-wrap bg-slate-50 p-3 rounded-lg border border-slate-100 text-sm mb-3">{sub.answer_text}</p>
+                                            
+                                            {/* Graded Details */}
+                                            {sub.score !== undefined ? (
+                                              <div className="p-3 bg-green-50 rounded-xl border border-green-200 text-xs">
+                                                <div className="flex justify-between items-center mb-1 font-bold text-green-800">
+                                                  <span>GRADED</span>
+                                                  <span className="text-sm">{sub.score} / {sub.max_points || 100}</span>
+                                                </div>
+                                                {sub.feedback && <p className="text-slate-600 mt-1 italic">Feedback: "{sub.feedback}"</p>}
+                                                {sub.graded_at && <p className="text-[10px] text-slate-400 mt-1">Graded on: {new Date(sub.graded_at).toLocaleString()}</p>}
+                                                <button 
+                                                  onClick={() => { setEditingSubmission(sub._id); setGradeScore(sub.score); setGradeMaxPoints(sub.max_points || 100); setGradeFeedback(sub.feedback || ''); }}
+                                                  className="text-blue-600 hover:text-blue-800 font-bold mt-2 text-[10px] hover:underline"
+                                                >
+                                                  Update Grade
+                                                </button>
+                                              </div>
+                                            ) : (
+                                              editingSubmission !== sub._id && (
+                                                <button 
+                                                  onClick={() => { setEditingSubmission(sub._id); setGradeScore(''); setGradeMaxPoints(assignment.max_points || 100); setGradeFeedback(''); }}
+                                                  className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded-lg border border-blue-200 transition-colors"
+                                                >
+                                                  Grade Submission
+                                                </button>
+                                              )
+                                            )}
+
+                                            {/* Inline Grading Form */}
+                                            {editingSubmission === sub._id && (
+                                              <motion.form 
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: 'auto' }}
+                                                onSubmit={(e) => handleGradeSubmit(sub._id, assignment._id, e)}
+                                                className="mt-3 p-4 border border-blue-200 rounded-xl bg-blue-50/20 space-y-3"
+                                              >
+                                                <h5 className="text-xs font-bold text-blue-800 uppercase tracking-wider">Grade Assignment Submission</h5>
+                                                <div className="flex gap-4">
+                                                   <div>
+                                                     <label className="block text-[10px] font-semibold text-slate-500 mb-1">Score</label>
+                                                     <input 
+                                                       type="number" 
+                                                       step="any"
+                                                       min="0"
+                                                       required
+                                                       value={gradeScore}
+                                                       onChange={e => setGradeScore(e.target.value)}
+                                                       className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white w-24"
+                                                     />
+                                                   </div>
+                                                   <div>
+                                                     <label className="block text-[10px] font-semibold text-slate-500 mb-1">Maximum Mark</label>
+                                                     <input 
+                                                       type="number" 
+                                                       step="any"
+                                                       min="0.1"
+                                                       required
+                                                       value={gradeMaxPoints}
+                                                       onChange={e => setGradeMaxPoints(e.target.value)}
+                                                       className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white w-24"
+                                                     />
+                                                   </div>
+                                                 </div>
+                                                <div>
+                                                  <label className="block text-[10px] font-semibold text-slate-500 mb-1">Feedback</label>
+                                                  <textarea 
+                                                    rows="2"
+                                                    value={gradeFeedback}
+                                                    onChange={e => setGradeFeedback(e.target.value)}
+                                                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500 outline-none bg-white resize-none"
+                                                    placeholder="Provide feedback..."
+                                                  />
+                                                </div>
+                                                <div className="flex gap-2 justify-end">
+                                                  <button 
+                                                    type="button"
+                                                    onClick={() => { setEditingSubmission(null); setGradeScore(''); setGradeMaxPoints(''); setGradeFeedback(''); }}
+                                                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-bold transition-colors"
+                                                  >
+                                                    Cancel
+                                                  </button>
+                                                  <button 
+                                                    type="submit"
+                                                    disabled={gradingSubmitting}
+                                                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors shadow-sm"
+                                                  >
+                                                    {gradingSubmitting ? 'Saving...' : 'Submit Grade'}
+                                                  </button>
+                                                </div>
+                                              </motion.form>
+                                            )}
                                          </div>
                                          {sub.file_url && (
                                             <a href={sub.file_url} target="_blank" rel="noreferrer" className="shrink-0 inline-flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-800 bg-emerald-50 px-4 py-2 rounded-lg transition-colors border border-emerald-100">
@@ -323,31 +461,85 @@ function Assignment() {
                                 )}
                              </div>
                            ) : (
-                             <div className="mt-8">
-                               <h4 className="font-bold text-slate-700 mb-4 border-b pb-2">Submit Your Answer</h4>
-                               {assignment.deadline && new Date() > new Date(assignment.deadline) ? (
-                                  <p className="text-rose-500 font-bold p-4 bg-rose-50 rounded-xl border border-rose-100">
-                                    The deadline for this assignment has passed. Submissions are closed.
-                                  </p>
-                               ) : (
-                               <form onSubmit={(e) => handleStudentSubmit(assignment._id, e)} className="space-y-5">
-                                  <div>
-                                    <textarea value={answeringFor === assignment._id ? answerText : ''} onChange={e => { setAnswerText(e.target.value); setAnsweringFor(assignment._id); }} rows="4"
-                                      className="w-full px-4 py-3 rounded-xl border border-slate-200  focus:ring-emerald-500 outline-none transition-all resize-none shadow-sm"
-                                      placeholder="Write your answer here... (Optional if attaching a file)" />
-                                  </div>
-                                  <div>
-                                    <label className="block text-sm font-semibold text-slate-600 mb-2">Attach File (Optional)</label>
-                                    <input type="file" onChange={e => setAnswerFile(e.target.files[0])} accept=".pdf,.doc,.docx"
-                                      className="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 transition-all cursor-pointer" />
-                                  </div>
-                                  <button disabled={submitting} type="submit"
-                                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-xl transition-colors shadow-lg shadow-emerald-200 flex items-center">
-                                    {submitting ? 'Submitting...' : <>Submit Answer <Send className="w-4 h-4 ml-2" /></>}
-                                  </button>
-                               </form>
-                               )}
-                             </div>
+                              <div className="mt-8">
+                               {(() => {
+                                 const mySub = submissions[assignment._id]?.find(sub => sub.student_id === user_id);
+                                 if (mySub) {
+                                   const isGraded = mySub.score !== undefined;
+                                   return (
+                                     <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm">
+                                       <h4 className="font-bold text-slate-700 mb-4 border-b pb-2 flex justify-between items-center">
+                                         <span>Your Submission</span>
+                                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                           isGraded ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                                         }`}>
+                                           {isGraded ? 'Graded' : 'Pending Review'}
+                                         </span>
+                                       </h4>
+                                       
+                                       {isGraded && (
+                                         <div className="mb-5 p-4 bg-green-50 rounded-xl border border-green-200">
+                                           <div className="flex justify-between items-center mb-2">
+                                             <span className="text-sm font-bold text-green-800">Score Awarded:</span>
+                                             <span className="text-xl font-extrabold text-slate-800">{mySub.score} / {mySub.max_points || 100}</span>
+                                           </div>
+                                           {mySub.feedback && (
+                                             <div className="mt-2 text-sm text-slate-700">
+                                               <span className="font-bold text-slate-600">Tutor Feedback:</span>
+                                               <p className="mt-1 italic text-slate-600">"{mySub.feedback}"</p>
+                                             </div>
+                                           )}
+                                         </div>
+                                       )}
+                                       
+                                       <div className="space-y-3 text-sm">
+                                         <div>
+                                           <span className="font-semibold text-slate-500">Your Answer:</span>
+                                           <p className="mt-1 text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100 whitespace-pre-wrap">{mySub.answer_text || "No written answer provided."}</p>
+                                         </div>
+                                         {mySub.file_url && (
+                                           <div className="pt-2">
+                                             <a href={mySub.file_url} target="_blank" rel="noreferrer" className="inline-flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-800 bg-emerald-50 px-4 py-2 rounded-lg transition-colors border border-emerald-100">
+                                               <FileText className="w-4 h-4 mr-2" /> View Attached Answer Document
+                                             </a>
+                                           </div>
+                                         )}
+                                         <p className="text-[11px] text-slate-400">Submitted on: {new Date(mySub.submitted_at).toLocaleString()}</p>
+                                       </div>
+                                     </div>
+                                   );
+                                 }
+
+                                 // Fallback to submission form
+                                 return (
+                                   <>
+                                     <h4 className="font-bold text-slate-700 mb-4 border-b pb-2">Submit Your Answer</h4>
+                                     {assignment.deadline && new Date() > new Date(assignment.deadline) ? (
+                                        <p className="text-rose-500 font-bold p-4 bg-rose-50 rounded-xl border border-rose-100">
+                                          The deadline for this assignment has passed. Submissions are closed.
+                                        </p>
+                                     ) : (
+                                     <form onSubmit={(e) => handleStudentSubmit(assignment._id, e)} className="space-y-5">
+                                        <div>
+                                          <textarea value={answeringFor === assignment._id ? answerText : ''} onChange={e => { setAnswerText(e.target.value); setAnsweringFor(assignment._id); }} rows="4"
+                                            className="w-full px-4 py-3 rounded-xl border border-slate-200  focus:ring-emerald-500 outline-none transition-all resize-none shadow-sm"
+                                            placeholder="Write your answer here... (Optional if attaching a file)" />
+                                        </div>
+                                        <div>
+                                          <label className="block text-sm font-semibold text-slate-600 mb-2">Attach File (Optional)</label>
+                                          <input type="file" onChange={e => setAnswerFile(e.target.files[0])} accept=".pdf,.doc,.docx"
+                                            className="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 transition-all cursor-pointer" />
+                                        </div>
+                                        <button disabled={submitting} type="submit"
+                                          className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-xl transition-colors shadow-lg shadow-emerald-200 flex items-center">
+                                          {submitting ? 'Submitting...' : <>Submit Answer <Send className="w-4 h-4 ml-2" /></>}
+                                        </button>
+                                     </form>
+                                     )}
+                                   </>
+                                 );
+                               })()}
+                              </div>
                            )}
                         </motion.div>
                       )}

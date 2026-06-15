@@ -16,7 +16,8 @@ import practice from '../assets/practice.png'
 
 import educationtech from '../assets/EducationTechnology.png'
 import mobileHero from '../assets/mobileHero.jpg'
-
+import LazyLoad from 'react-lazyload';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
 
 import logo from '../assets/logo.png'
 import Footer from '../components/Footer'
@@ -25,10 +26,21 @@ import Footer from '../components/Footer'
 const Home = () => {
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [heroTextIndex, setHeroTextIndex] = useState(0);
+    const [bgImage, setBgImage] = useState(null);
+    const isMobile = windowWidth <= 768;
+    const imageUrl = isMobile ? mobileHero : heroBg;
+
     const heroTexts = [
         <React.Fragment>Master any subject with <span className="text-green-500 gradient-to-r from-yellow-500 to-green-600">Lextorah AI Tutor</span></React.Fragment>,
         <React.Fragment>Master any subject with AI-powered learning, guided by <span className="text-green-500 gradient-to-r from-yellow-500 to-green-600">Expert Tutors</span></React.Fragment>
     ];
+
+    useEffect(() => {
+        setBgImage(null); // Reset background image to trigger loading state
+        const img = new Image();
+        img.src = imageUrl;
+        img.onload = () =>{ setBgImage(imageUrl)};
+    }, [imageUrl]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -43,7 +55,7 @@ const Home = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const isMobile = windowWidth <= 768;
+    
 
     const fadeInUp = {
         hidden: { opacity: 0, y: 20 },
@@ -69,7 +81,7 @@ const Home = () => {
       {/* Hero Section */}
       <div 
         className="pt-[400px] md:pt-0 pb-12 md:pb-22 px-4 md:px-12 lg:px-20 mx-auto flex flex-col items-start justify-center md:items-start text-left bg-cover bg-center min-h-[600px] md:min-h-[900px] w-full transition-all duration-300"
-        style={{ backgroundImage: `url(${isMobile ? mobileHero : heroBg})` }}
+        style={{ backgroundImage: bgImage ? `url(${bgImage})` : 'none', backgroundColor: bgImage ? 'transparent' : '#f0f0f0' }}
       >
         <div className="max-w-3xl mx-auto md:mx-0 flex flex-col items-center md:items-start text-center md:text-left w-full">
         <div className="min-h-[140px] md:min-h-[180px] flex items-center justify-center md:justify-start mb-6 w-full">
@@ -120,7 +132,9 @@ const Home = () => {
         id='aitutor'
     >
         <motion.div variants={fadeInUp} className="relative">
-            <img src={msLexi} alt="Ms. Lexi" className="w-full h-auto" />
+      
+            <img src={msLexi} loading='lazy' alt="Ms. Lexi" className="w-full h-auto" />
+           
             <div className="absolute bottom-6 right-0 md:bottom-1.5 md:-right-10 bg-white p-4 md:p-5 rounded-2xl shadow-lg border border-slate-50 z-20 max-w-[200px] md:max-w-[240px]">
                 <div className="flex items-center gap-3 mb-1.5">
                     <div className="w-2.5 h-2.5 bg-[#22C55E] rounded-full animate-pulse"></div>
@@ -187,7 +201,7 @@ const Home = () => {
 
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
                 <motion.div variants={fadeInUp} className='px-8 py-8 bg-gradient-to-br from-[#F0FDFA] to-[#FFFFFF] border border-[#CCFBF1] rounded-xl shadow-lg flex flex-col h-full'>
-                    <img src={student} alt="" className='mb-6' />
+                    <img src={student} alt="" className='mb-6' loading='lazy'/>
                     <GraduationCap className='w-12 h-12 py-1 px-3 bg-[#0D9488] rounded-lg text-white mb-3'/>
                     <h1 className='text-[24px] font-InterBold text-[#111827]'>For Students & Learners</h1>
                     
@@ -222,7 +236,7 @@ const Home = () => {
 
 
                 <motion.div variants={fadeInUp} className='px-8 py-8 bg-gradient-to-br from-[#FFFBEB] to-[#FFFFFF] border border-[#FEF3C7] rounded-xl shadow-lg flex flex-col h-full'>
-                    <img src={teacher} alt="" className='mb-6' />
+                    <img src={teacher} alt="" className='mb-6' loading='lazy'/>
                     <UserStar className='w-12 h-12 py-1 px-3 bg-[#D97706] rounded-lg text-white mb-3'/>
                     <h1 className='text-[24px] font-InterBold text-[#111827]'>For Teachers & Tutors</h1>
                     <div className='space-y-3 mt-4'>
@@ -252,7 +266,7 @@ const Home = () => {
 
 
                 <motion.div variants={fadeInUp} className='px-8 py-8 bg-gradient-to-br from-[#ECFDF5] to-[#FFFFFF] border border-[#D1FAE5] rounded-xl shadow-lg flex flex-col h-full'>
-                    <img src={institution} alt="" className='mb-6 rounded-xl' />
+                    <img src={institution} alt="" className='mb-6 rounded-xl' loading='lazy'/>
                     <Landmark className='w-12 h-12 py-1 px-3 bg-[#059669] rounded-lg text-white mb-3'/>
                     <h1 className='text-[24px] font-InterBold text-[#111827]'>For Institutions</h1>
                     <div className='space-y-3 mt-4'>
@@ -309,7 +323,7 @@ const Home = () => {
 
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-8'>
                 <motion.div variants={fadeInUp} className='py-8 px-8 rounded-3xl border border-[#CCFBF1] shadow-xl'>
-                    <img src={ask} alt="" className='mb-6' />
+                    <img src={ask} alt="" className='mb-6' loading='lazy' />
                     <CircleQuestionMark className="w-12 h-12 py-1 px-3 bg-[#CCFBF1] rounded-lg text-[#0D9488] mb-3" />
                     <h1 className='font-InterBold mb-3'>Ask</h1>
                     <p className='font-Inter text-[#4B5563]'>Students ask questions or request help anytime, from anywhere.</p>
@@ -317,7 +331,7 @@ const Home = () => {
                 </motion.div>
 
                 <motion.div variants={fadeInUp} className='py-8 px-8 rounded-3xl border border-[#CCFBF1] shadow-xl'>
-                    <img src={learn} alt="" className='mb-6' />
+                    <img src={learn} alt="" className='mb-6' loading='lazy' />
                     <Lightbulb className="w-12 h-12 py-1 px-3 bg-[#CCFBF1] rounded-lg text-[#0D9488] mb-3" />
                     <h1 className='font-InterBold mb-3'>Learn</h1>
                     <p className='font-Inter text-[#4B5563]'>Ms. Lexi explains concepts, provides examples, and guides practice.</p>
@@ -325,7 +339,7 @@ const Home = () => {
                 </motion.div>
                 
                 <motion.div variants={fadeInUp} className='py-8 px-8 rounded-3xl border border-[#CCFBF1] shadow-xl'>
-                    <img src={practice} alt="" className='mb-6' />
+                    <img src={practice} alt="" className='mb-6' loading='lazy' />
                     <PenLine className="w-12 h-12 py-1 px-3 bg-[#CCFBF1] rounded-lg text-[#0D9488] mb-3" />
                     <h1 className='font-InterBold mb-3'>Practice</h1>
                     <p className='font-Inter text-[#4B5563] max-w-48'>Learners receive exercises, quizzes, and revision prompts.</p>
@@ -333,7 +347,7 @@ const Home = () => {
                 </motion.div>
 
                 <motion.div variants={fadeInUp} className='py-8 px-8 rounded-3xl border border-[#CCFBF1] shadow-xl'>
-                    <img src={progress} alt="" className='mb-6' />
+                    <img src={progress} loading='lazy' alt="" className='mb-6'   />
                     <ChartLine className="w-12 h-12 py-1 px-3 bg-[#CCFBF1] rounded-lg text-[#0D9488] mb-3" />
                     <h1 className='font-InterBold mb-3'>Progress</h1>
                     <p className='font-Inter text-[#4B5563]'>Learning stays aligned with Lextorah programs, study plans, tutors, and progression goals.</p>
@@ -364,7 +378,7 @@ const Home = () => {
                 <motion.div variants={fadeInUp} className='w-full rounded-xl'>
 
 
-                     <img src={educationtech} alt="" className='rounded-2xl w-full h-auto' /> 
+                     <img src={educationtech} loading='lazy' alt="" className='rounded-2xl w-full h-auto' /> 
 
                 </motion.div>
 
@@ -417,7 +431,7 @@ const Home = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                     {/* Card 1 */}
                     <motion.div variants={fadeInUp} className='relative h-64 md:h-80 rounded-3xl overflow-hidden group shadow-lg cursor-pointer'>
-                        <img src={student} alt="Students & Learners" className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110' />
+                        <img src={student} loading='lazy' alt="Students & Learners" className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110' />
                         <div className='absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-6 md:p-8'>
                             <h3 className='text-white text-xl md:text-2xl font-bold mb-2'>Students & Learners</h3>
                             <p className='text-white/90 text-sm md:text-base'>Anyone who wants guided, flexible, and supportive learning.</p>
@@ -426,7 +440,7 @@ const Home = () => {
 
                     {/* Card 2 */}
                     <motion.div variants={fadeInUp} className='relative h-64 md:h-80 rounded-3xl overflow-hidden group shadow-lg cursor-pointer'>
-                        <img src={teacher} alt="Educators" className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110' />
+                        <img src={teacher} loading='lazy' alt="Educators" className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110' />
                          <div className='absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-6 md:p-8'>
                             <h3 className='text-white text-xl md:text-2xl font-bold mb-2'>Educators</h3>
                             <p className='text-white/90 text-sm md:text-base'>Teachers who want students supported beyond live lessons.</p>
@@ -435,11 +449,13 @@ const Home = () => {
 
                     {/* Card 3 */}
                     <motion.div variants={fadeInUp} className='relative h-64 md:h-80 rounded-3xl overflow-hidden group shadow-lg cursor-pointer'>
-                        <img src={institution} alt="Schools & Universities" className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110' />
+                        
+                        <img src={institution} loading='lazy' alt="Schools & Universities" className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110' />
                          <div className='absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-6 md:p-8'>
                             <h3 className='text-white text-xl md:text-2xl font-bold mb-2'>Schools & Universities</h3>
                             <p className='text-white/90 text-sm md:text-base'>Institutions looking to scale learning support responsibly.</p>
                         </div>
+
                     </motion.div>
                 </div>
             </div>

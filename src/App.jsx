@@ -72,6 +72,7 @@ const RequestInstitutionAccess = lazy(() => import('./(root)/pages/Institutional
 const TutorCurriculum = lazy(() => import('./(root)/pages/TutorCurriculum'))
 const Assessments = lazy(() => import('./(root)/pages/Assessments'))
 const Analytics = lazy(() => import('./(root)/pages/Analytics'))
+const AddCourse = lazy(() => import('./(root)/pages/AddCourse'))
 
 
 
@@ -152,6 +153,7 @@ function App() {
           <Route path='/tutor-curriculum' element={<TutorCurriculum />} />
           <Route path='/assessments' element={<Assessments />} />
           <Route path='/analytics' element={<Analytics />} />
+          <Route path='/add-course' element={<AddCourse />} />
 
 
         </Route>

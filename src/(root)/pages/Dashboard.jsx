@@ -13,25 +13,25 @@ import { TodaysClass } from '../../components/StudentsDashboard/TodayClass';
 
 import { apiClient } from '../../utils/api';
 
-const classData = [
-    {
-        course: "German",
-        level: "A1",
-        students: 5,
-        Alerts: "1 alert"
-    },
-    {
-        course: "Spanish",
-        level: "A2",
-        students: 4,
-        Alerts: "No alerts"},
-    {
-        course: "French",
-        level: "B1",
-        students: 3,
-        Alerts: "2 alerts"
-    }
-]
+// const classData = [
+//     {
+//         course: "German",
+//         level: "A1",
+//         students: 5,
+//         Alerts: "1 alert"
+//     },
+//     {
+//         course: "Spanish",
+//         level: "A2",
+//         students: 4,
+//         Alerts: "No alerts"},
+//     {
+//         course: "French",
+//         level: "B1",
+//         students: 3,
+//         Alerts: "2 alerts"
+//     }
+// ]
 const Dashboard = () => {
   const user = useSelector((state) => state.user);
   const { firstName, token, enrolledLevel, enrolledCourse, studentSprints } = user;
@@ -45,7 +45,7 @@ const Dashboard = () => {
     return acc + (sprint.students?.length || 0);
 }, 0);
 console.log(studentCount)
-
+    const classes = managedSprints?.length || 0;
 //   useEffect(() => {
 //     const fetchSchedule = async () => {
 //       if (!token) return;
@@ -151,7 +151,7 @@ return (
         <div className="mb-8 mt-6 grid md:grid-cols-4 gap-4">
             <TutorDashboard 
                 title="My Classes" 
-                value= '1'
+                value= {classes}
                 icon={BookOpen} 
                 color="blue-700"
             />
@@ -254,7 +254,7 @@ return (
                             <th className="py-2">Course</th>
                             <th className="py-2">Level</th>
                             <th className="py-2">Students</th>
-                            <th className="py-2">Alerts</th>
+                            {/* <th className="py-2">Alerts</th> */}
                         </tr>
                     </thead>
                     <tbody>
@@ -267,7 +267,7 @@ return (
                                     <td className="py-3 font-medium text-slate-800">{sprint.name}</td>
                                     <td className="py-3 text-slate-600">{level}</td>
                                     <td className="py-3 text-slate-600">{studentsCount}</td>
-                                    <td className="py-3 text-slate-600 text-sm"><span className="px-2 py-1 bg-green-100 text-green-700 rounded-full">No alerts</span></td>
+                                    {/* <td className="py-3 text-slate-600 text-sm"><span className="px-2 py-1 bg-green-100 text-green-700 rounded-full">No alerts</span></td> */}
                                 </tr>
                             );
                         })}

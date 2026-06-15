@@ -19,7 +19,7 @@ const NavBar = () => {
     <nav className='lg:px-20 px-6 py-4 flex justify-between items-center fixed top-0 left-0 right-0 bg-[#FFFFFF] backdrop-blur-md z-50 border-b border-green-100'>
         {/* Logo */}
         <Link to='/' className="flex items-center gap-2">
-            <img src={logo} alt="logo" className='h-8 w-auto object-contain' />
+            <img src={logo} loading='lazy' alt="logo" className='h-8 w-auto object-contain' />
         </Link>
        
         <div className='items-center gap-8 hidden lg:flex'>
