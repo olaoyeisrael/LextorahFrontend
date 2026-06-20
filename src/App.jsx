@@ -73,6 +73,7 @@ const TutorCurriculum = lazy(() => import('./(root)/pages/TutorCurriculum'))
 const Assessments = lazy(() => import('./(root)/pages/Assessments'))
 const Analytics = lazy(() => import('./(root)/pages/Analytics'))
 const AddCourse = lazy(() => import('./(root)/pages/AddCourse'))
+const ProgressReport = lazy(() => import('./(root)/pages/ProgressReport'))
 
 
 
@@ -154,6 +155,7 @@ function App() {
           <Route path='/assessments' element={<Assessments />} />
           <Route path='/analytics' element={<Analytics />} />
           <Route path='/add-course' element={<AddCourse />} />
+          <Route path='/progress-report' element={<ProgressReport />} />
 
 
         </Route>

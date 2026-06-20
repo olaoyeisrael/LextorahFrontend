@@ -11,16 +11,37 @@ const Aialert = () => {
     const isUserAdmin = isAdmin();
     const sprintCourseCodes = [...new Set(managedSprints.map(s => s.course_code || '').filter(Boolean))];
     
-    // Fallback to COURSE_CODES for admins or if no tutor sprints are loaded
+    const [dbCourseCodes, setDbCourseCodes] = useState([]);
+
+    // Fetch dynamic course codes from backend
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const res = await apiClient('/api/courses');
+                if (res.ok) {
+                    const data = await res.json();
+                    setDbCourseCodes(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch database courses", err);
+            }
+        };
+        fetchCourses();
+    }, []);
+
+    const activeCodes = dbCourseCodes.length > 0 ? dbCourseCodes : COURSE_CODES;
+
+    // Fallback to activeCodes for admins or if no tutor sprints are loaded
     const courseList = (!isUserAdmin && sprintCourseCodes.length > 0) 
         ? sprintCourseCodes 
-        : COURSE_CODES;
+        : activeCodes;
 
     const [selectedCourse, setSelectedCourse] = useState("");
     const [selectedType, setSelectedType] = useState("All");
     const [alerts, setAlerts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
 
     useEffect(() => {
         if (!selectedCourse && courseList.length > 0) {

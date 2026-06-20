@@ -9,11 +9,31 @@ const LiveClasses = () => {
     const { token } = useSelector((state) => state.user);
     const [schedule, setSchedule] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [dbCourseCodes, setDbCourseCodes] = useState([]);
+
+    // Fetch dynamic course codes from backend
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const res = await apiClient('/api/courses');
+                if (res.ok) {
+                    const data = await res.json();
+                    setDbCourseCodes(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch database courses", err);
+            }
+        };
+        fetchCourses();
+    }, []);
+
+    const activeCodes = dbCourseCodes.length > 0 ? dbCourseCodes : COURSE_CODES;
     
     // Form State
     const [formData, setFormData] = useState({
         course: COURSE_CODES[0],
         level: '',
+
         week: 'Week 1',
         topic: '',
         date: '',
@@ -149,7 +169,7 @@ const LiveClasses = () => {
                   <div>
                       <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Course</label>
                       <select name="course" value={formData.course} onChange={handleInputChange} className="w-full p-2 rounded-lg border border-slate-200 text-sm">
-                          {COURSE_CODES.map(code => (
+                           {activeCodes.map(code => (
                               <option key={code} value={code}>{code}</option>
                           ))}
                       </select>

@@ -16,8 +16,27 @@ const Upload = () => {
     const hasManagedSprints = managedSprints.length > 0;
     const sprintCourseCodes = [...new Set(managedSprints.map(s => s.course_code || '').filter(Boolean))];
 
+    const [dbCourseCodes, setDbCourseCodes] = useState([]);
+
+    // Fetch dynamic course codes from backend
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const res = await apiClient('/api/courses');
+                if (res.ok) {
+                    const data = await res.json();
+                    setDbCourseCodes(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch database courses", err);
+            }
+        };
+        fetchCourses();
+    }, []);
+
     // Group active codes dynamically by language/subject group
-    const codesToGroup = hasManagedSprints ? sprintCourseCodes : COURSE_CODES;
+    const activeCodes = dbCourseCodes.length > 0 ? dbCourseCodes : COURSE_CODES;
+    const codesToGroup = hasManagedSprints ? sprintCourseCodes : activeCodes;
     console.log("codesToGroup: ", codesToGroup);
     const groupedCodes = React.useMemo(() => {
         return codesToGroup.reduce((acc, code) => {

@@ -19,6 +19,26 @@ const StudentPerformance = () => {
     const [loading, setLoading] = useState(true);
     const [selectedResult, setSelectedResult] = useState(null);
     const [filters, setFilters] = useState({ course: '', level: '' });
+    const [dbCourseCodes, setDbCourseCodes] = useState([]);
+
+    // Fetch dynamic course codes from backend
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const res = await apiClient('/api/courses');
+                if (res.ok) {
+                    const data = await res.json();
+                    setDbCourseCodes(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch database courses", err);
+            }
+        };
+        fetchCourses();
+    }, []);
+
+    const activeCodes = dbCourseCodes.length > 0 ? dbCourseCodes : COURSE_CODES;
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -92,7 +112,7 @@ const StudentPerformance = () => {
                             <option key={code} value={code}>{code}</option>
                         ))
                     ) : (
-                        COURSE_CODES.map(code => (
+                        activeCodes.map(code => (
                             <option key={code} value={code}>{code}</option>
                         ))
                     )}

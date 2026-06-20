@@ -14,6 +14,26 @@ function Assignment() {
 
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [dbCourseCodes, setDbCourseCodes] = useState([]);
+
+  // Fetch dynamic course codes from backend
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await apiClient('/api/courses');
+        if (res.ok) {
+          const data = await res.json();
+          setDbCourseCodes(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch database courses", err);
+      }
+    };
+    fetchCourses();
+  }, []);
+
+  const activeCodes = dbCourseCodes.length > 0 ? dbCourseCodes : COURSE_CODES;
+
 
   // Tutor Creating Assignment Form State
   const [topic, setTopic] = useState('');
@@ -257,7 +277,7 @@ function Assignment() {
                   >
                     <option value="">Select Course Code</option>
                     {role === 'admin' 
-                      ? COURSE_CODES.map(code => <option key={code} value={code}>{code}</option>)
+                      ? activeCodes.map(code => <option key={code} value={code}>{code}</option>)
                       : (managedCourseCodes || []).map(code => <option key={code} value={code}>{code}</option>)
                     }
                   </select>

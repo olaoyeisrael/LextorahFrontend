@@ -1,9 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PlusCircle, BookOpen, Globe, Layers, Clock, Users, FileText, CloudUpload, X, CheckCircle2, ChevronRight } from 'lucide-react';
-
-const CATEGORIES = ['French', 'Spanish', 'German', 'Yoruba', 'Igbo', 'Hausa', 'English'];
-
+import { PlusCircle, BookOpen, Globe, Layers, Clock, Users, FileText, CheckCircle2, ChevronRight } from 'lucide-react';
+import { apiClient } from '../../utils/api';
 
 function AddCourse() {
   const [form, setForm] = useState({
@@ -16,25 +14,16 @@ function AddCourse() {
     description: '',
   });
 
- 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-
-
-
-
- 
-
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.title || !form.code || !form.category || !form.level) {
       setError('Please fill in all required fields (Course Title, Code, Category, and Level).');
@@ -44,11 +33,24 @@ function AddCourse() {
     setLoading(true);
     setError('');
 
-    // Mock API call delay
-    setTimeout(() => {
+    try {
+      const res = await apiClient('/api/courses', {
+        method: 'POST',
+        body: JSON.stringify(form)
+      });
+
+      if (res.ok) {
+        setSuccess(true);
+      } else {
+        const errData = await res.json();
+        setError(errData.detail || 'Failed to create course. Please try again.');
+      }
+    } catch (err) {
+      console.error('Error creating course:', err);
+      setError('Connection to course server failed.');
+    } finally {
       setLoading(false);
-      setSuccess(true);
-    }, 1500);
+    }
   };
 
   const resetForm = () => {
@@ -61,8 +63,6 @@ function AddCourse() {
       maxCapacity: '',
       description: '',
     });
-    setCoverImage(null);
-    setCoverPreview(null);
     setSuccess(false);
   };
 
@@ -95,10 +95,9 @@ function AddCourse() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-8">
-              
-
               {/* Core Information Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Course Title */}
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center">
                     <BookOpen className="w-4 h-4 mr-2 text-slate-400" /> Course Title *
@@ -110,10 +109,11 @@ function AddCourse() {
                     onChange={handleChange}
                     required
                     placeholder="Title of the course"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700"
                   />
                 </div>
 
+                {/* Course Code */}
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center">
                     <Layers className="w-4 h-4 mr-2 text-slate-400" /> Course Code *
@@ -125,15 +125,52 @@ function AddCourse() {
                     onChange={handleChange}
                     required
                     placeholder="e.g. SPA/A1/WD/155"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700"
                   />
                 </div>
+
+                {/* Category */}
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center">
+                    <Globe className="w-4 h-4 mr-2 text-slate-400" /> Category *
+                  </label>
+                  <input
+                    type="text"
+                    name="category"
+                    value={form.category}
+                    onChange={handleChange}
+                    required
+                    placeholder="Select Category"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700"
+                  />
+                </div>
+
+                {/* Course Level */}
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center">
+                    <Layers className="w-4 h-4 mr-2 text-slate-400" /> Course Level *
+                  </label>
+                  <input
+                    type="text"
+                    name="level"
+                    value={form.level}
+                    onChange={handleChange}
+                    required
+                    placeholder="Select Level"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700"
+                  />
+                </div>
+
+                {/* Duration */}
+              
+
+
+           
+            
               </div>
-          
 
               {/* Form Buttons */}
               <div className="flex gap-4 pt-4 border-t border-slate-100 justify-end">
-
                 <button
                   type="submit"
                   disabled={loading}

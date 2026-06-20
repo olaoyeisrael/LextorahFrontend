@@ -23,6 +23,7 @@ const adminLinks = [
     { icon: CheckCircle, label: 'Student Performance', path: '/student-performance' },
     { icon: Video, label: 'Live Classes', path: '/live-classes-admin' },
     { icon: PlusCircle, label: 'Add Course', path: '/add-course' },
+    { icon: ClipboardList, label: 'Progress Report', path: '/progress-report'},
 ];
 
 const tutorLinks = [
