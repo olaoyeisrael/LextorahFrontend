@@ -15,6 +15,40 @@ const SupportChat = () => {
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef(null);
 
+    const renderMessageContent = (text, role) => {
+        if (!text) return null;
+        const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
+        const parts = text.split(urlRegex);
+        return parts.map((part, idx) => {
+            if (part.match(urlRegex)) {
+                let cleanUrl = part;
+                let trailingPunctuation = "";
+                const punctMatch = part.match(/[.,;:!?)]+$/);
+                if (punctMatch) {
+                    cleanUrl = part.substring(0, part.length - punctMatch[0].length);
+                    trailingPunctuation = punctMatch[0];
+                }
+                const href = cleanUrl.startsWith('http') ? cleanUrl : `https://${cleanUrl}`;
+                return (
+                    <span key={idx}>
+                        <a 
+                            href={href} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className={`underline break-all cursor-pointer font-bold ${
+                                role === 'user' ? 'text-white hover:text-white/80' : 'text-blue-600 hover:text-blue-800'
+                            }`}
+                        >
+                            {cleanUrl}
+                        </a>
+                        {trailingPunctuation}
+                    </span>
+                );
+            }
+            return part;
+        });
+    };
+
     // Generate or retrieve anonymous session ID
     const sessionId = React.useMemo(() => {
         let storedId = sessionStorage.getItem('support_session_id');
@@ -104,7 +138,7 @@ const SupportChat = () => {
                                             ? 'bg-[#82C325] text-white rounded-tr-none shadow-sm' 
                                             : 'bg-[#F3F4F6] text-slate-800'}
                                     `}>
-                                        {msg.content}
+                                        {renderMessageContent(msg.content, msg.role)}
                                     </div>
                                 </div>
                             ))}
