@@ -37,6 +37,9 @@ const Classroom = ({ userId: propUserId, topic: propTopic }) => {
   const [mode, setMode] = useState("LEARNING"); // LEARNING or QUIZ
   const [quizData, setQuizData] = useState(null);
   const [currentSection, setCurrentSection] = useState(1);
+  const [isVideo, setIsVideo] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [transcript, setTranscript] = useState("");
   const scrollRef = useRef(null);
 
   const today = new Date();
@@ -67,12 +70,20 @@ const Classroom = ({ userId: propUserId, topic: propTopic }) => {
     }
   }, [explanation]);
 
-  const fetchNextSection = () => {
-    setExplanation(""); 
+  const fetchNextSection = (opts = {}) => {
+    if (!opts.triggerQuiz) {
+      setExplanation(""); 
+      setIsVideo(false);
+      setVideoUrl("");
+      setTranscript("");
+    }
     setIsTeaching(true);
 
     // Using EventSource for Server-Sent Events (SSE) with LangGraph Backend
-    const url = `http://localhost:8000/classroom/next/${resolvedUserId}?topic=${encodeURIComponent(resolvedTopic)}&sprint_id=${activeSprintId}`;
+    let url = `http://localhost:8000/classroom/next/${resolvedUserId}?topic=${encodeURIComponent(resolvedTopic)}&sprint_id=${activeSprintId}`;
+    if (opts.triggerQuiz) {
+      url += `&trigger_quiz=true`;
+    }
     const eventSource = new EventSource(url);
 
     eventSource.onmessage = (event) => {
@@ -83,10 +94,22 @@ const Classroom = ({ userId: propUserId, topic: propTopic }) => {
         eventSource.close();
         setIsTeaching(false);
       } 
+      else if (event.data.includes('"type": "video"')) {
+        try {
+          const parsed = JSON.parse(event.data);
+          setVideoUrl(parsed.video_url);
+          setTranscript(parsed.transcript);
+          setIsVideo(true);
+        } catch (e) {
+          console.error("Error parsing video payload", e);
+        }
+      }
       else if (event.data === "[DONE]") {
         eventSource.close();
         setIsTeaching(false);
-        setCurrentSection(prev => prev + 1);
+        if (!isVideo) {
+          setCurrentSection(prev => prev + 1);
+        }
       } 
       else {
         try {
@@ -158,6 +181,9 @@ const Classroom = ({ userId: propUserId, topic: propTopic }) => {
                                 setExplanation("");
                                 setMode("LEARNING");
                                 setCurrentSection(1);
+                                setIsVideo(false);
+                                setVideoUrl("");
+                                setTranscript("");
                             }}
                             className={`w-full flex items-center justify-between p-3 rounded-xl text-left transition-all border ${
                                 isActive 
@@ -205,7 +231,7 @@ const Classroom = ({ userId: propUserId, topic: propTopic }) => {
              
              {mode === "LEARNING" && (
                 <button 
-                  onClick={fetchNextSection}
+                  onClick={() => isVideo ? fetchNextSection({ triggerQuiz: true }) : fetchNextSection()}
                   disabled={isTeaching || loadingTopics || !resolvedTopic}
                   className={`px-6 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 ${
                     isTeaching || loadingTopics || !resolvedTopic
@@ -215,6 +241,8 @@ const Classroom = ({ userId: propUserId, topic: propTopic }) => {
                 >
                   {isTeaching ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Agent thinking...</>
+                  ) : isVideo ? (
+                      <>Take Quiz Assessment <MoveRight className="w-4 h-4" /></>
                   ) : explanation.length > 0 ? (
                       <>Continue Explaining <MoveRight className="w-4 h-4" /></>
                   ) : (
@@ -231,30 +259,63 @@ const Classroom = ({ userId: propUserId, topic: propTopic }) => {
                     <h1 className="text-3xl font-bold text-slate-900">
                         {resolvedTopic || "Select a module to begin"}
                     </h1>
-                    <p className="text-slate-500 mt-2">Section {currentSection}</p>
+                    <p className="text-slate-500 mt-2">{isVideo ? "Video Lesson" : `Section ${currentSection}`}</p>
                 </div>
 
-                {/* Explanation Stream Box */}
-                <div 
-                  ref={scrollRef}
-                  className="flex-grow bg-white border border-slate-200 shadow-sm rounded-3xl p-8 overflow-y-auto leading-relaxed text-lg relative"
-                >
-                  {explanation ? (
-                    <div className="prose prose-slate max-w-none prose-p:mb-6 prose-headings:text-slate-900 prose-strong:text-indigo-900 marker:text-indigo-500">
-                      {explanation.split('\n').map((line, i) => (
-                        <p key={i} className={`${line.startsWith('-') ? 'ml-4' : ''}`}>{line}</p>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="h-full flex flex-col items-center justify-center text-slate-400">
-                      <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-6 border border-indigo-100">
-                          <BookOpen className="w-8 h-8 text-indigo-300" />
+                {isVideo ? (
+                  /* Video Player & Transcript Box */
+                  <div className="flex-grow flex flex-col gap-6 overflow-hidden">
+                      <div className="relative aspect-video rounded-3xl overflow-hidden shadow-lg border border-slate-200 bg-black flex items-center justify-center shrink-0">
+                          {videoUrl ? (
+                              <video 
+                                  controls 
+                                  className="w-full h-full object-contain" 
+                              >
+                                  <source src={videoUrl} type="video/mp4" />
+                                  Your browser does not support the video tag.
+                              </video>
+                          ) : (
+                              <div className="text-slate-400 flex flex-col items-center">
+                                  <Loader2 className="w-8 h-8 animate-spin mb-2 text-indigo-500" />
+                                  <p>Loading video player...</p>
+                              </div>
+                          )}
                       </div>
-                      <h3 className="text-xl font-bold text-slate-700 mb-2">Ready to learn?</h3>
-                      <p className="text-center max-w-sm">Click the <strong>Start Lesson</strong> button in the top right to let the AI tutor begin explaining the material.</p>
-                    </div>
-                  )}
-                </div>
+                      
+                      <div className="flex-1 bg-white border border-slate-200 shadow-sm rounded-3xl p-8 overflow-y-auto flex flex-col min-h-[150px]">
+                          <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 shrink-0">Video Transcript</h3>
+                          <div className="flex-grow overflow-y-auto leading-relaxed text-slate-700 text-base">
+                              {transcript ? (
+                                  <p className="whitespace-pre-wrap">{transcript}</p>
+                              ) : (
+                                  <p className="text-slate-400 italic">No transcript available for this video.</p>
+                              )}
+                          </div>
+                      </div>
+                  </div>
+                ) : (
+                  /* Explanation Stream Box */
+                  <div 
+                    ref={scrollRef}
+                    className="flex-grow bg-white border border-slate-200 shadow-sm rounded-3xl p-8 overflow-y-auto leading-relaxed text-lg relative"
+                  >
+                    {explanation ? (
+                      <div className="prose prose-slate max-w-none prose-p:mb-6 prose-headings:text-slate-900 prose-strong:text-indigo-900 marker:text-indigo-500">
+                        {explanation.split('\n').map((line, i) => (
+                          <p key={i} className={`${line.startsWith('-') ? 'ml-4' : ''}`}>{line}</p>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="h-full flex flex-col items-center justify-center text-slate-400">
+                        <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-6 border border-indigo-100">
+                            <BookOpen className="w-8 h-8 text-indigo-300" />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-700 mb-2">Ready to learn?</h3>
+                        <p className="text-center max-w-sm">Click the <strong>Start Lesson</strong> button in the top right to let the AI tutor begin explaining the material.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
             </div>
           </div>
         ) : (

@@ -33,6 +33,9 @@ const Learn = () => {
     const [activeSection, setActiveSection] = useState(1); // Use index as ID now
     const [courseFinished, setCourseFinished] = useState(false);
     const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+    const [isVideo, setIsVideo] = useState(false);
+    const [videoUrl, setVideoUrl] = useState("");
+    const [transcript, setTranscript] = useState("");
     const audioRef = useRef(null);
 
     
@@ -71,12 +74,17 @@ const Learn = () => {
         }
     }, [token, navigate, activeSprintId, topicObj]);
 
-  // Start Stream function (called initially and on 'Contine')
-  const startStream = (targetSection = null, customLoadingMessage = "Lextorah AI is explaining...") => {
+  // Start Stream function (called initially and on 'Continue')
+  const startStream = (targetSection = null, customLoadingMessage = "Lextorah AI is explaining...", triggerQuiz = false) => {
     if (!currentTopic || !user_id) return;
     
     setLoading(true);
-    setData(""); // Clear current explanation
+    if (!triggerQuiz) {
+        setData(""); // Clear current explanation
+        setIsVideo(false);
+        setVideoUrl("");
+        setTranscript("");
+    }
     setLoadingMessage(customLoadingMessage);
     
     // Close existing connection if any
@@ -88,6 +96,9 @@ const Learn = () => {
     let url = `${BASE_URL}/classroom/next/${user_id}?topic=${encodeURIComponent(currentTopic)}&sprint_id=${activeSprintId}&course_code=${encodeURIComponent(courseCode || '')}`;
     if (targetSection !== null) {
         url += `&section=${targetSection}`;
+    }
+    if (triggerQuiz) {
+        url += `&trigger_quiz=true`;
     }
     const eventSource = new EventSource(url);
     wsRef.current = eventSource;
@@ -123,6 +134,10 @@ const Learn = () => {
                 setActiveSection(parsed.section_index);
                 currentSectionIndex = parsed.section_index;
                 setLoading(false);
+            } else if (parsed.type === 'video') {
+                setVideoUrl(parsed.video_url);
+                setTranscript(parsed.transcript);
+                setIsVideo(true);
             } else if (parsed.type === 'explanation' && parsed.text) {
                  setData((prev) => prev ? prev + parsed.text : parsed.text);
                  currentExplanation += parsed.text;
@@ -202,6 +217,10 @@ const Learn = () => {
 
   const handleNext = () => {
      stopAudio();
+     if (isVideo) {
+         startStream(null, "Generating quiz...", true);
+         return;
+     }
      // Check if we are at the very end of sections
      let msg = "Agent is explaining...";
      if (sections.length > 0 && activeSection >= sections.length) {
@@ -482,27 +501,61 @@ const Learn = () => {
                                           {/* Header with speaker */}
                                           <div className="flex justify-between items-center mb-8 pb-6 border-b border-slate-100 shrink-0">
                                               <span className="text-green-600 font-bold uppercase tracking-widest text-sm bg-green-50 px-4 py-2 rounded-xl">
-                                                  {activeSection} {sections.length > 0 && `of ${sections.length}`}
+                                                  {isVideo ? "Video Lesson" : `${activeSection} ${sections.length > 0 && `of ${sections.length}`}`}
                                               </span>
-                                              <button 
-                                                  onClick={isPlayingAudio ? stopAudio : playAudio}
-                                                  disabled={!data || loading}
-                                                  className={`p-3 rounded-full transition-all flex items-center gap-2 font-bold ${isPlayingAudio ? 'bg-amber-100 text-amber-700 animate-pulse shadow-inner' : 'bg-green-50 hover:bg-green-100 text-green-700 hover:scale-105'}`}
-                                                  title="Listen to this card"
-                                              >
-                                                  {isPlayingAudio ? (
-                                                      <><Square className="w-5 h-5 fill-current" /> Stop Playing</>
-                                                  ) : (
-                                                      <><Volume2 className="w-5 h-5" /> Play Audio</>
-                                                  )}
-                                              </button>
+                                              {!isVideo && (
+                                                  <button 
+                                                      onClick={isPlayingAudio ? stopAudio : playAudio}
+                                                      disabled={!data || loading}
+                                                      className={`p-3 rounded-full transition-all flex items-center gap-2 font-bold ${isPlayingAudio ? 'bg-amber-100 text-amber-700 animate-pulse shadow-inner' : 'bg-green-50 hover:bg-green-100 text-green-700 hover:scale-105'}`}
+                                                      title="Listen to this card"
+                                                  >
+                                                      {isPlayingAudio ? (
+                                                          <><Square className="w-5 h-5 fill-current" /> Stop Playing</>
+                                                      ) : (
+                                                          <><Volume2 className="w-5 h-5" /> Play Audio</>
+                                                      )}
+                                                  </button>
+                                              )}
                                           </div>
                                           
                                           {/* Content */}
-                                          <div className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 text-center sm:text-left">
-                                              <div className="prose prose-lg md:prose-xl prose-slate mx-auto text-slate-700 prose-headings:text-slate-900 marker:text-green-500 prose-a:text-green-600 prose-strong:text-green-800 tracking-tight leading-relaxed">
-                                                  {data ? <ReactMarkdown>{String(data).replace(/\n/g, '  \n')}</ReactMarkdown> : <div className="text-slate-400 italic mt-10 text-center">Waiting for AI tutor...</div>}
-                                              </div>
+                                          <div className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-8 text-center sm:text-left flex flex-col gap-6 min-h-0">
+                                              {isVideo ? (
+                                                  <div className="flex-grow flex flex-col gap-6 min-h-0">
+                                                      <div className="relative aspect-video rounded-2xl overflow-hidden shadow-lg border border-slate-200 bg-black flex items-center justify-center shrink-0">
+                                                          {videoUrl ? (
+                                                              <video 
+                                                                  controls 
+                                                                  className="w-full h-full object-contain" 
+                                                              >
+                                                                  <source src={videoUrl} type="video/mp4" />
+                                                                  Your browser does not support the video tag.
+                                                              </video>
+                                                          ) : (
+                                                              <div className="text-slate-400 flex flex-col items-center">
+                                                                  <Loader className="w-8 h-8 animate-spin mb-2 text-green-500" />
+                                                                  <p>Loading video player...</p>
+                                                              </div>
+                                                          )}
+                                                      </div>
+                                                      
+                                                      <div className="flex-1 bg-slate-50 border border-slate-100 shadow-inner rounded-2xl p-6 overflow-y-auto flex flex-col min-h-[120px]">
+                                                          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 shrink-0">Video Transcript</h3>
+                                                          <div className="flex-grow overflow-y-auto leading-relaxed text-slate-700 text-sm text-left">
+                                                              {transcript ? (
+                                                                  <p className="whitespace-pre-wrap">{transcript}</p>
+                                                              ) : (
+                                                                  <p className="text-slate-400 italic">No transcript available for this video.</p>
+                                                              )}
+                                                          </div>
+                                                      </div>
+                                                  </div>
+                                              ) : (
+                                                  <div className="prose prose-lg md:prose-xl prose-slate mx-auto text-slate-700 prose-headings:text-slate-900 marker:text-green-500 prose-a:text-green-600 prose-strong:text-green-800 tracking-tight leading-relaxed">
+                                                      {data ? <ReactMarkdown>{String(data).replace(/\n/g, '  \n')}</ReactMarkdown> : <div className="text-slate-400 italic mt-10 text-center">Waiting for AI tutor...</div>}
+                                                  </div>
+                                              )}
                                           </div>
 
                                           {/* Footer Navigation */}
@@ -520,7 +573,7 @@ const Learn = () => {
                                                   disabled={loading}
                                                   className="px-8 py-3.5 rounded-xl font-bold transition-all flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
                                               >
-                                                  {sections.length > 0 && activeSection >= sections.length ? 'Take the Quiz' : 'Next Card'} <ChevronRight className="w-5 h-5" />
+                                                  {isVideo || (sections.length > 0 && activeSection >= sections.length) ? 'Take the Quiz' : 'Next Card'} <ChevronRight className="w-5 h-5" />
                                               </button>
                                           </div>
                                       </motion.div>

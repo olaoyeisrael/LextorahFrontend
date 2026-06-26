@@ -6,7 +6,7 @@ import { motion, time } from 'framer-motion';
 import { isAdmin, isTutor } from '../../utils/auth';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { updateEnrollment } from '../../store/userSlice';
+import { updateEnrollment, setSprints } from '../../store/userSlice';
 import Schedule from '../../components/Schedule';
 import { StudentDashboard } from '../../components/StudentsDashboard/UpcomingClass';
 import { TodaysClass } from '../../components/StudentsDashboard/TodayClass';
@@ -90,6 +90,63 @@ console.log(studentCount)
     console.log(import.meta.env.VITE_BACKEND_URL)
   }, [])
 
+  useEffect(() => {
+    const syncSprints = async () => {
+      if (!token) return;
+      try {
+        const res = await apiClient('/api/user/sprints');
+        if (res.ok) {
+          const data = await res.json();
+          const localManaged = data.managed_sprints || [];
+          const localStudent = data.student_sprints || [];
+
+          const existingManaged = user.managedSprints || [];
+          const mergedManaged = [...existingManaged];
+          localManaged.forEach(ls => {
+            if (!mergedManaged.some(ms => String(ms.id) === String(ls.sprint_id))) {
+              mergedManaged.push({
+                id: ls.sprint_id,
+                name: ls.name,
+                course_code: ls.course_code,
+                start_date: ls.start_date,
+                end_date: ls.end_date,
+                duration_weeks: ls.duration_weeks,
+                schedules: ls.schedules,
+                students: ls.students
+              });
+            }
+          });
+
+          const existingStudent = user.studentSprints || [];
+          const mergedStudent = [...existingStudent];
+          localStudent.forEach(ls => {
+            if (!mergedStudent.some(ms => String(ms.id) === String(ls.sprint_id))) {
+              mergedStudent.push({
+                id: ls.sprint_id,
+                name: ls.name,
+                course_code: ls.course_code,
+                start_date: ls.start_date,
+                end_date: ls.end_date,
+                duration_weeks: ls.duration_weeks,
+                schedules: ls.schedules,
+                students: ls.students
+              });
+            }
+          });
+
+          dispatch(setSprints({
+            managedSprints: mergedManaged,
+            studentSprints: mergedStudent
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to sync local sprints", err);
+      }
+    };
+
+    syncSprints();
+  }, [token, dispatch]);
+
 
   // Admin View
   if (isAdmin()) {
@@ -101,7 +158,7 @@ console.log(studentCount)
             </div>
             
 
-            <div className="grid md:grid-cols-2 gap-6 mb-12">
+            <div className="grid md:grid-cols-3 gap-6 mb-12">
                  <motion.div 
                     whileHover={{ y: -5 }}
                     className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between"
@@ -111,7 +168,7 @@ console.log(studentCount)
                              <h2 className="text-xl font-bold text-slate-900 mb-2">Upload Material</h2>
                              <p className="text-slate-600 text-sm mb-4">Add new course materials, lecture notes, or resources.</p>
                         </div>
-                         <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center">
+                          <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center">
                             <CloudUpload className="w-8 h-8 text-green-500" />
                         </div>
                     </div>
@@ -129,12 +186,30 @@ console.log(studentCount)
                              <h2 className="text-xl font-bold text-slate-900 mb-2">Student Performance</h2>
                              <p className="text-slate-600 text-sm mb-4">View assessment results and progress for all students.</p>
                         </div>
-                         <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
                             <CheckCircle className="w-8 h-8 text-blue-500" />
                         </div>
                     </div>
                     <Link to="/student-performance" className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl text-center transition-colors">
                         View Performance
+                    </Link>
+                </motion.div>
+
+                <motion.div 
+                    whileHover={{ y: -5 }}
+                    className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between"
+                >
+                     <div className="flex justify-between items-start mb-4">
+                        <div>
+                             <h2 className="text-xl font-bold text-slate-900 mb-2">Managed Courses</h2>
+                             <p className="text-slate-600 text-sm mb-4">Create cohorts/sprints and assign students to courses.</p>
+                        </div>
+                         <div className="w-16 h-16 bg-indigo-100 rounded-lg flex items-center justify-center">
+                            <GraduationCap className="w-8 h-8 text-indigo-500" />
+                        </div>
+                    </div>
+                    <Link to="/admin/courses" className="w-full py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl text-center transition-colors">
+                        Manage Courses
                     </Link>
                 </motion.div>
             </div>

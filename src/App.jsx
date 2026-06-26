@@ -74,6 +74,8 @@ const Assessments = lazy(() => import('./(root)/pages/Assessments'))
 const Analytics = lazy(() => import('./(root)/pages/Analytics'))
 const AddCourse = lazy(() => import('./(root)/pages/AddCourse'))
 const ProgressReport = lazy(() => import('./(root)/pages/ProgressReport'))
+const ManagedCourses = lazy(() => import('./(root)/pages/ManagedCourses'))
+const CreateSprint = lazy(() => import('./(root)/pages/CreateSprint'))
 
 
 
@@ -156,6 +158,8 @@ function App() {
           <Route path='/analytics' element={<Analytics />} />
           <Route path='/add-course' element={<AddCourse />} />
           <Route path='/progress-report' element={<ProgressReport />} />
+          <Route path='/admin/courses' element={<ManagedCourses />} />
+          <Route path='/admin/create-sprint' element={<CreateSprint />} />
 
 
         </Route>

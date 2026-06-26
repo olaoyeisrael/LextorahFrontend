@@ -20,6 +20,8 @@ const SprintSyllabusForm = ({ sprint }) => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+    console.log('sprint:', sprint)
+    console.log('sprint start date:', sprint.start_date)
 
 
    
@@ -71,16 +73,21 @@ const SprintSyllabusForm = ({ sprint }) => {
             return;
         }
 
-        // Parse start date, fallback to today if invalid or missing
-        let sprintStartDate = new Date(sprint.start_date);
-        if (isNaN(sprintStartDate.getTime())) {
+        // Parse start date, fallback to today if invalid or missing.
+        // We parse the string manually to avoid timezone shifting.
+        let sprintStartDate;
+        const dateParts = sprint.start_date ? sprint.start_date.split('-') : [];
+        if (dateParts.length === 3) {
+            sprintStartDate = new Date(
+                parseInt(dateParts[0]),
+                parseInt(dateParts[1]) - 1,
+                parseInt(dateParts[2])
+            );
+        } else {
             sprintStartDate = new Date();
+            sprintStartDate.setHours(0, 0, 0, 0);
         }
 
-        // We want to find the first actual class date.
-        // The sprint start_date might be a Monday, but classes might be only Wed/Fri.
-        // We'll iterate day by day from start_date and assign dates.
-        
         // Helper to add days to a date
         const addDays = (date, days) => {
             const result = new Date(date);
@@ -88,53 +95,57 @@ const SprintSyllabusForm = ({ sprint }) => {
             return result;
         };
 
-        // Get day index (0 = Sunday, 1 = Monday... 6 = Saturday)
-        const getDayIndex = (dayName) => {
-            const map = { 'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
-            return map[dayName];
+        // Helper to get day name in local time
+        const getWeekdayName = (date) => {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            return days[date.getDay()];
         };
 
-        // 2. Generate the blank session structure
+        // Helper to format date as YYYY-MM-DD in local time
+        const formatDateLocal = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        // 2. Generate the blank session structure day-by-day
         const generatedSessions = [];
         let sessionCounter = 1;
         let currentDate = new Date(sprintStartDate);
 
-        for (let week = 1; week <= durationWeeks; week++) {
-            sortedSchedules.forEach((schedule) => {
-                // Find the next date that matches this schedule's day_of_week
-                const targetDayIndex = getDayIndex(schedule.day_of_week);
-                
-                // Advance currentDate until it matches targetDayIndex
-                while (currentDate.getDay() !== targetDayIndex) {
-                    currentDate = addDays(currentDate, 1);
+        while (generatedSessions.length < totalSessions) {
+            const dayName = getWeekdayName(currentDate);
+            // Check if this day matches any of the weekly schedules
+            const matchingSchedules = sortedSchedules.filter(s => s.day_of_week === dayName);
+
+            matchingSchedules.forEach((schedule) => {
+                if (generatedSessions.length < totalSessions) {
+                    const formattedDate = formatDateLocal(currentDate);
+                    const weekNum = Math.ceil((generatedSessions.length + 1) / sessionsPerWeek);
+
+                    generatedSessions.push({
+                        id: `session-${sessionCounter}`,
+                        session_number: sessionCounter,
+                        week: weekNum,
+                        day_of_week: schedule.day_of_week,
+                        start_time: schedule.start_time,
+                        end_time: schedule.end_time,
+                        topic: [],
+                        session_date: formattedDate
+                    });
+                    sessionCounter++;
                 }
-
-                // Format date as YYYY-MM-DD for the input[type="date"]
-                const formattedDate = currentDate.toISOString().split('T')[0];
-
-                generatedSessions.push({
-                    id: `session-${sessionCounter}`,
-                    session_number: sessionCounter,
-                    week: week,
-                    day_of_week: schedule.day_of_week,
-                    start_time: schedule.start_time,
-                    end_time: schedule.end_time,
-                    topic: [],
-                    session_date: formattedDate
-                });
-                sessionCounter++;
-                
-                // Advance exactly 1 day so the next schedule search doesn't get stuck on the same day
-                currentDate = addDays(currentDate, 1);
             });
-            // At the end of the week, the currentDate is advanced naturally by the loop finding the next days
+
+            // Advance exactly 1 day to check the next calendar date
+            currentDate = addDays(currentDate, 1);
         }
 
         setSessions(generatedSessions);
-        console.log("Generated Session: ", generatedSessions)
+        console.log("Generated Session: ", generatedSessions);
         
-        // TODO: In a real implementation, you would try to fetch the existing
-        // syllabus for this sprint here and merge it with the generated structure
+        // Fetch existing syllabus for this sprint and merge it
         fetchExistingSyllabus(sprint.id, generatedSessions);
 
     }, [sprint]);
@@ -168,7 +179,7 @@ const SprintSyllabusForm = ({ sprint }) => {
                              return {
                                  ...session,
                                  topic: matchedTopics,
-                                 session_date: match.session_date || ''
+                                 session_date: session.session_date
                              };
                          }
                          return session;

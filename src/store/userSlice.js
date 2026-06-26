@@ -43,6 +43,19 @@ const userSlice = createSlice({
       localStorage.setItem('studentSprints', JSON.stringify(state.studentSprints));
       localStorage.setItem('managedCourseCodes', JSON.stringify(state.managedCourseCodes));
     },
+    setSprints: (state, action) => {
+      state.managedSprints = action.payload.managedSprints || [];
+      state.studentSprints = action.payload.studentSprints || [];
+      
+      // Compile and update unique managedCourseCodes from sprints
+      const allSprints = [...state.managedSprints, ...state.studentSprints];
+      const uniqueCourseCodes = Array.from(new Set(allSprints.map(sprint => sprint.course_code).filter(Boolean)));
+      state.managedCourseCodes = uniqueCourseCodes;
+
+      localStorage.setItem('managedSprints', JSON.stringify(state.managedSprints));
+      localStorage.setItem('studentSprints', JSON.stringify(state.studentSprints));
+      localStorage.setItem('managedCourseCodes', JSON.stringify(state.managedCourseCodes));
+    },
     updateEnrollment: (state, action) => {
         state.enrolledCourse = action.payload.course;
         state.enrolledLevel = action.payload.level;
@@ -83,6 +96,6 @@ const userSlice = createSlice({
 });
 
 
-export const { setUser, logout, updateEnrollment, updateToken } = userSlice.actions;
+export const { setUser, logout, updateEnrollment, updateToken, setSprints } = userSlice.actions;
 
 export default userSlice.reducer;
