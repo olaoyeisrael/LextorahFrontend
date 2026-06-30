@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Calendar, Clock, Link, Save, Video, Edit2, Check, X, Trash2 } from 'lucide-react';
-import { COURSE_CODES } from '../../utils/courseData';
+import { COURSE_CODES, getSubjectGroup } from '../../utils/courseData';
 
 import { apiClient } from '../../utils/api';
 
@@ -29,12 +29,23 @@ const LiveClasses = () => {
 
     const activeCodes = dbCourseCodes.length > 0 ? dbCourseCodes : COURSE_CODES;
     
+    const groupedCodes = React.useMemo(() => {
+        return activeCodes.reduce((acc, code) => {
+            const groupName = getSubjectGroup(code);
+            if (!acc[groupName]) {
+                acc[groupName] = [];
+            }
+            acc[groupName].push(code);
+            return acc;
+        }, {});
+    }, [activeCodes]);
+    
     // Form State
     const [formData, setFormData] = useState({
         course: COURSE_CODES[0],
         level: '',
 
-        week: 'Week 1',
+        week: 1,
         topic: '',
         date: '',
         time: '',
@@ -47,7 +58,7 @@ const LiveClasses = () => {
 
     const fetchClasses = async () => {
         try {
-            const res = await apiClient(`/live_classes?course=${encodeURIComponent(formData.course.toLowerCase())}&level=${encodeURIComponent(formData.level.toLowerCase())}`);
+            const res = await apiClient(`/live_classes?course_code=${encodeURIComponent(formData.course)}`);
             const data = await res.json();
             setSchedule(data.live_classes || []);
         } catch (err) {
@@ -59,7 +70,7 @@ const LiveClasses = () => {
 
     useEffect(() => {
         fetchClasses();
-    }, [formData.course, formData.level]); // Refresh when filter changes
+    }, [formData.course]); // Refresh when course filter changes
 
     const handleInputChange = (e) => {
         if (e.target.name === 'course') {
@@ -77,8 +88,10 @@ const LiveClasses = () => {
         try {
             const submitData = {
                 ...formData,
+                week: `Week ${formData.week}`,
                 course: formData.course.toLowerCase(),
-                level: formData.level.toLowerCase()
+                level: formData.level.toLowerCase(),
+                course_code: formData.course.toUpperCase()
             };
 
             const res = await apiClient('/live_class', {
@@ -90,7 +103,7 @@ const LiveClasses = () => {
                 alert("Class scheduled successfully!");
                 fetchClasses();
                 // Reset some fields
-                setFormData({ ...formData, topic: '', date: '', time: '', meeting_link: '' });
+                setFormData({ ...formData, week: 1, topic: '', date: '', time: '', meeting_link: '' });
             } else {
                 alert("Failed to schedule class");
             }
@@ -168,23 +181,28 @@ const LiveClasses = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                       <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Course</label>
-                      <select name="course" value={formData.course} onChange={handleInputChange} className="w-full p-2 rounded-lg border border-slate-200 text-sm">
-                           {activeCodes.map(code => (
-                              <option key={code} value={code}>{code}</option>
-                          ))}
-                      </select>
+                       <select name="course" value={formData.course} onChange={handleInputChange} className="w-full p-2 rounded-lg border border-slate-200 text-sm">
+                            {Object.entries(groupedCodes).map(([groupHeader, codes]) => (
+                                <optgroup key={groupHeader} label={groupHeader}>
+                                    {codes.map(code => (
+                                        <option key={code} value={code}>{code}</option>
+                                    ))}
+                                </optgroup>
+                            ))}
+                       </select>
                   </div>                  <div className="grid grid-cols-2 gap-4">
-                       <div>
-                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Week</label>
-                          <select name="week" value={formData.week} onChange={handleInputChange} className="w-full p-2 rounded-lg border border-slate-200 text-sm">
-                              <option>Week 1</option>
-                              <option>Week 2</option>
-                              <option>Week 3</option>
-                              <option>Week 4</option>
-                              <option>Week 6</option>
-                              <option>Week 8</option>
-                          </select>
-                      </div>
+                        <div>
+                           <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Week</label>
+                           <input 
+                               type="number" 
+                               name="week" 
+                               value={formData.week} 
+                               onChange={handleInputChange} 
+                               min="1"
+                               className="w-full p-2 rounded-lg border border-slate-200 text-sm" 
+                               required 
+                           />
+                       </div>
                       <div>
                           <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Duration (Min)</label>
                           <input type="number" name="duration" value={formData.duration} onChange={handleInputChange} className="w-full p-2 rounded-lg border border-slate-200 text-sm" />
@@ -249,7 +267,7 @@ const LiveClasses = () => {
                               <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-1">
                                       <h3 className="font-bold text-slate-900">{Array.isArray(cls.topic) ? cls.topic.join(', ') : cls.topic}</h3>
-                                      <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-bold rounded uppercase">{cls.course} {cls.level}</span>
+                                      <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-bold rounded uppercase">{cls.course_code || `${cls.course} ${cls.level}`}</span>
                                   </div>
                                   
                                   <div className="flex items-center gap-4 text-xs text-slate-500 mb-3">

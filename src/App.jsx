@@ -35,6 +35,7 @@ const Test = lazy(() => import('./(root)/pages/Test'))
 const Login = lazy(() => import('./(root)/auth/Login'))
 const Signup = lazy(() => import('./(root)/pages/Signup'))
 const LiveClasses = lazy(() => import('./(root)/pages/LiveClasses'))
+const StudentLiveClasses = lazy(() => import('./(root)/pages/StudentLiveClasses'))
 const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'))
 const NotFound = lazy(() => import('./(root)/pages/NotFound'))
 const ParentsPage = lazy(() => import('./(root)/pages/Parents'))
@@ -142,6 +143,7 @@ function App() {
           <Route path="/student-performance" element={<StudentPerformance />} />
           <Route path="/curriculum" element={<Curriculum />} />
           <Route path="/live-classes-admin" element={<LiveClasses />} />
+          <Route path="/live-classes" element={<StudentLiveClasses />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/exam-prep" element={<ExamPrep />} />
           <Route path="/tutor-live-classes" element={<TutorLiveClasses />} />

@@ -452,13 +452,20 @@ return (
             </div>
             
 
-            <div className='grid md:grid-cols-4 gap-4'>
+            <div className='grid md:grid-cols-5 gap-4'>
                 <StudentQuickActionCard 
                     title="Start Lesson"
                     description="Continue where you left off"
                     icon={Play}
                     color="blue-500"
                     link="/learn"
+                />
+                <StudentQuickActionCard
+                    title="Live Classes"
+                    description="Join scheduled live video classes"
+                    icon={Video}
+                    color="red-500"
+                    link="/live-classes"
                 />
                 <StudentQuickActionCard
                     title="Take a Test"
