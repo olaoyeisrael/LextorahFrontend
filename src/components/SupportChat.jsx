@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, Loader } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import ReactMarkdown from 'react-markdown';
 
 import { apiClient } from '../utils/api';
 
@@ -17,36 +17,53 @@ const SupportChat = () => {
 
     const renderMessageContent = (text, role) => {
         if (!text) return null;
-        const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
-        const parts = text.split(urlRegex);
-        return parts.map((part, idx) => {
-            if (part.match(urlRegex)) {
-                let cleanUrl = part;
+
+        // Convert raw URLs (not in markdown links) to markdown links
+        const regex = /(\[[^\]]+\]\([^)]+\))|((?:https?:\/\/|www\.)[^\s]+)/g;
+        const processedText = text.replace(regex, (match, g1, g2) => {
+            if (g1) return g1;
+            if (g2) {
+                let url = g2;
                 let trailingPunctuation = "";
-                const punctMatch = part.match(/[.,;:!?)]+$/);
+                const punctMatch = url.match(/[.,;:!?)]+$/);
                 if (punctMatch) {
-                    cleanUrl = part.substring(0, part.length - punctMatch[0].length);
+                    url = url.substring(0, url.length - punctMatch[0].length);
                     trailingPunctuation = punctMatch[0];
                 }
-                const href = cleanUrl.startsWith('http') ? cleanUrl : `https://${cleanUrl}`;
-                return (
-                    <span key={idx}>
-                        <a 
-                            href={href} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className={`underline break-all cursor-pointer font-bold ${
-                                role === 'user' ? 'text-white hover:text-white/80' : 'text-blue-600 hover:text-blue-800'
-                            }`}
-                        >
-                            {cleanUrl}
-                        </a>
-                        {trailingPunctuation}
-                    </span>
-                );
+                const href = url.startsWith('http') ? url : `https://${url}`;
+                return `[${url}](${href})${trailingPunctuation}`;
             }
-            return part;
+            return match;
         });
+
+        return (
+            <div className="markdown-content text-sm leading-relaxed">
+                <ReactMarkdown
+                    components={{
+                        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                        strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+                        em: ({ children }) => <em className="italic">{children}</em>,
+                        ul: ({ children }) => <ul className="list-disc pl-4 mb-2 last:mb-0">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 last:mb-0">{children}</ol>,
+                        li: ({ children }) => <li className="mb-1">{children}</li>,
+                        a: ({ href, children }) => (
+                            <a
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`underline break-all cursor-pointer font-bold ${
+                                    role === 'user' ? 'text-white hover:text-white/80' : 'text-blue-600 hover:text-blue-800'
+                                }`}
+                            >
+                                {children}
+                            </a>
+                        )
+                    }}
+                >
+                    {processedText.replace(/\n/g, '  \n')}
+                </ReactMarkdown>
+            </div>
+        );
     };
 
     // Generate or retrieve anonymous session ID
