@@ -77,6 +77,7 @@ const AddCourse = lazy(() => import('./(root)/pages/AddCourse'))
 const ProgressReport = lazy(() => import('./(root)/pages/ProgressReport'))
 const ManagedCourses = lazy(() => import('./(root)/pages/ManagedCourses'))
 const CreateSprint = lazy(() => import('./(root)/pages/CreateSprint'))
+const LextorahAssessment = lazy(() => import('./(root)/pages/LextorahAssessment'))
 
 
 
@@ -113,6 +114,7 @@ function App() {
         <Route path='/request-institution-access' element={<RequestInstitutionAccess/>}/>
         <Route path='/book-demo' element={<BookDemo/>}/>
           <Route path="*" element={<NotFound />} />
+          <Route path='/lextorah-assessment' element={<LextorahAssessment/>}/>
         </Route>
         
         <Route path="/login" element={<Login />} />
