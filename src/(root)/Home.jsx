@@ -81,7 +81,7 @@ const Home = () => {
       {/* Hero Section */}
       <div 
         className="pt-[400px] md:pt-0 pb-12 md:pb-22 px-4 md:px-12 lg:px-20 mx-auto flex flex-col items-start justify-center md:items-start text-left bg-cover bg-center min-h-[600px] md:min-h-[900px] w-full transition-all duration-300"
-        style={{ backgroundImage: bgImage ? `url(${bgImage})` : 'none', backgroundColor: bgImage ? 'transparent' : '#f0f0f0' }}
+        style={{ backgroundImage: bgImag ? `url(${bgImae})` : 'none', backgroundColor: bgImage ? 'transparent' : '#f0f0f0' }}
       >
         <div className="max-w-3xl mx-auto md:mx-0 flex flex-col items-center md:items-start text-center md:text-left w-full">
         <div className="min-h-[140px] md:min-h-[180px] flex items-center justify-center md:justify-start mb-6 w-full">
