@@ -8,7 +8,7 @@ const Profile = () => {
     
     // Fallback details matching mockup if not present in redux
     const fullName = firstName || lastName ? `${firstName || ''} ${lastName || ''}`.trim() : "Amara Okafor";
-    const userEmail = email || "amara.o@lextorah.ai";
+    const userEmail = email || "[EMAIL_ADDRESS]";
     const studentId = "LTX-2026-0417"; // Standard structured student ID
 
     // Calculate overview metrics dynamically where possible

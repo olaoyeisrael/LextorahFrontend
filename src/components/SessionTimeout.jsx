@@ -12,11 +12,11 @@ const SessionTimeout = () => {
     const [countdown, setCountdown] = useState(60);
     
     const warningTimerRef = useRef(null);
-    const logoutTimerRef = useRef(null);
     const countdownIntervalRef = useRef(null);
     
-    const WARNING_TIME = 14 * 60 * 1000; // 14 minutes in ms
-    const LOGOUT_TIME = 15 * 60 * 1000;  // 15 minutes in ms
+    // In production, set WARNING_TIME to 14 * 60 * 1000 (14 minutes).
+    // Set to 5 * 1000 (5 seconds) for quick local testing.
+    const WARNING_TIME = 5 * 1000; 
 
     const handleLogout = () => {
         // Collect current unsaved text inputs to prevent data loss
@@ -34,7 +34,7 @@ const SessionTimeout = () => {
 
         // Clear warning UI
         setShowWarning(false);
-        clearInterval(countdownIntervalRef.current);
+        if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
         
         // Log out user
         localStorage.removeItem('token');
@@ -49,28 +49,26 @@ const SessionTimeout = () => {
 
         // Clear existing timers
         if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
-        if (logoutTimerRef.current) clearTimeout(logoutTimerRef.current);
         if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
 
         setShowWarning(false);
         setCountdown(60);
 
-        // Set warnings and logout timers
+        // Set warning timer
         warningTimerRef.current = setTimeout(() => {
             setShowWarning(true);
             startCountdown();
         }, WARNING_TIME);
-
-        logoutTimerRef.current = setTimeout(() => {
-            handleLogout();
-        }, LOGOUT_TIME);
     };
 
     const startCountdown = () => {
+        if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+        
         countdownIntervalRef.current = setInterval(() => {
             setCountdown((prev) => {
                 if (prev <= 1) {
                     clearInterval(countdownIntervalRef.current);
+                    handleLogout(); // Automatically log out when countdown hits 0
                     return 0;
                 }
                 return prev - 1;
@@ -101,7 +99,6 @@ const SessionTimeout = () => {
                 window.removeEventListener(event, handleActivity);
             });
             if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
-            if (logoutTimerRef.current) clearTimeout(logoutTimerRef.current);
             if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
         };
     }, [token, showWarning]);
