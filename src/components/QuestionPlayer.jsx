@@ -139,7 +139,7 @@ function QuestionPlayer({ questions = [], timed = false, timeLimit = 1800, onCom
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-xl font-bold text-slate-700">AI is grading your answers...</p>
+        <p className="text-xl font-bold text-slate-700">Ms. Lexi is grading your answers...</p>
         <p className="text-sm text-slate-400 mt-2">This may take a moment.</p>
       </div>
     );

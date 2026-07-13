@@ -7,7 +7,8 @@ import msLexi from '../assets/msLexi.png';
 
 const studentLinks = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-  { icon: BookOpen, label: 'My Courses', path: '/courses' },
+  { icon: BookOpen, label: 'My Courses', path: '/learn' },
+  { icon: GraduationCap, label: 'Student Profile', path: '/profile' },
   { icon: Video, label: 'Live Classes', path: '/live-classes' },
   { icon: MonitorCheck, label: 'Assessments', path: '/assessment' },
   { icon: BookOpen, label: 'Assignments', path: '/assignment' },

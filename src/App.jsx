@@ -28,6 +28,7 @@ const Upload = lazy(() => import('./(root)/pages/Upload'))
 const Course = lazy(() => import('./(root)/pages/Course'))
 const History = lazy(() => import('./(root)/pages/History'))
 const Settings = lazy(() => import('./(root)/pages/Settings'))
+const Profile = lazy(() => import('./(root)/pages/Profile'))
 const StudentPerformance = lazy(() => import('./(root)/pages/StudentPerformance'))
 const Curriculum = lazy(() => import('./(root)/pages/Curriculum'))
 const Dashboard = lazy(() => import('./(root)/pages/Dashboard'))
@@ -98,6 +99,7 @@ function App() {
   return (
     <main>
       <ScrollToAnchor />
+      <SessionTimeout />
       <Suspense fallback={<div style={{minHeight: "100vh"}}/>}>
       <Routes >
       <Route element={<RootLayer/>}>
@@ -142,6 +144,7 @@ function App() {
           <Route path="/test" element={<Test />} />
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/student-performance" element={<StudentPerformance />} />
           <Route path="/curriculum" element={<Curriculum />} />
           <Route path="/live-classes-admin" element={<LiveClasses />} />

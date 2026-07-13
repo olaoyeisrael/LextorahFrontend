@@ -561,11 +561,11 @@ const Learn = () => {
                                           {/* Footer Navigation */}
                                           <div className="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center shrink-0">
                                               <button 
-                                                  onClick={handlePrevious}
+                                                  onClick={handlePrev}
                                                   disabled={activeSection <= 1 || loading}
                                                   className="px-6 py-3.5 rounded-xl font-bold transition-all flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
                                               >
-                                                  <ChevronLeft className="w-5 h-5" /> Previous Card
+                                                  <ChevronLeft className="w-5 h-5" /> Previous Lesson
                                               </button>
                                               
                                               <button 
@@ -573,7 +573,7 @@ const Learn = () => {
                                                   disabled={loading}
                                                   className="px-8 py-3.5 rounded-xl font-bold transition-all flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
                                               >
-                                                  {isVideo || (sections.length > 0 && activeSection >= sections.length) ? 'Take the Quiz' : 'Next Card'} <ChevronRight className="w-5 h-5" />
+                                                  {isVideo || (sections.length > 0 && activeSection >= sections.length) ? 'Take the Quiz' : 'Next Lesson'} <ChevronRight className="w-5 h-5" />
                                               </button>
                                           </div>
                                       </motion.div>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PlusCircle, BookOpen, Globe, Layers, Clock, Users, FileText, CheckCircle2, ChevronRight } from 'lucide-react';
+import { PlusCircle, BookOpen, Globe, Layers, Clock, Users, FileText, CheckCircle2, ChevronRight, Trash2, Loader2 } from 'lucide-react';
 import { apiClient } from '../../utils/api';
+import { useDetailedCoursesQuery, useDeleteCourseMutation } from '../../utils/queries';
 
 function AddCourse() {
   const [form, setForm] = useState({
@@ -17,6 +18,9 @@ function AddCourse() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+
+  const { data: courses = [], isLoading: loadingCourses, refetch: refetchCourses } = useDetailedCoursesQuery();
+  const deleteCourseMutation = useDeleteCourseMutation();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -41,6 +45,7 @@ function AddCourse() {
 
       if (res.ok) {
         setSuccess(true);
+        refetchCourses(); // Update list immediately
       } else {
         const errData = await res.json();
         setError(errData.detail || 'Failed to create course. Please try again.');
@@ -50,6 +55,19 @@ function AddCourse() {
       setError('Connection to course server failed.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteCourse = (code) => {
+    if (window.confirm(`Are you sure you want to delete the course template '${code}'?`)) {
+      deleteCourseMutation.mutate(code, {
+        onSuccess: () => {
+          refetchCourses();
+        },
+        onError: (err) => {
+          alert(err.message || 'Failed to delete course template.');
+        }
+      });
     }
   };
 
@@ -67,7 +85,7 @@ function AddCourse() {
   };
 
   return (
-    <div className="p-6 md:p-12 max-w-5xl mx-auto">
+    <div className="p-6 md:p-12 max-w-5xl mx-auto font-Mada">
       <div className="flex items-center space-x-3 mb-8">
         <div className="p-3 bg-blue-100 rounded-2xl text-blue-600">
           <PlusCircle className="w-8 h-8" />
@@ -86,7 +104,7 @@ function AddCourse() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.4 }}
-            className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8 md:p-12"
+            className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8 md:p-12 mb-10"
           >
             {error && (
               <div className="mb-6 p-4 rounded-xl bg-red-50 text-red-700 border border-red-200 text-sm font-semibold">
@@ -156,37 +174,74 @@ function AddCourse() {
                     value={form.level}
                     onChange={handleChange}
                     required
-                    placeholder="Select Level"
+                    placeholder="e.g. A1, Intermediate"
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700"
                   />
                 </div>
-
-                {/* Duration */}
-              
-
-
-           
-            
               </div>
 
-              {/* Form Buttons */}
-              <div className="flex gap-4 pt-4 border-t border-slate-100 justify-end">
+              {/* Optional Fields Accordion */}
+              <div className="border-t border-slate-100 pt-8">
+                <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
+                  Optional Pacing details
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Duration */}
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center">
+                      <Clock className="w-4 h-4 mr-2 text-slate-400" /> Duration (Weeks)
+                    </label>
+                    <input
+                      type="number"
+                      name="duration"
+                      value={form.duration}
+                      onChange={handleChange}
+                      placeholder="e.g. 10"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700"
+                    />
+                  </div>
+
+                  {/* Max Capacity */}
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center">
+                      <Users className="w-4 h-4 mr-2 text-slate-400" /> Max Student Capacity
+                    </label>
+                    <input
+                      type="number"
+                      name="maxCapacity"
+                      value={form.maxCapacity}
+                      onChange={handleChange}
+                      placeholder="e.g. 50"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700"
+                    />
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="mt-6">
+                  <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center">
+                    <FileText className="w-4 h-4 mr-2 text-slate-400" /> Course Description
+                  </label>
+                  <textarea
+                    name="description"
+                    value={form.description}
+                    onChange={handleChange}
+                    rows="4"
+                    placeholder="Enter brief description of course objectives..."
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700 resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Submit button */}
+              <div className="flex justify-end pt-4">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-blue-200 flex items-center justify-center min-w-[160px] disabled:bg-blue-400"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  {loading ? (
-                    <span className="flex items-center gap-2">
-                      <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Creating...
-                    </span>
-                  ) : (
-                    'Create Course'
-                  )}
+                  {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {loading ? 'Creating...' : 'Create Course Template'}
                 </button>
               </div>
             </form>
@@ -198,7 +253,7 @@ function AddCourse() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: 'spring', damping: 20 }}
-            className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8 md:p-12 text-center"
+            className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8 md:p-12 text-center mb-10"
           >
             <div className="p-4 bg-emerald-50 rounded-full text-emerald-600 inline-block mb-6 shadow-inner">
               <CheckCircle2 className="w-16 h-16" />
@@ -245,6 +300,60 @@ function AddCourse() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Course Templates List */}
+      <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8 md:p-12">
+        <h2 className="text-2xl font-extrabold text-slate-800 mb-6 flex items-center gap-2">
+          <BookOpen className="w-6 h-6 text-blue-600" /> Registered Course Templates
+        </h2>
+
+        {loadingCourses ? (
+          <div className="flex justify-center items-center py-12 text-slate-400">
+            <Loader2 className="w-8 h-8 animate-spin mr-2" /> Loading templates...
+          </div>
+        ) : courses.length === 0 ? (
+          <div className="text-center py-10 bg-slate-50 rounded-2xl border border-slate-200 border-dashed text-slate-400">
+            No course templates registered yet. Create one above to get started.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100 text-slate-400 text-sm font-bold">
+                  <th className="pb-4 pr-4">Course Code</th>
+                  <th className="pb-4 px-4">Title</th>
+                  <th className="pb-4 px-4">Category</th>
+                  <th className="pb-4 px-4">Level</th>
+                  <th className="pb-4 pl-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700 text-sm">
+                {courses.map((course) => (
+                  <tr key={course.id || course.course_code} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="py-4 pr-4 font-bold text-slate-850 font-mono">{course.course_code}</td>
+                    <td className="py-4 px-4 font-semibold">{course.title}</td>
+                    <td className="py-4 px-4">{course.category}</td>
+                    <td className="py-4 px-4">
+                      <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs font-bold border border-slate-200">
+                        {course.level}
+                      </span>
+                    </td>
+                    <td className="py-4 pl-4 text-right">
+                      <button
+                        onClick={() => handleDeleteCourse(course.course_code)}
+                        className="p-2 text-rose-500 hover:bg-rose-50 hover:text-rose-700 rounded-lg transition-colors inline-flex items-center"
+                        title="Delete Course Template"
+                      >
+                        <Trash2 className="w-4.5 h-4.5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

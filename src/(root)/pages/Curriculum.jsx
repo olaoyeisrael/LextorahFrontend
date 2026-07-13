@@ -5,8 +5,14 @@ import { Plus, BookOpen, Loader2, Trash2, FileText, Edit2, X, Check } from 'luci
 import { COURSE_CODES, getSubjectGroup } from '../../utils/courseData';
 import { useSelector } from 'react-redux';
 import { isTutor } from '../../utils/auth';
-
 import { apiClient } from '../../utils/api';
+import { 
+    useCoursesQuery, 
+    useCurriculumQuery, 
+    useAddCurriculumBatchMutation, 
+    useUpdateCurriculumMutation, 
+    useDeleteCurriculumMutation 
+} from '../../utils/queries';
 
 const Curriculum = () => {
     const navigate = useNavigate();
@@ -30,23 +36,8 @@ const Curriculum = () => {
     // Build unique course codes from managed sprints
     const sprintCourseCodes = [...new Set(managedSprints.map(s => s.course_code || '').filter(Boolean))];
 
-    const [dbCourseCodes, setDbCourseCodes] = useState([]);
-
-    // Fetch dynamic course codes from backend
-    useEffect(() => {
-        const fetchCourses = async () => {
-            try {
-                const res = await apiClient('/api/courses');
-                if (res.ok) {
-                    const data = await res.json();
-                    setDbCourseCodes(data);
-                }
-            } catch (err) {
-                console.error("Failed to fetch database courses", err);
-            }
-        };
-        fetchCourses();
-    }, []);
+    // Fetch dynamic course codes from backend via TanStack Query
+    const { data: dbCourseCodes = [] } = useCoursesQuery();
 
     // Group active codes dynamically by language/subject group
     const activeCodes = dbCourseCodes.length > 0 ? dbCourseCodes : COURSE_CODES;
@@ -68,10 +59,7 @@ const Curriculum = () => {
     const defaultLevel = hasManagedSprints ? '' : 'A1';
 
     // State
-    const [loading, setLoading] = useState(false);
-    const [items, setItems] = useState([]);
     const [filters, setFilters] = useState({ course: defaultCourse, level: defaultLevel });
-    const [loadingButton, setLoadingButton] = useState(false);
     
     const [form, setForm] = useState({
         course: defaultCourse,
@@ -87,28 +75,8 @@ const Curriculum = () => {
     const [editingItem, setEditingItem] = useState(null);
     const [editForm, setEditForm] = useState({ topic: '', course_code: '' });
 
-    // Fetch Curriculum
-    const fetchCurriculum = async () => {
-        setLoading(true);
-        try {
-            // Tutors filter by course_code, others by course+level
-            const queryStr = `/curriculum?course_code=${encodeURIComponent(filters.course)}`;
-            const res = await apiClient(queryStr);
-            const data = await res.json();
-            if (data.curriculum) {
-                setItems(data.curriculum);
-                console.log("Fetched Curriculum: ", data.curriculum);
-            }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchCurriculum();
-    }, [filters]); 
+    // Fetch Curriculum via TanStack Query
+    const { data: items = [], isLoading: loading, refetch: fetchCurriculum } = useCurriculumQuery(null, null, filters.course); 
 
     const handleChange = (e) => {
         if (e.target.name === 'course') {
@@ -153,18 +121,20 @@ const Curriculum = () => {
         }
     };
 
+    const addBatchMutation = useAddCurriculumBatchMutation();
+    const deleteMutation = useDeleteCurriculumMutation();
+    const updateMutation = useUpdateCurriculumMutation();
+
     // Handle Submit
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         setMessage('');
-        setLoadingButton(true);
 
         // Prepare batch
         const batch = topicList.map((t, idx) => ({
             course: form.course,
             level: form.level,
-            // Week is deprecated, we could send None or derived
-            week: idx + 1, // sending pseudo-week/module number if needed
+            week: idx + 1,
             topic: typeof t === 'string' ? t : t.topic,
             course_code: form.course,
             description: null
@@ -174,48 +144,26 @@ const Curriculum = () => {
             setMessage("Please add at least one topic.");
             return;
         }
-        console.log("Batch: ",batch);
 
-        try {
-            const res = await apiClient('/curriculum/batch', {
-                method: 'POST',
-                body: JSON.stringify(batch)
-            });
-
-            if (res.ok) {
-                const data = await res.json();
+        addBatchMutation.mutate(batch, {
+            onSuccess: (data) => {
                 setMessage(data.msg || 'Topics added successfully!');
                 setTopicList([{ topic: '', course_code: '' }]); // Reset list
-                fetchCurriculum(); // Refresh
-                setLoadingButton(false);
-            } else {
-
-                setMessage('Failed to add topics.');
-                setLoadingButton(false);
+            },
+            onError: (err) => {
+                setMessage(err.message || 'Failed to add topics.');
             }
-        } catch (err) {
-            console.error(err);
-            setMessage('Error connecting to server.');
-            setLoadingButton(false);
-        }
+        });
     };
 
-    const handleDeleteTopic = async (id) => {
+    const handleDeleteTopic = (id) => {
         if (!window.confirm("Are you sure you want to delete this topic?")) return;
         
-        try {
-            const res = await apiClient(`/curriculum/${id}`, {
-                method: 'DELETE',
-            });
-
-            if (res.ok) {
-                fetchCurriculum();
-            } else {
+        deleteMutation.mutate(id, {
+            onError: () => {
                 alert("Failed to delete topic");
             }
-        } catch (err) {
-            console.error(err);
-        }
+        });
     };
 
     const handleEditClick = (item) => {
@@ -231,25 +179,24 @@ const Curriculum = () => {
         setEditForm({ topic: '', course_code: '' });
     };
 
-    const handleSaveEdit = async (id) => {
-        try {
-            const res = await apiClient(`/curriculum/${id}`, {
-                method: 'PUT',
-                body: JSON.stringify({
+    const handleSaveEdit = (id) => {
+        updateMutation.mutate(
+            { 
+                id, 
+                payload: {
                     topic: editForm.topic,
                     course_code: editForm.course_code
-                })
-            });
-
-            if (res.ok) {
-                setEditingItem(null);
-                fetchCurriculum();
-            } else {
-                alert("Failed to update topic");
+                }
+            },
+            {
+                onSuccess: () => {
+                    setEditingItem(null);
+                },
+                onError: () => {
+                    alert("Failed to update topic");
+                }
             }
-        } catch (err) {
-            console.error("Error updating curriculum", err);
-        }
+        );
     };
 
     return (
@@ -330,7 +277,7 @@ const Curriculum = () => {
                                 {message}
                             </div>
                         )}
-                        { loadingButton ? (
+                        { addBatchMutation.isPending ? (
                             <div className="flex justify-center items-center">
                                 <Loader2 className="w-6 h-6 text-green-600 animate-spin" />
                             </div>
