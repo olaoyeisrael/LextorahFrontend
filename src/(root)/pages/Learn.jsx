@@ -561,7 +561,7 @@ const Learn = () => {
                                           {/* Footer Navigation */}
                                           <div className="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center shrink-0">
                                               <button 
-                                                  onClick={handlePrev}
+                                                  onClick={handlePrevious}
                                                   disabled={activeSection <= 1 || loading}
                                                   className="px-6 py-3.5 rounded-xl font-bold transition-all flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
                                               >

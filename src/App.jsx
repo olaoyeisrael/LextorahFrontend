@@ -38,7 +38,7 @@ const Login = lazy(() => import('./(root)/auth/Login'))
 const Signup = lazy(() => import('./(root)/pages/Signup'))
 const LiveClasses = lazy(() => import('./(root)/pages/LiveClasses'))
 const StudentLiveClasses = lazy(() => import('./(root)/pages/StudentLiveClasses'))
-const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'))
+import ProtectedRoute, { StudentProtectedRoute, TutorProtectedRoute, AdminProtectedRoute } from './components/ProtectedRoute'
 const NotFound = lazy(() => import('./(root)/pages/NotFound'))
 const ParentsPage = lazy(() => import('./(root)/pages/Parents'))
 const TeachersPage = lazy(() => import('./(root)/pages/Teachers'))
@@ -134,45 +134,60 @@ function App() {
 
         
         {/* Authenticated Routes */}
-        <Route element={<ProtectedRoute/>}>
-        <Route element={<DashboardLayout/>}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path='/upload' element={<Upload/>}/>
-          <Route path="/ask" element={<Ask />} />
-          <Route path="/learn" element={<LearnSelection />} />
-          <Route path="/lesson" element={<Learn />} />
-          <Route path="/courses" element={<Course />} />
-          <Route path="/test" element={<Test />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/student-performance" element={<StudentPerformance />} />
-          <Route path="/curriculum" element={<Curriculum />} />
-          <Route path="/live-classes-admin" element={<LiveClasses />} />
-          <Route path="/live-classes" element={<StudentLiveClasses />} />
-          <Route path="/assessment" element={<Assessment />} />
-          <Route path="/exam-prep" element={<ExamPrep />} />
-          <Route path="/tutor-live-classes" element={<TutorLiveClasses />} />
-          <Route path="/notifications" element={<Notification />} />
-          <Route path="/ai-report" element={<AIReport />} />
-          <Route path='/assign-topics' element={<AssignTopics/>} />
-          <Route path='/upcoming-schedule' element={<SchedulePage/>}/>
-          <Route path='/practice-questions' element={<PracticeQuestion/>}/>
-          <Route path='/mock-exams' element={<Mock/>}/>
-          <Route path='/assignment' element={<Assignment />} />
-          <Route path='/how-to-use' element={<HowToUse />} />
-          <Route path='/tutor-curriculum' element={<TutorCurriculum />} />
-          <Route path='/assessments' element={<Assessments />} />
-          <Route path='/analytics' element={<Analytics />} />
-          <Route path='/add-course' element={<AddCourse />} />
-          <Route path='/progress-report' element={<ProgressReport />} />
-          <Route path='/admin/courses' element={<ManagedCourses />} />
-          <Route path='/admin/create-sprint' element={<CreateSprint />} />
+        <Route element={<ProtectedRoute />}>
+          <Route element={<DashboardLayout />}>
+            {/* Universal Authenticated Routes */}
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/notifications" element={<Notification />} />
+            <Route path="/how-to-use" element={<HowToUse />} />
 
+            {/* Student Only Routes */}
+            <Route element={<StudentProtectedRoute />}>
+              <Route path="/ask" element={<Ask />} />
+              <Route path="/learn" element={<LearnSelection />} />
+              <Route path="/lesson" element={<Learn />} />
+              <Route path="/courses" element={<Course />} />
+              <Route path="/test" element={<Test />} />
+              <Route path="/history" element={<History />} />
+              <Route path="/live-classes" element={<StudentLiveClasses />} />
+              <Route path="/assessment" element={<Assessment />} />
+              <Route path="/exam-prep" element={<ExamPrep />} />
+              <Route path="/upcoming-schedule" element={<SchedulePage />} />
+              <Route path="/practice-questions" element={<PracticeQuestion />} />
+              <Route path="/mock-exams" element={<Mock />} />
+              <Route path="/assignment" element={<Assignment />} />
+            </Route>
 
+            {/* Tutor / Teacher Only Routes */}
+            <Route element={<TutorProtectedRoute />}>
+              <Route path="/upload" element={<Upload />} />
+              <Route path="/tutor-live-classes" element={<TutorLiveClasses />} />
+              <Route path="/tutor-curriculum" element={<TutorCurriculum />} />
+              <Route path="/assessments" element={<Assessments />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/add-course" element={<AddCourse />} />
+              <Route path="/progress-report" element={<ProgressReport />} />
+              <Route path="/ai-report" element={<AIReport />} />
+              <Route path="/assign-topics" element={<AssignTopics />} />
+            </Route>
+
+            {/* Admin Only Routes */}
+            <Route element={<AdminProtectedRoute />}>
+              <Route path="/student-performance" element={<StudentPerformance />} />
+              <Route path="/curriculum" element={<Curriculum />} />
+              <Route path="/live-classes-admin" element={<LiveClasses />} />
+              <Route path="/admin/courses" element={<ManagedCourses />} />
+              <Route path="/admin/create-sprint" element={<CreateSprint />} />
+            </Route>
+          </Route>
+
+          {/* Student Classroom Page */}
+          <Route element={<StudentProtectedRoute />}>
+            <Route path="/classroom" element={<Classroom2 />} />
+          </Route>
         </Route>
-        </Route>
-        <Route path="/classroom" element={<Classroom2 />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
