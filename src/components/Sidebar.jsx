@@ -8,12 +8,13 @@ import msLexi from '../assets/msLexi.png';
 const studentLinks = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
   { icon: BookOpen, label: 'My Courses', path: '/learn' },
-  { icon: GraduationCap, label: 'Student Profile', path: '/profile' },
+  
   { icon: Video, label: 'Live Classes', path: '/live-classes' },
   { icon: MonitorCheck, label: 'Assessments', path: '/assessment' },
   { icon: BookOpen, label: 'Assignments', path: '/assignment' },
   { icon: History, label: 'Course History', path: '/history' },
   { icon: HelpCircle, label: 'How to Use', path: '/how-to-use' },
+  { icon: GraduationCap, label: 'Student Profile', path: '/profile' },
   // { icon: History, label: 'Course Room', path: '/classroom' },
   // { icon: Settings, label: 'Settings', path: '/settings' },
 ];
@@ -25,6 +26,7 @@ const adminLinks = [
     { icon: CheckCircle, label: 'Student Performance', path: '/student-performance' },
     { icon: Video, label: 'Live Classes', path: '/live-classes-admin' },
     { icon: PlusCircle, label: 'Add Course', path: '/add-course' },
+    { icon: BookOpen, label: 'Assignments', path: '/assignment' },
     { icon: ClipboardList, label: 'Progress Report', path: '/progress-report'},
 ];
 

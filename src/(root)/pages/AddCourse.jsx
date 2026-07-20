@@ -181,13 +181,13 @@ function AddCourse() {
               </div>
 
               {/* Optional Fields Accordion */}
-              <div className="border-t border-slate-100 pt-8">
+              {/* <div className="border-t border-slate-100 pt-8">
                 <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
                   Optional Pacing details
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                </h3> */}
+                {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> */}
                   {/* Duration */}
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center">
                       <Clock className="w-4 h-4 mr-2 text-slate-400" /> Duration (Weeks)
                     </label>
@@ -202,7 +202,7 @@ function AddCourse() {
                   </div>
 
                   {/* Max Capacity */}
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center">
                       <Users className="w-4 h-4 mr-2 text-slate-400" /> Max Student Capacity
                     </label>
@@ -214,11 +214,11 @@ function AddCourse() {
                       placeholder="e.g. 50"
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700"
                     />
-                  </div>
-                </div>
+                  </div> 
+                </div> 
 
                 {/* Description */}
-                <div className="mt-6">
+                {/* <div className="mt-6">
                   <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center">
                     <FileText className="w-4 h-4 mr-2 text-slate-400" /> Course Description
                   </label>
@@ -230,7 +230,7 @@ function AddCourse() {
                     placeholder="Enter brief description of course objectives..."
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-slate-700 resize-none"
                   />
-                </div>
+                </div> *
               </div>
 
               {/* Submit button */}

@@ -228,3 +228,26 @@ export const useDeleteCourseMutation = () => {
         },
     });
 };
+
+// --- TUTOR DASHBOARD QUERIES ---
+export const useTutorMetricsQuery = (isTutorOrAdmin) => useQuery({
+    queryKey: ['tutorMetrics'],
+    queryFn: async () => {
+        const res = await apiClient('/api/tutor/metrics');
+        if (!res.ok) throw new Error('Failed to fetch tutor metrics');
+        return await res.json();
+    },
+    enabled: !!isTutorOrAdmin,
+    refetchInterval: 5000, // Poll every 5 seconds for real-time reactivity
+});
+
+export const useTutorSprintsQuery = (isTutorOrAdmin) => useQuery({
+    queryKey: ['tutorSprints'],
+    queryFn: async () => {
+        const res = await apiClient('/api/user/sprints');
+        if (!res.ok) throw new Error('Failed to fetch user sprints');
+        return await res.json();
+    },
+    enabled: !!isTutorOrAdmin,
+    refetchInterval: 5000, // Poll every 5 seconds
+});

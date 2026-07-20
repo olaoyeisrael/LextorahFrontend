@@ -142,6 +142,8 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/notifications" element={<Notification />} />
             <Route path="/how-to-use" element={<HowToUse />} />
+            <Route path="/assignment" element={<Assignment />} />
+            <Route path="/exam-prep" element={<ExamPrep />} />
 
             {/* Student Only Routes */}
             <Route element={<StudentProtectedRoute />}>
@@ -153,11 +155,10 @@ function App() {
               <Route path="/history" element={<History />} />
               <Route path="/live-classes" element={<StudentLiveClasses />} />
               <Route path="/assessment" element={<Assessment />} />
-              <Route path="/exam-prep" element={<ExamPrep />} />
+              {/* <Route path="/exam-prep" element={<ExamPrep />} /> */}
               <Route path="/upcoming-schedule" element={<SchedulePage />} />
               <Route path="/practice-questions" element={<PracticeQuestion />} />
               <Route path="/mock-exams" element={<Mock />} />
-              <Route path="/assignment" element={<Assignment />} />
             </Route>
 
             {/* Tutor / Teacher Only Routes */}
@@ -171,6 +172,7 @@ function App() {
               <Route path="/progress-report" element={<ProgressReport />} />
               <Route path="/ai-report" element={<AIReport />} />
               <Route path="/assign-topics" element={<AssignTopics />} />
+              <Route path="/student-performance" element={<StudentPerformance />} />
             </Route>
 
             {/* Admin Only Routes */}

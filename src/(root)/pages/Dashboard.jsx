@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTutorMetricsQuery, useTutorSprintsQuery } from '../../utils/queries';
 import { Link } from 'react-router-dom';
 import { Lightbulb, HelpCircle, CloudUpload, CheckCircle, Lock, Book, BookOpen, User, TriangleAlert, FileExclamationPoint, Calendar, Clock, Target, TrendingUp, ArrowRight, Zap, Play, ClipboardCheck, GraduationCap, Bot, BarChart2, Award, FileCheck, Video, Calendar1, Clock1, Clock4, TestTube, Calculator, PenTool, ChartLine, MonitorCheck, ChartColumnIncreasing } from 'lucide-react';
 import { motion, time } from 'framer-motion';
@@ -38,13 +39,15 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const [scheduleData, setScheduleData] = useState(null);
   const [loading, setLoading] = useState(false);
-    const managedSprints = useSelector((state) => state.user?.managedSprints);
+    const isTutorOrAdmin = isTutor() || isAdmin();
+    const { data: tutorMetrics, isLoading: loadingMetrics } = useTutorMetricsQuery(isTutorOrAdmin);
+    const { data: tutorSprintsData, isLoading: loadingSprints } = useTutorSprintsQuery(!!token);
 
-    const numberOfStudent = managedSprints
+    const managedSprints = useSelector((state) => state.user?.managedSprints) || [];
+
     const studentCount = managedSprints.reduce((acc, sprint) => {
-    return acc + (sprint.students?.length || 0);
-}, 0);
-console.log(studentCount)
+        return acc + (sprint.students?.length || 0);
+    }, 0);
     const classes = managedSprints?.length || 0;
 //   useEffect(() => {
 //     const fetchSchedule = async () => {
@@ -91,61 +94,79 @@ console.log(studentCount)
   }, [])
 
   useEffect(() => {
-    const syncSprints = async () => {
-      if (!token) return;
-      try {
-        const res = await apiClient('/api/user/sprints');
-        if (res.ok) {
-          const data = await res.json();
-          const localManaged = data.managed_sprints || [];
-          const localStudent = data.student_sprints || [];
+    if (!tutorSprintsData) return;
 
-          const existingManaged = user.managedSprints || [];
-          const mergedManaged = [...existingManaged];
-          localManaged.forEach(ls => {
-            if (!mergedManaged.some(ms => String(ms.id) === String(ls.sprint_id))) {
-              mergedManaged.push({
-                id: ls.sprint_id,
-                name: ls.name,
-                course_code: ls.course_code,
-                start_date: ls.start_date,
-                end_date: ls.end_date,
-                duration_weeks: ls.duration_weeks,
-                schedules: ls.schedules,
-                students: ls.students
-              });
-            }
-          });
+    const localManaged = tutorSprintsData.managed_sprints || [];
+    const localStudent = tutorSprintsData.student_sprints || [];
 
-          const existingStudent = user.studentSprints || [];
-          const mergedStudent = [...existingStudent];
-          localStudent.forEach(ls => {
-            if (!mergedStudent.some(ms => String(ms.id) === String(ls.sprint_id))) {
-              mergedStudent.push({
-                id: ls.sprint_id,
-                name: ls.name,
-                course_code: ls.course_code,
-                start_date: ls.start_date,
-                end_date: ls.end_date,
-                duration_weeks: ls.duration_weeks,
-                schedules: ls.schedules,
-                students: ls.students
-              });
-            }
-          });
+    const isMongoId = (id) => typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id);
 
-          dispatch(setSprints({
-            managedSprints: mergedManaged,
-            studentSprints: mergedStudent
-          }));
-        }
-      } catch (err) {
-        console.error("Failed to sync local sprints", err);
+    // Filter out Mongo sprints that were deleted in the python DB, but keep Laravel logins
+    const localManagedIds = new Set(localManaged.map(ls => String(ls.sprint_id || ls.id || ls._id)).filter(Boolean));
+    const mergedManaged = (user.managedSprints || []).filter(ms => {
+      const msIdStr = String(ms.id);
+      if (isMongoId(msIdStr)) {
+        return localManagedIds.has(msIdStr);
       }
-    };
+      return true;
+    });
 
-    syncSprints();
-  }, [token, dispatch]);
+    localManaged.forEach(ls => {
+      const lsId = ls.sprint_id || ls.id || ls._id;
+      if (!lsId) return;
+      const idx = mergedManaged.findIndex(ms => String(ms.id) === String(lsId));
+      const mapped = {
+        id: lsId,
+        name: ls.name,
+        course_code: ls.course_code,
+        start_date: ls.start_date,
+        end_date: ls.end_date,
+        duration_weeks: ls.duration_weeks,
+        schedules: ls.schedules,
+        students: ls.students
+      };
+      if (idx > -1) {
+        mergedManaged[idx] = mapped;
+      } else {
+        mergedManaged.push(mapped);
+      }
+    });
+
+    const localStudentIds = new Set(localStudent.map(ls => String(ls.sprint_id || ls.id || ls._id)).filter(Boolean));
+    const mergedStudent = (user.studentSprints || []).filter(ms => {
+      const msIdStr = String(ms.id);
+      if (isMongoId(msIdStr)) {
+        return localStudentIds.has(msIdStr);
+      }
+      return true;
+    });
+
+    localStudent.forEach(ls => {
+      const lsId = ls.sprint_id || ls.id || ls._id;
+      if (!lsId) return;
+      const idx = mergedStudent.findIndex(ms => String(ms.id) === String(lsId));
+      const mapped = {
+        id: lsId,
+        name: ls.name,
+        course_code: ls.course_code,
+        start_date: ls.start_date,
+        end_date: ls.end_date,
+        duration_weeks: ls.duration_weeks,
+        schedules: ls.schedules,
+        students: ls.students
+      };
+      if (idx > -1) {
+        mergedStudent[idx] = mapped;
+      } else {
+        mergedStudent.push(mapped);
+      }
+    });
+
+    dispatch(setSprints({
+      managedSprints: mergedManaged,
+      studentSprints: mergedStudent
+    }));
+  }, [tutorSprintsData, dispatch]);
 
 
   // Admin View
@@ -217,60 +238,89 @@ console.log(studentCount)
       );
   }
   if (isTutor()) {    
+    const activeSprintsList = managedSprints;
 
-return (
-    <>
-    <div className='max-w-6xl mx-auto'>
-        <h1 className='font-InterBold text-2xl'>Dashboard</h1>
-        <p className='text-[#65758B] font-Inter'>Welcome back, Tutor</p>
-        <div className="mb-8 mt-6 grid md:grid-cols-4 gap-4">
-            <TutorDashboard 
-                title="My Classes" 
-                value= {classes}
-                icon={BookOpen} 
-                color="blue-700"
-            />
-
-            <TutorDashboard 
-                title="Total Students" 
-                value= {studentCount}
-                icon={User} 
-                color="blue-500"
-            />
-             <TutorDashboard 
-                title="Reports Pending" 
-                value= '2'
-                icon={FileExclamationPoint} 
-                color="yellow-500"
-            />
-
-             <TutorDashboard 
-                title="Students at Risk" 
-                value= '0'
-                icon={TriangleAlert} 
-                color="red-500"
-            />
-
+    return (
+        <>
+        <div className='max-w-6xl mx-auto'>
+            <h1 className='font-InterBold text-2xl'>Dashboard</h1>
+            <p className='text-[#65758B] font-Inter'>Welcome back, Tutor</p>
             
+            {loadingMetrics ? (
+                <div className="mb-8 mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[1, 2, 3, 4].map(idx => (
+                        <div key={idx} className="border border-slate-200 border-t-4 border-t-slate-300 rounded-xl px-6 py-5 flex items-center bg-white shadow-sm w-full animate-pulse">
+                            <div className="flex-1 space-y-2">
+                                <div className="h-3 bg-slate-200 rounded w-2/3"></div>
+                                <div className="h-6 bg-slate-200 rounded w-1/3"></div>
+                            </div>
+                            <div className="w-8 h-8 bg-slate-100 rounded-full ml-auto"></div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="mb-8 mt-6 grid md:grid-cols-4 gap-4">
+                    <TutorDashboard 
+                        title="My Classes" 
+                        value={activeSprintsList.length}
+                        icon={BookOpen} 
+                        color="blue-700"
+                    />
+
+                    <TutorDashboard 
+                        title="Total Students" 
+                        value={activeSprintsList.reduce((acc, s) => acc + (s.students?.length || 0), 0)}
+                        icon={User} 
+                        color="blue-500"
+                    />
+                    
+                    <TutorDashboard 
+                        title="Reports Pending" 
+                        value={tutorMetrics?.pending_reports ?? 0}
+                        icon={FileExclamationPoint} 
+                        color="yellow-500"
+                    />
+
+                    <TutorDashboard 
+                        title="Students at Risk" 
+                        value={tutorMetrics?.ai_alerts ?? 0}
+                        icon={TriangleAlert} 
+                        color="red-500"
+                    />
+                </div>
+            )}
         </div>
 
-        </div>
-
-        {/* My Sprints Grid (New Request) */}
+        {/* My Sprints Grid */}
         <div className='border-[#E1E7EF] border rounded-xl p-6 bg-white shadow-sm mt-8'>
             <div className="flex items-center gap-3 mb-6">
                 <Book className="w-6 h-6 text-green-600" />
                 <h1 className='font-InterBold text-2xl'>My Active Sprints</h1>
             </div>
             
-            {(!user?.managedSprints && !user?.user?.managed_sprints) || (user?.managedSprints?.length === 0 && user?.user?.managed_sprints?.length === 0) ? (
+            {loadingSprints ? (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3].map(idx => (
+                        <div key={idx} className="border border-slate-200 rounded-xl overflow-hidden bg-white animate-pulse flex flex-col min-h-[220px]">
+                            <div className="h-16 bg-slate-200 p-4"></div>
+                            <div className="p-4 flex-1 space-y-4">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="h-10 bg-slate-100 rounded"></div>
+                                    <div className="h-10 bg-slate-100 rounded"></div>
+                                </div>
+                                <div className="h-8 bg-slate-100 rounded mt-4"></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : activeSprintsList.length === 0 ? (
                 <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-200">
                     <p className="text-slate-500 font-medium">No active sprints assigned to you.</p>
                 </div>
             ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {(user?.managedSprints || user?.user?.managed_sprints || []).map((sprint) => (
-                        <div key={sprint.id} className="border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow flex flex-col">
+                    {activeSprintsList.map((sprint) => (
+                        <div key={sprint.sprint_id || sprint.id} className="border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow flex flex-col">
                             <div className="bg-gradient-to-r from-green-600 to-green-700 p-4 text-white">
                                 <h3 className="font-bold text-lg truncate" title={sprint.name}>{sprint.name}</h3>
                                 <p className="text-green-100 text-sm font-medium">{sprint.course_code}</p>
@@ -322,38 +372,45 @@ return (
         {/* my classes here */}
         <div className='border-[#E1E7EF] border rounded-xl p-6 bg-white shadow-sm mt-8'>
             <h1 className='font-InterBold text-3xl'>My Classes</h1>
-                <div className="overflow-x-auto mt-4">
+            <div className="overflow-x-auto mt-4">
                 <table className="w-full text-left">
                     <thead className='text-[#65758B] font-Inter text-sm'>
                         <tr className="border-b border-[#E1E7EF]">
                             <th className="py-2">Course</th>
                             <th className="py-2">Level</th>
                             <th className="py-2">Students</th>
-                            {/* <th className="py-2">Alerts</th> */}
                         </tr>
                     </thead>
                     <tbody>
-                        {(user?.managedSprints || user?.user?.managed_sprints || []).map((sprint, index) => {
-                            const parts = sprint.course_code?.split('/') || [];
-                            const level = sprint.course_level || parts[1] || 'N/A';
-                            const studentsCount = sprint.students?.length || 0;
-                            return (
-                                <tr key={sprint.id || index} className="border-b border-[#E1E7EF] transition-colors hover:bg-slate-50">
-                                    <td className="py-3 font-medium text-slate-800">{sprint.name}</td>
-                                    <td className="py-3 text-slate-600">{level}</td>
-                                    <td className="py-3 text-slate-600">{studentsCount}</td>
-                                    {/* <td className="py-3 text-slate-600 text-sm"><span className="px-2 py-1 bg-green-100 text-green-700 rounded-full">No alerts</span></td> */}
+                        {loadingSprints ? (
+                            [1, 2, 3].map(idx => (
+                                <tr key={idx} className="border-b border-[#E1E7EF] animate-pulse">
+                                    <td className="py-3"><div className="h-4 bg-slate-200 rounded w-1/2"></div></td>
+                                    <td className="py-3"><div className="h-4 bg-slate-200 rounded w-1/4"></div></td>
+                                    <td className="py-3"><div className="h-4 bg-slate-200 rounded w-1/4"></div></td>
                                 </tr>
-                            );
-                        })}
-                        {(!user?.managedSprints && !user?.user?.managed_sprints) || (user?.managedSprints?.length === 0 && user?.user?.managed_sprints?.length === 0) ? (
+                            ))
+                        ) : activeSprintsList.length === 0 ? (
                             <tr>
-                                <td colSpan="4" className="py-6 text-center text-slate-500">No classes assigned yet.</td>
+                                <td colSpan="3" className="py-6 text-center text-slate-500">No classes assigned yet.</td>
                             </tr>
-                        ) : null}
+                        ) : (
+                            activeSprintsList.map((sprint, index) => {
+                                const parts = sprint.course_code?.split('/') || [];
+                                const level = sprint.course_level || parts[1] || 'N/A';
+                                const studentsCount = sprint.students?.length || 0;
+                                return (
+                                    <tr key={sprint.sprint_id || sprint.id || index} className="border-b border-[#E1E7EF] transition-colors hover:bg-slate-50">
+                                        <td className="py-3 font-medium text-slate-800">{sprint.name}</td>
+                                        <td className="py-3 text-slate-600">{level}</td>
+                                        <td className="py-3 text-slate-600">{studentsCount}</td>
+                                    </tr>
+                                );
+                            })
+                        )}
                     </tbody>
                 </table>
-        </div>
+            </div>
         </div>
         
          {/* Quick Actions */}

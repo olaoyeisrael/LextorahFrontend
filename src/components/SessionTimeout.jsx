@@ -16,7 +16,8 @@ const SessionTimeout = () => {
     
     // In production, set WARNING_TIME to 14 * 60 * 1000 (14 minutes).
     // Set to 5 * 1000 (5 seconds) for quick local testing.
-    const WARNING_TIME = 5 * 1000; 
+    // Reduced to 1 minute for user testing (60 * 1000 ms)
+    const WARNING_TIME = 60 * 1000; 
 
     const handleLogout = () => {
         // Collect current unsaved text inputs to prevent data loss
@@ -45,63 +46,63 @@ const SessionTimeout = () => {
     };
 
     const resetTimers = () => {
-        if (!token) return;
-
-        // Clear existing timers
-        if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
-        if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
-
         setShowWarning(false);
         setCountdown(60);
-
-        // Set warning timer
-        warningTimerRef.current = setTimeout(() => {
-            setShowWarning(true);
-            startCountdown();
-        }, WARNING_TIME);
     };
 
-    const startCountdown = () => {
-        if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
-        
-        countdownIntervalRef.current = setInterval(() => {
-            setCountdown((prev) => {
-                if (prev <= 1) {
-                    clearInterval(countdownIntervalRef.current);
-                    handleLogout(); // Automatically log out when countdown hits 0
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-    };
-
+    // 1. Manage Inactivity Timer
     useEffect(() => {
         if (!token) return;
 
         const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
         
-        const handleActivity = () => {
-            if (!showWarning) {
-                resetTimers();
-            }
+        const resetInactivityTimer = () => {
+            if (showWarning) return; // Don't reset if warning is shown
+
+            if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
+            
+            warningTimerRef.current = setTimeout(() => {
+                setShowWarning(true);
+            }, WARNING_TIME);
         };
 
         events.forEach((event) => {
-            window.addEventListener(event, handleActivity);
+            window.addEventListener(event, resetInactivityTimer);
         });
 
-        // Initialize timers
-        resetTimers();
+        // Initialize inactivity timer
+        resetInactivityTimer();
 
         return () => {
             events.forEach((event) => {
-                window.removeEventListener(event, handleActivity);
+                window.removeEventListener(event, resetInactivityTimer);
             });
             if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
-            if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
         };
     }, [token, showWarning]);
+
+    // 2. Manage Countdown Timer when warning is shown
+    useEffect(() => {
+        if (!showWarning) {
+            setCountdown(60);
+            return;
+        }
+
+        countdownIntervalRef.current = setInterval(() => {
+            setCountdown((prev) => {
+                if (prev <= 1) {
+                    clearInterval(countdownIntervalRef.current);
+                    handleLogout();
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => {
+            if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+        };
+    }, [showWarning]);
 
     if (!showWarning) return null;
 
