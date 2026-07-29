@@ -5,11 +5,30 @@ import { Menu, Bell, ChevronDown } from 'lucide-react';
 import msLexi from '../assets/msLexi.png';
 import { useSelector } from 'react-redux';
 import { isAdmin, isTutor } from '../utils/auth';
+import { apiClient } from '../utils/api';
 
 const DashboardLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const firstName = useSelector((state) => state.user?.firstName);
     const lastName = useSelector((state) => state.user?.lastName);
+    const [unreadCount, setUnreadCount] = React.useState(0);
+
+    React.useEffect(() => {
+        const fetchUnread = async () => {
+            try {
+                const response = await apiClient('/notifications');
+                if (response.ok) {
+                    const data = await response.json();
+                    setUnreadCount(data.unread_count || 0);
+                }
+            } catch (err) {
+                console.error("Failed to fetch unread notifications", err);
+            }
+        };
+        fetchUnread();
+        const interval = setInterval(fetchUnread, 60000);
+        return () => clearInterval(interval);
+    }, []);
   
 
     return (
@@ -25,7 +44,7 @@ const DashboardLayout = () => {
                         </div> */}
                         <img src={msLexi} alt="Lextorah Logo" className="w-8 h-8 rounded-full" />
                         <span className="text-xl font-bold text-slate-900">Lextorah AI</span>
-                    </div>
+                     </div>
                     <button 
                         onClick={() => setIsSidebarOpen(true)}
                         className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg"
@@ -44,7 +63,9 @@ const DashboardLayout = () => {
                     <div className="flex items-center gap-6">
                         <Link className="relative p-2 text-slate-400 hover:text-slate-600 transition-colors" to="/notifications">
                             <Bell className="w-5 h-5" />
-                            <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+                            {unreadCount > 0 && (
+                                <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                            )}
                         </Link>
                         <div className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1.5 rounded-full pr-3 transition-colors">
                             <div className="w-8 h-8 rounded-full bg-green-500 flex justify-center items-center text-white text-xs font-bold shadow-sm">
