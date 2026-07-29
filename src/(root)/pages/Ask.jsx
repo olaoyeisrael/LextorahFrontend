@@ -6,6 +6,17 @@ import msLexi from '../../assets/msLexi.png'
 import { apiClient } from '../../utils/api';
 
 
+const STUDENT_TEMPLATES = [
+  { label: "💡 Understand Concept", prompt: "Explain the concept of [Topic] in simple terms." },
+  { label: "📝 Summarize Lesson", prompt: "Summarize the key points of the lesson on [Topic]." },
+  { label: "✍️ Practice Questions", prompt: "Generate 5 practice questions for [Topic] with answers." },
+  { label: "🎯 Exam Prep", prompt: "Quiz me on JAMB/WAEC style questions for [Subject]." },
+  { label: "✏️ Writing Assistance", prompt: "Review my essay on [Topic] and suggest improvements." },
+  { label: "🗣️ Language Practice", prompt: "Practice conversational [Language] with me at [A1/A2/B1] level." },
+  { label: "📅 Study Plan", prompt: "Create a 4-week study plan for mastering [Subject]." },
+  { label: "📚 Revision Sheet", prompt: "Create a concise quick-revision cheat sheet for [Topic]." }
+];
+
 const Ask = () => {
   const [userId, setUserId] = useState(null);
   const [question, setQuestion] = useState('');
@@ -311,11 +322,29 @@ const Ask = () => {
           )}
           <div ref={messagesEndRef}/>
         </div>
-        
-
+          {/* Prompt Library Pills */}
+          <div className="flex gap-2 overflow-x-auto pb-2 mb-2 scrollbar-thin scrollbar-thumb-slate-200">
+            {STUDENT_TEMPLATES.map((tmpl, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setQuestion(tmpl.prompt);
+                  const textarea = document.querySelector('textarea');
+                  if (textarea) {
+                    textarea.value = tmpl.prompt;
+                    textarea.style.height = 'auto';
+                    textarea.style.height = `${textarea.scrollHeight}px`;
+                  }
+                }}
+                className="whitespace-nowrap px-3.5 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-full text-xs font-bold text-slate-700 transition-colors shadow-sm"
+              >
+                {tmpl.label}
+              </button>
+            ))}
+          </div>
 
           {/* Input section */}
-        <div  className="flex gap-2 mt-4 items-center bg-white p-4 rounded-lg shadow-sm">
+        <div  className="flex gap-2 items-center bg-white p-4 rounded-lg shadow-sm">
           <button className={`p-3 rounded-full disabled:opacity-60 transition-all ${isRecording ? 'bg-red-500 animate-pulse text-white' : 'bg-green-600 text-white'}`} onClick={handleMicClick}>
             <Mic />
           </button>

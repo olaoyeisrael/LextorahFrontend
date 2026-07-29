@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom'; // Assuming react-router-dom is used
-import { LayoutDashboard, BookOpen, History, Settings, LogOut, MonitorCheck, Video, CheckCircle, Calendar, ClipboardList, GraduationCap, HelpCircle, PlusCircle } from 'lucide-react';
+import { LayoutDashboard, BookOpen, History, Settings, LogOut, MonitorCheck, Video, CheckCircle, Calendar, ClipboardList, GraduationCap, HelpCircle, PlusCircle, Bot } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import msLexi from '../assets/msLexi.png';
@@ -36,7 +36,8 @@ const tutorLinks = [
     { icon: CheckCircle, label: 'Curriculum', path: '/tutor-curriculum' },
     { icon: Video, label: 'Live Classes', path: '/tutor-live-classes' },
     // { icon: BookOpen, label: 'Curriculum', path: '/curriculum' },
-    // { icon: BookOpen, label: 'Assignments', path: '/assignment' },
+    { icon: BookOpen, label: 'Assignments', path: '/assignment' },
+    { icon: Bot, label: 'Ms. Lexi Assistant', path: '/tutor-chat' },
     { icon: BookOpen, label: 'Assessments', path: '/assessments' },
     { icon: Video, label: 'Upload Materials', path: '/upload' },
     // { icon: ClipboardList, label: 'AI Alerts', path: '/ai-report' },
@@ -82,12 +83,14 @@ const Sidebar = ({ isOpen, onClose }) => {
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} ${role === 'admin' ? 'bg-[#061B4A]' : role === 'tutor' ? 'bg-[#0D9488]' : 'bg-green-50'}
       `}>
         <div className="p-6">
-            <div className="flex items-center gap-2 mb-8">
-               <img src={msLexi} alt="Lextorah Logo" className="w-8 h-8 rounded-full" />  
-               <div className="flex items-center gap-1.5">
-                   <span className={`${role === 'admin' ? 'text-white' : role === 'tutor' ? 'text-white' : 'text-slate-900'} text-xl font-bold tracking-tight`}>Lextorah</span>
-                   <span className="bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded text-[10px] font-bold">AI</span>
+            <div className="flex flex-col gap-1 mb-8">
+               <div className="flex items-center gap-2">
+                  <img src={msLexi} alt="Ms. Lexi Logo" className="w-8 h-8 rounded-full object-cover" />  
+                  <span className={`${role === 'admin' || role === 'tutor' ? 'text-white' : 'text-slate-900'} text-xl font-bold tracking-tight`}>Ms. Lexi</span>
                </div>
+               <span className={`${role === 'admin' || role === 'tutor' ? 'text-white/70' : 'text-slate-500'} text-[11px] font-semibold mt-1`}>
+                  {role === 'tutor' ? 'Your AI Teaching Assistant' : role === 'admin' ? 'Admin Portal' : 'Your AI Learning Companion'}
+               </span>
             </div>
 
             <div className='mt-16'>

@@ -203,6 +203,14 @@ function QuestionPlayer({ questions = [], timed = false, timeLimit = 1800, onCom
                 );
               })}
             </div>
+          ) : currentQuestion?.type === 'essay_theory' || currentQuestion?.type === 'comprehension' || currentQuestion?.type === 'speaking_listening' ? (
+            <textarea
+              value={answers[currentQuestion?._id] || ''}
+              onChange={(e) => handleAnswer(currentQuestion._id, e.target.value)}
+              placeholder="Type your detailed response here..."
+              rows={6}
+              className="w-full px-5 py-4 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all text-lg font-medium resize-none"
+            />
           ) : (
             <input
               type="text"

@@ -8,12 +8,12 @@ const Profile = () => {
     
     // Fallback details matching mockup if not present in redux
     const fullName = firstName || lastName ? `${firstName || ''} ${lastName || ''}`.trim() : "Amara Okafor";
-    const userEmail = email || "[EMAIL_ADDRESS]";
-    const studentId = "LTX-2026-0417"; // Standard structured student ID
+    const userEmail = email;
+    // const studentId = 53; // Standard structured student ID
 
     // Calculate overview metrics dynamically where possible
     const enrolledCount = studentSprints?.length || 8;
-    const completedCount = 5; // Placeholder/mock metric
+    const completedCount = 0; // Placeholder/mock metric
     const activeCount = 3;    // Placeholder/mock metric
     const progressPercent = 72; // Placeholder/mock metric
 
@@ -56,7 +56,7 @@ const Profile = () => {
                             </span>
                         </div>
                         <div className="flex flex-col gap-1 text-sm text-slate-500">
-                            <p><span className="font-semibold">Student ID:</span> {studentId}</p>
+                            {/* <p><span className="font-semibold">Student ID:</span> {studentId}</p> */}
                             <p><span className="font-semibold">Email:</span> {userEmail}</p>
                         </div>
                     </div>

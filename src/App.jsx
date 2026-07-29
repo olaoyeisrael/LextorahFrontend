@@ -80,6 +80,8 @@ const ProgressReport = lazy(() => import('./(root)/pages/ProgressReport'))
 const ManagedCourses = lazy(() => import('./(root)/pages/ManagedCourses'))
 const CreateSprint = lazy(() => import('./(root)/pages/CreateSprint'))
 const LextorahAssessment = lazy(() => import('./(root)/pages/LextorahAssessment'))
+const Feedback = lazy(() => import('./(root)/pages/Feedback'))
+const TutorChat = lazy(() => import('./(root)/pages/TutorChat'))
 
 
 
@@ -144,6 +146,7 @@ function App() {
             <Route path="/how-to-use" element={<HowToUse />} />
             <Route path="/assignment" element={<Assignment />} />
             <Route path="/exam-prep" element={<ExamPrep />} />
+            <Route path="/feedback" element={<Feedback />} />
 
             {/* Student Only Routes */}
             <Route element={<StudentProtectedRoute />}>
@@ -173,6 +176,7 @@ function App() {
               <Route path="/ai-report" element={<AIReport />} />
               <Route path="/assign-topics" element={<AssignTopics />} />
               <Route path="/student-performance" element={<StudentPerformance />} />
+              <Route path="/tutor-chat" element={<TutorChat />} />
             </Route>
 
             {/* Admin Only Routes */}

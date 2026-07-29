@@ -14,6 +14,9 @@ function ExamPrep() {
   const [courseCode, setCourseCode] = useState('');
   const [questionText, setQuestionText] = useState('');
   const [file, setFile] = useState(null);
+  const [subject, setSubject] = useState('');
+  const [topic, setTopic] = useState('');
+  const [difficulty, setDifficulty] = useState('');
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
   const [parsedCount, setParsedCount] = useState(0);
@@ -29,6 +32,9 @@ function ExamPrep() {
       formData.append('tutor_id', user_id);
       if (questionText) formData.append('question_text', questionText);
       if (file) formData.append('file', file);
+      if (subject) formData.append('subject', subject);
+      if (topic) formData.append('topic', topic);
+      if (difficulty) formData.append('difficulty', difficulty);
 
       const response = await apiClient('/exam-questions/upload', {
         method: 'POST',
@@ -40,6 +46,9 @@ function ExamPrep() {
         setParsedCount(data.count);
         setQuestionText('');
         setFile(null);
+        setSubject('');
+        setTopic('');
+        setDifficulty('');
       } else {
         setMessage(data.detail || 'Failed to parse questions.');
       }
@@ -66,7 +75,7 @@ function ExamPrep() {
               <Upload className="w-6 h-6 mr-3 text-blue-600" />
               Upload Exam Questions
             </h2>
-            <p className="text-sm text-slate-500 mb-6">Upload a PDF or paste question text. AI will automatically parse and structure the questions into the question pool.</p>
+            <p className="text-sm text-slate-500 mb-6">Upload a PDF or paste question text. Configure optional indexing filters to categorize the questions.</p>
 
             {message && (
               <div className={`mb-6 p-4 rounded-lg flex items-center shadow-sm ${parsedCount > 0 ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}>
@@ -76,20 +85,59 @@ function ExamPrep() {
             )}
 
             <form onSubmit={handleUpload} className="space-y-6">
-              <div>
-                <label className="block text-sm font-semibold text-slate-600 mb-2">Course Code</label>
-                <select
-                  value={courseCode}
-                  onChange={e => setCourseCode(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-white"
-                >
-                  <option value="">Select course code...</option>
-                  {managedCourseCodes?.map(courseCode => (
-                    <option key={courseCode} value={courseCode}>{courseCode}</option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-600 mb-2">Course Code *</label>
+                  <select
+                    value={courseCode}
+                    onChange={e => setCourseCode(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-white"
+                  >
+                    <option value="">Select course code...</option>
+                    {managedCourseCodes?.map(courseCode => (
+                      <option key={courseCode} value={courseCode}>{courseCode}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-600 mb-2">Subject (Optional)</label>
+                  <input
+                    type="text"
+                    value={subject}
+                    onChange={e => setSubject(e.target.value)}
+                    placeholder="e.g. Mathematics"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-white text-slate-750"
+                  />
+                </div>
               </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-600 mb-2">Topic (Optional)</label>
+                  <input
+                    type="text"
+                    value={topic}
+                    onChange={e => setTopic(e.target.value)}
+                    placeholder="e.g. Algebra"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-white text-slate-750"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-600 mb-2">Difficulty (Optional)</label>
+                  <select
+                    value={difficulty}
+                    onChange={e => setDifficulty(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all bg-white text-slate-750"
+                  >
+                    <option value="">Any Difficulty</option>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-slate-600 mb-2">Paste Exam Questions (Optional)</label>
                 <textarea
