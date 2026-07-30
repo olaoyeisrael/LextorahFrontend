@@ -106,22 +106,26 @@ function QuestionPlayer({ questions = [], timed = false, timeLimit = 1800, onCom
 
           <div className="p-6 space-y-4">
             <h3 className="text-lg font-bold text-slate-700 border-b pb-2">Question Breakdown</h3>
-            {details && details.map((d, i) => (
-              <div key={i} className={`p-4 rounded-xl border ${d.correct ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
-                <div className="flex items-start gap-3">
-                  {d.correct ?
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" /> :
-                    <XCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
-                  }
-                  <div className="flex-1">
-                    <p className="font-semibold text-slate-800 text-sm">{questions[i]?.question}</p>
-                    <p className="text-xs text-slate-500 mt-1">Your answer: <span className="font-bold">{d.student_answer || "(blank)"}</span></p>
-                    {!d.correct && <p className="text-xs text-emerald-700 mt-1">Correct: <span className="font-bold">{d.correct_answer}</span></p>}
-                    {d.feedback && <p className="text-xs text-slate-600 mt-1 italic">{d.feedback}</p>}
+            {details && details.map((d, i) => {
+              const isCorrect = d.correct ?? d.is_correct;
+              const studentAnswer = d.student_answer ?? d.user_answer;
+              return (
+                <div key={i} className={`p-4 rounded-xl border ${isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
+                  <div className="flex items-start gap-3">
+                    {isCorrect ?
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" /> :
+                      <XCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
+                    }
+                    <div className="flex-1">
+                      <p className="font-semibold text-slate-800 text-sm">{d.question || questions[i]?.question}</p>
+                      <p className="text-xs text-slate-500 mt-1">Your answer: <span className="font-bold">{studentAnswer || "(blank)"}</span></p>
+                      {!isCorrect && <p className="text-xs text-emerald-700 mt-1">Correct: <span className="font-bold">{d.correct_answer}</span></p>}
+                      {d.feedback && <p className="text-xs text-slate-600 mt-1 italic">{d.feedback}</p>}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="p-6 border-t">

@@ -190,7 +190,7 @@ function ExamPrep() {
                     </div>
                     <div className="text-center">
                          <h2 className="text-xl font-extrabold text-slate-900 mb-2">Practice Questions</h2>
-                         <p className='text-slate-500 text-sm'>50 random questions • 1 hour time limit</p>
+                         <p className='text-slate-500 text-sm'>10 random questions </p>
                     </div>
                 </div>
                 <Link to="/practice-questions" className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-center transition-colors shadow-lg shadow-blue-200">

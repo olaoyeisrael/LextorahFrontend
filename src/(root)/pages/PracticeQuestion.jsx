@@ -59,7 +59,7 @@ function PracticeQuestion() {
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 text-center">
           <BookOpen className="w-16 h-16 text-blue-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-slate-800 mb-2">Practice Mode</h2>
-          <p className="text-slate-500 mb-6">Select a course to fetch 50 random practice questions.</p>
+          <p className="text-slate-500 mb-6">Select a course to fetch 10 random practice questions.</p>
           
           <select 
             value={selectedCourse}

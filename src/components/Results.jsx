@@ -162,45 +162,51 @@ function Results() {
                             {/* Questions Detail Box */}
                             <div className="p-6 overflow-y-auto flex-1 space-y-5 bg-[#FAFBFD]">
                                 {selectedResult.details && selectedResult.details.length > 0 ? (
-                                    selectedResult.details.map((item, index) => (
-                                        <div key={index} className="bg-white p-5 rounded-2xl border border-slate-150 shadow-sm">
-                                            <div className="flex gap-3 mb-3 items-start">
-                                                <span className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500 shrink-0">
-                                                    {index + 1}
-                                                </span>
-                                                <h4 className="font-bold text-slate-800 text-base mt-0.5 leading-snug">
-                                                    {item.question}
-                                                </h4>
-                                            </div>
-
-                                            <div className="space-y-2 pl-9">
-                                                {/* Student Answer */}
-                                                <div className={`p-3 rounded-xl border text-sm flex justify-between items-center ${
-                                                    item.is_correct 
-                                                        ? 'bg-emerald-50/50 border-emerald-100 text-emerald-800' 
-                                                        : 'bg-red-50/50 border-red-100 text-red-800'
-                                                }`}>
-                                                    <div>
-                                                        <span className="font-semibold block text-[10px] uppercase tracking-wider opacity-60">Your Answer</span>
-                                                        <span className="font-bold">{item.user_answer || "No response"}</span>
-                                                    </div>
-                                                    {item.is_correct ? (
-                                                        <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                                                    ) : (
-                                                        <XCircle className="w-5 h-5 text-red-600 shrink-0" />
-                                                    )}
+                                    selectedResult.details.map((item, index) => {
+                                        const isCorrect = item.is_correct !== undefined ? item.is_correct : (item.correct !== undefined ? item.correct : true);
+                                        const userAnswer = item.user_answer || item.student_answer || item.answer;
+                                        const correctAnswer = item.correct_answer || item.correct_option || item.correct;
+                                        
+                                        return (
+                                            <div key={index} className="bg-white p-5 rounded-2xl border border-slate-150 shadow-sm">
+                                                <div className="flex gap-3 mb-3 items-start">
+                                                    <span className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500 shrink-0">
+                                                        {index + 1}
+                                                    </span>
+                                                    <h4 className="font-bold text-slate-800 text-base mt-0.5 leading-snug">
+                                                        {item.question}
+                                                    </h4>
                                                 </div>
 
-                                                {/* Correct Answer (if student was incorrect) */}
-                                                {!item.is_correct && (
-                                                    <div className="p-3 rounded-xl bg-emerald-50/50 border border-emerald-100 text-emerald-800 text-sm">
-                                                        <span className="font-semibold block text-[10px] uppercase tracking-wider opacity-60">Correct Answer</span>
-                                                        <span className="font-bold">{item.correct_answer}</span>
+                                                <div className="space-y-2 pl-9">
+                                                    {/* Student Answer */}
+                                                    <div className={`p-3 rounded-xl border text-sm flex justify-between items-center ${
+                                                        isCorrect 
+                                                            ? 'bg-emerald-50/50 border-emerald-100 text-emerald-800' 
+                                                            : 'bg-red-50/50 border-red-100 text-red-800'
+                                                    }`}>
+                                                        <div>
+                                                            <span className="font-semibold block text-[10px] uppercase tracking-wider opacity-60">Your Answer</span>
+                                                            <span className="font-bold">{userAnswer || "No response"}</span>
+                                                        </div>
+                                                        {isCorrect ? (
+                                                            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                                                        ) : (
+                                                            <XCircle className="w-5 h-5 text-red-600 shrink-0" />
+                                                        )}
                                                     </div>
-                                                )}
+
+                                                    {/* Correct Answer (if student was incorrect) */}
+                                                    {!isCorrect && (
+                                                        <div className="p-3 rounded-xl bg-emerald-50/50 border border-emerald-100 text-emerald-800 text-sm">
+                                                            <span className="font-semibold block text-[10px] uppercase tracking-wider opacity-60">Correct Answer</span>
+                                                            <span className="font-bold">{correctAnswer}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
+                                        );
+                                    })
                                 ) : (
                                     <div className="p-10 text-center text-slate-400 bg-white rounded-2xl border border-slate-100">
                                         No question-by-question breakdown details available for this result.

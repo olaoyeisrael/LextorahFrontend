@@ -58,7 +58,9 @@ function Mock() {
       })
     });
     const data = await response.json();
+    console.log('Exam result saved:', data);
     return data;
+    
   };
 
   if (!hasStarted) {
