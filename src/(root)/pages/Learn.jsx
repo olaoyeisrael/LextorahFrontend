@@ -165,7 +165,7 @@ const Learn = () => {
     
     // Do not auto-start if we just finished a topic or if we are in quiz mode
     if (!quizData && !courseFinished) {
-         startStream(topicIsCompleted ? 1000 : null, topicIsCompleted ? "Generating quiz..." : "Agent is explaining...");
+         startStream(topicIsCompleted ? 1000 : null, topicIsCompleted ? "Generating quiz..." : "Ms. Lexi is explaining...");
     }
 
     return () => {
@@ -222,7 +222,7 @@ const Learn = () => {
          return;
      }
      // Check if we are at the very end of sections
-     let msg = "Agent is explaining...";
+     let msg = "Ms. Lexi is explaining...";
      if (sections.length > 0 && activeSection >= sections.length) {
          msg = "Generating quiz...";
      }
