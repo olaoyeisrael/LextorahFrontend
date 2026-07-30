@@ -553,7 +553,7 @@ const Learn = () => {
                                                   </div>
                                               ) : (
                                                   <div className="prose prose-lg md:prose-xl prose-slate mx-auto text-slate-700 prose-headings:text-slate-900 marker:text-green-500 prose-a:text-green-600 prose-strong:text-green-800 tracking-tight leading-relaxed">
-                                                      {data ? <ReactMarkdown>{String(data).replace(/\n/g, '  \n')}</ReactMarkdown> : <div className="text-slate-400 italic mt-10 text-center">Waiting for AI tutor...</div>}
+                                                      {data ? <ReactMarkdown>{String(data).replace(/\n/g, '  \n')}</ReactMarkdown> : <div className="text-slate-400 italic mt-10 text-center">Waiting for Ms. Lexi...</div>}
                                                   </div>
                                               )}
                                           </div>
