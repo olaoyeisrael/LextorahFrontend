@@ -414,18 +414,27 @@ const Dashboard = () => {
         </div>
         
          {/* Quick Actions */}
-         <div className="grid md:grid-cols-2 gap-6 mb-12 mt-8">
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 mt-8">
              <QuickActionCard
                  title="Live Classes"
+                 description="Manage online live classrooms, schedules, and active student groups."
                  icon={Video}
                  color="green-500"
                  link="/tutor-live-classes" 
              />
              <QuickActionCard
                  title="Student Performance"
+                 description="Track individual student metrics, scores, grades, and alert records."
                  icon={ClipboardCheck}
                  color="blue-500"
                  link="/student-performance"
+             />
+             <QuickActionCard
+                 title="Ms. Lexi Assistant"
+                 description="Chat with Ms. Lexi to draft lesson plans, assignments, and curriculum notes."
+                 icon={Bot}
+                 color="emerald-500"
+                 link="/tutor-chat"
              />
          </div>
      </>

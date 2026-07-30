@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom'; // Assuming react-router-dom is used
-import { LayoutDashboard, BookOpen, History, Settings, LogOut, MonitorCheck, Video, CheckCircle, Calendar, ClipboardList, GraduationCap, HelpCircle, PlusCircle, Bot } from 'lucide-react';
+import { LayoutDashboard, BookOpen, History, Settings, LogOut, MonitorCheck, Video, CheckCircle, Calendar, ClipboardList, GraduationCap, HelpCircle, PlusCircle, Bot, MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import msLexi from '../assets/msLexi.png';
@@ -15,8 +15,7 @@ const studentLinks = [
   { icon: History, label: 'Course History', path: '/history' },
   { icon: HelpCircle, label: 'How to Use', path: '/how-to-use' },
   { icon: GraduationCap, label: 'Student Profile', path: '/profile' },
-  // { icon: History, label: 'Course Room', path: '/classroom' },
-  // { icon: Settings, label: 'Settings', path: '/settings' },
+  { icon: MessageSquare, label: 'Feedback', path: '/feedback' },
 ];
 
 
@@ -28,6 +27,8 @@ const adminLinks = [
     { icon: PlusCircle, label: 'Add Course', path: '/add-course' },
     { icon: BookOpen, label: 'Assignments', path: '/assignment' },
     { icon: ClipboardList, label: 'Progress Report', path: '/progress-report'},
+    { icon: ClipboardList, label: 'Leadership Board', path: '/admin/leadership-board' },
+    { icon: MessageSquare, label: 'Feedback', path: '/feedback' },
 ];
 
 const tutorLinks = [
@@ -36,16 +37,12 @@ const tutorLinks = [
     { icon: CheckCircle, label: 'Curriculum', path: '/tutor-curriculum' },
     { icon: Video, label: 'Live Classes', path: '/tutor-live-classes' },
     // { icon: BookOpen, label: 'Curriculum', path: '/curriculum' },
-    { icon: BookOpen, label: 'Assignments', path: '/assignment' },
-    { icon: Bot, label: 'Ms. Lexi Assistant', path: '/tutor-chat' },
+    // { icon: BookOpen, label: 'Assignments', path: '/assignment' },
     { icon: BookOpen, label: 'Assessments', path: '/assessments' },
     { icon: Video, label: 'Upload Materials', path: '/upload' },
     // { icon: ClipboardList, label: 'AI Alerts', path: '/ai-report' },
     { icon: ClipboardList, label: 'Analytics', path: '/analytics' },
-    // { icon: CheckCircle, label: 'Student Performance', path: '/student-performance' },
-    // { icon: GraduationCap, label: 'Exam Prep', path: '/exam-prep' },
-      { icon: HelpCircle, label: 'How to Use', path: '/how-to-use' },
-    
+    { icon: MessageSquare, label: 'Feedback', path: '/feedback' },
 ];
 
 

@@ -1,5 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { ClipboardList, BookOpenCheck } from 'lucide-react'
 
 const containerVariants = {
@@ -33,20 +34,25 @@ function Assessments() {
             animate="visible"
             className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
         >
-            <motion.a variants={itemVariants} className='bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all group block h-full' href='/assignment' >
-                <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                    <ClipboardList className="w-6 h-6" />
-                </div>
-                <h2 className='text-xl font-bold text-slate-800 mb-2'>Assignment</h2>
-                <p className='text-slate-500 text-sm leading-relaxed'>Create and manage assignments for your students.</p>
-            </motion.a>
-            <motion.a variants={itemVariants} className='bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all group block h-full' href='/exam-prep'>
-                <div className="w-12 h-12 bg-fuchsia-50 text-fuchsia-600 rounded-xl flex items-center justify-center mb-4 group-hover:bg-fuchsia-600 group-hover:text-white transition-colors">
-                    <BookOpenCheck className="w-6 h-6" />
-                </div>
-                <h2 className='text-xl font-bold text-slate-800 mb-2'>Exam Prep</h2>
-                <p className='text-slate-500 text-sm leading-relaxed'>Upload Materials for Exam Preparation</p>
-            </motion.a>
+            <motion.div variants={itemVariants}>
+                <Link className='bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all group block h-full' to='/assignment' >
+                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <ClipboardList className="w-6 h-6" />
+                    </div>
+                    <h2 className='text-xl font-bold text-slate-800 mb-2'>Assignment</h2>
+                    <p className='text-slate-500 text-sm leading-relaxed'>Create and manage assignments for your students.</p>
+                </Link>
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+                <Link className='bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all group block h-full' to='/exam-prep'>
+                    <div className="w-12 h-12 bg-fuchsia-50 text-fuchsia-600 rounded-xl flex items-center justify-center mb-4 group-hover:bg-fuchsia-600 group-hover:text-white transition-colors">
+                        <BookOpenCheck className="w-6 h-6" />
+                    </div>
+                    <h2 className='text-xl font-bold text-slate-800 mb-2'>Exam Prep</h2>
+                    <p className='text-slate-500 text-sm leading-relaxed'>Upload Materials for Exam Preparation</p>
+                </Link>
+            </motion.div>
             
         </motion.div>
    </motion.section>

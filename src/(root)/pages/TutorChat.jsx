@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Mic, Send, Volume2, Bot, User, Loader, Play, Pause } from 'lucide-react';
+import { Send, Bot, User, Loader } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import msLexi from '../../assets/msLexi.png';
 import { apiClient } from '../../utils/api';
@@ -29,14 +29,6 @@ const TutorChat = () => {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  const [isRecording, setIsRecording] = useState(false);
-  const mediaRecorderRef = useRef(null);
-  const chunksRef = useRef([]);
-
-  // Audio Playback State
-  const [playingState, setPlayingState] = useState({ id: null, isPlaying: false, loading: false });
-  const audioRef = useRef(null);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -48,7 +40,6 @@ const TutorChat = () => {
   useEffect(() => {
     const id = localStorage.getItem('user_id') || 'tutor';
     setUserId(id);
-    // Load session messages if they exist
     const saved = sessionStorage.getItem('tutor_chat_messages');
     if (saved) {
       try {
@@ -62,55 +53,6 @@ const TutorChat = () => {
   const saveMessages = (msgs) => {
     setMessages(msgs);
     sessionStorage.setItem('tutor_chat_messages', JSON.stringify(msgs));
-  };
-
-  const handleMicClick = async () => {
-    if (isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-    } else {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorderRef.current = mediaRecorder;
-        chunksRef.current = [];
-
-        mediaRecorder.ondataavailable = (e) => {
-          if (e.data.size > 0) {
-            chunksRef.current.push(e.data);
-          }
-        };
-
-        mediaRecorder.onstop = async () => {
-          const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-          const file = new File([blob], "recording.webm", { type: "audio/webm" });
-          const formData = new FormData();
-          formData.append("file", file);
-
-          setLoading(true);
-          try {
-            const res = await apiClient('/transcribe', {
-              method: 'POST',
-              body: formData
-            });
-            const data = await res.json();
-            if (data.text) {
-              await handleSubmit(data.text);
-            }
-          } catch (err) {
-            console.error("Transcription error", err);
-          } finally {
-            setLoading(false);
-          }
-          stream.getTracks().forEach(track => track.stop());
-        };
-
-        mediaRecorder.start();
-        setIsRecording(true);
-      } catch (err) {
-        console.error("Error accessing microphone:", err);
-      }
-    }
   };
 
   const handleSubmit = async (overrideQuestion = null) => {
@@ -158,41 +100,6 @@ const TutorChat = () => {
     }
   };
 
-  const handleSpeech = async (msgId, text) => {
-    if (playingState.id === msgId && playingState.isPlaying) {
-      audioRef.current.pause();
-      setPlayingState({ id: null, isPlaying: false, loading: false });
-      return;
-    }
-
-    setPlayingState({ id: msgId, isPlaying: false, loading: true });
-
-    try {
-      const res = await apiClient('/getAudio', {
-        method: 'POST',
-        body: JSON.stringify({ text })
-      });
-      const data = await res.json();
-      if (data.audioContent) {
-        if (audioRef.current) {
-          audioRef.current.pause();
-        }
-        const audioUrl = `data:audio/mp3;base64,${data.audioContent}`;
-        const newAudio = new Audio(audioUrl);
-        audioRef.current = newAudio;
-        newAudio.play();
-        setPlayingState({ id: msgId, isPlaying: true, loading: false });
-
-        newAudio.onended = () => {
-          setPlayingState({ id: null, isPlaying: false, loading: false });
-        };
-      }
-    } catch (err) {
-      console.error(err);
-      setPlayingState({ id: null, isPlaying: false, loading: false });
-    }
-  };
-
   const clearConversation = () => {
     const resetMsgs = [
       {
@@ -205,11 +112,11 @@ const TutorChat = () => {
   };
 
   return (
-    <main className="flex-1 bg-slate-50 min-h-screen p-6 md:p-12">
-      <div className="max-w-4xl mx-auto flex flex-col h-[85vh] bg-white rounded-3xl shadow-xl border border-slate-100 p-6 md:p-8">
+    <main className="flex flex-col h-[calc(100vh-120px)] bg-slate-50 p-2 md:p-6 overflow-hidden">
+      <div className="max-w-4xl w-full mx-auto flex flex-col h-full bg-white rounded-3xl shadow-xl border border-slate-100 p-6 md:p-8 overflow-hidden">
         
         {/* Header */}
-        <div className="flex items-center gap-4 border-b border-slate-100 pb-6 mb-6">
+        <div className="flex items-center gap-4 border-b border-slate-100 pb-4 mb-4 shrink-0">
           <div className="w-14 h-14 rounded-full overflow-hidden bg-slate-50 border-2 border-emerald-500 flex items-center justify-center">
             <img src={msLexi} alt="Ms. Lexi" className="w-full h-full object-cover object-top scale-125 translate-y-[2px]" />
           </div>
@@ -219,18 +126,18 @@ const TutorChat = () => {
           </div>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto pr-2 space-y-6 scrollbar-thin scrollbar-thumb-slate-100">
+        {/* Messages list (Scrollable) */}
+        <div className="flex-1 overflow-y-auto pr-2 space-y-6 scrollbar-thin scrollbar-thumb-slate-200">
           {messages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`flex gap-3 max-w-[80%] ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                 
-                {/* Icon */}
+                {/* User/Bot Icon */}
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-sm ${msg.sender === 'user' ? 'bg-blue-600 text-white' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
                   {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                 </div>
 
-                {/* Bubble content */}
+                {/* Message Bubble */}
                 <div className="flex flex-col gap-2">
                   <div className={`p-4 rounded-2xl shadow-sm leading-relaxed text-sm font-medium ${msg.sender === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-slate-50 text-slate-800 border border-slate-100 rounded-tl-none'}`}>
                     <div className="markdown-content">
@@ -253,32 +160,6 @@ const TutorChat = () => {
                       </ReactMarkdown>
                     </div>
                   </div>
-
-                  {/* Play Answer button for assistant messages */}
-                  {msg.sender !== 'user' && msg.id !== 'welcome' && (
-                    <button
-                      onClick={() => handleSpeech(msg.id, msg.text)}
-                      className="self-start flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 rounded-full text-xs font-bold transition-all shadow-sm"
-                      disabled={playingState.loading && playingState.id === msg.id}
-                    >
-                      {playingState.loading && playingState.id === msg.id ? (
-                        <>
-                          <Loader className="w-3 h-3 animate-spin text-slate-500" />
-                          <span>Generating Voice...</span>
-                        </>
-                      ) : playingState.isPlaying && playingState.id === msg.id ? (
-                        <>
-                          <Pause className="w-3 h-3 text-red-500" />
-                          <span>Pause</span>
-                        </>
-                      ) : (
-                        <>
-                          <Volume2 className="w-3.5 h-3.5" />
-                          <span>Play Answer</span>
-                        </>
-                      )}
-                    </button>
-                  )}
                 </div>
 
               </div>
@@ -300,8 +181,8 @@ const TutorChat = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Prompt Library Drawer */}
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-2 scrollbar-thin scrollbar-thumb-slate-100 border-t border-slate-100 pt-4 mt-4">
+        {/* Prompt Templates */}
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-2 scrollbar-thin scrollbar-thumb-slate-200 border-t border-slate-100 pt-4 mt-4 shrink-0">
           {TUTOR_TEMPLATES.map((tmpl, idx) => (
             <button
               key={idx}
@@ -321,14 +202,8 @@ const TutorChat = () => {
           ))}
         </div>
 
-        {/* Input box */}
-        <div className="flex gap-2 items-center bg-slate-50 p-4 rounded-2xl border border-slate-150 shadow-inner">
-          <button
-            className={`p-3 rounded-full disabled:opacity-60 transition-all ${isRecording ? 'bg-red-500 animate-pulse text-white' : 'bg-emerald-600 text-white'}`}
-            onClick={handleMicClick}
-          >
-            <Mic />
-          </button>
+        {/* Input panel (Without Mic button) */}
+        <div className="flex gap-2 items-center bg-slate-50 p-4 rounded-2xl border border-slate-150 shadow-inner shrink-0">
           <textarea
             value={question}
             onChange={(e) => {
@@ -350,14 +225,14 @@ const TutorChat = () => {
           <button
             onClick={() => handleSubmit()}
             disabled={loading || !question.trim()}
-            className="bg-emerald-600 text-white p-3 rounded-xl disabled:opacity-60 transition-all shadow-md"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white p-3.5 rounded-xl disabled:opacity-60 transition-all shadow-md"
           >
             <Send className="w-5 h-5" />
           </button>
           <button
             type="button"
             onClick={clearConversation}
-            className="ml-2 text-xs text-slate-500 bg-white hover:bg-slate-100 px-3 py-3 border border-slate-200 rounded-xl font-bold shadow-sm"
+            className="ml-2 text-xs text-slate-500 bg-white hover:bg-slate-100 px-3.5 py-3.5 border border-slate-200 rounded-xl font-bold shadow-sm"
           >
             Clear
           </button>

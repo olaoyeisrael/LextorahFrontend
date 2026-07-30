@@ -17,7 +17,7 @@ const SessionTimeout = () => {
     // In production, set WARNING_TIME to 14 * 60 * 1000 (14 minutes).
     // Set to 5 * 1000 (5 seconds) for quick local testing.
     // Reduced to 1 minute for user testing (60 * 1000 ms)
-    const WARNING_TIME = 60 * 1000; 
+    const WARNING_TIME = 45 * 60 * 1000; 
 
     const handleLogout = () => {
         // Collect current unsaved text inputs to prevent data loss

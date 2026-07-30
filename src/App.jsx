@@ -82,6 +82,7 @@ const CreateSprint = lazy(() => import('./(root)/pages/CreateSprint'))
 const LextorahAssessment = lazy(() => import('./(root)/pages/LextorahAssessment'))
 const Feedback = lazy(() => import('./(root)/pages/Feedback'))
 const TutorChat = lazy(() => import('./(root)/pages/TutorChat'))
+const LeadershipBoard = lazy(() => import('./(root)/pages/LeadershipBoard'))
 
 
 
@@ -169,6 +170,7 @@ function App() {
               <Route path="/upload" element={<Upload />} />
               <Route path="/tutor-live-classes" element={<TutorLiveClasses />} />
               <Route path="/tutor-curriculum" element={<TutorCurriculum />} />
+              <Route path="/curriculum" element={<Curriculum />} />
               <Route path="/assessments" element={<Assessments />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/add-course" element={<AddCourse />} />
@@ -186,6 +188,7 @@ function App() {
               <Route path="/live-classes-admin" element={<LiveClasses />} />
               <Route path="/admin/courses" element={<ManagedCourses />} />
               <Route path="/admin/create-sprint" element={<CreateSprint />} />
+              <Route path="/admin/leadership-board" element={<LeadershipBoard />} />
             </Route>
           </Route>
 
