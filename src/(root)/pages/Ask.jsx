@@ -320,10 +320,9 @@ const Ask = () => {
                 </div>
             </div>
           )}
-          <div ref={messagesEndRef}/>
-        </div>
-          {/* Prompt Library Pills */}
-          <div className="flex gap-2 overflow-x-auto pb-2 mb-2 scrollbar-thin scrollbar-thumb-slate-200">
+          
+          {/* Prompt Library Pills - rendered inside scrollable view to guarantee visibility */}
+          <div className="flex gap-2 overflow-x-auto py-2.5 my-2 shrink-0 scrollbar-thin scrollbar-thumb-slate-200">
             {STUDENT_TEMPLATES.map((tmpl, idx) => (
               <button
                 key={idx}
@@ -336,12 +335,15 @@ const Ask = () => {
                     textarea.style.height = `${textarea.scrollHeight}px`;
                   }
                 }}
-                className="whitespace-nowrap px-3.5 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-full text-xs font-bold text-slate-700 transition-colors shadow-sm"
+                className="whitespace-nowrap px-3.5 py-2 bg-slate-100 hover:bg-green-50 border border-slate-200 hover:border-green-300 rounded-full text-xs font-bold text-slate-700 hover:text-green-700 transition-colors shadow-sm"
               >
                 {tmpl.label}
               </button>
             ))}
           </div>
+
+          <div ref={messagesEndRef}/>
+        </div>
 
           {/* Input section */}
         <div  className="flex gap-2 items-center bg-white p-4 rounded-lg shadow-sm">

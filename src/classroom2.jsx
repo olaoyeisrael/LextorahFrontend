@@ -4,8 +4,10 @@ import { apiClient } from './utils/api';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Lock, BookOpen, ChevronLeft, Bot, Sparkles, MoveRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { Lock, BookOpen, ChevronLeft, Bot, Sparkles, MoveRight, Loader2, CheckCircle2, Calculator } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import MathMarkdown from './components/MathMarkdown';
+import { EducationalTools } from './components/EducationalTools';
 
 const Classroom = ({ userId: propUserId, topic: propTopic }) => {
   const [searchParams] = useSearchParams();
@@ -40,6 +42,7 @@ const Classroom = ({ userId: propUserId, topic: propTopic }) => {
   const [isVideo, setIsVideo] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
   const [transcript, setTranscript] = useState("");
+  const [isToolsOpen, setIsToolsOpen] = useState(false);
   const scrollRef = useRef(null);
 
   const today = new Date();
@@ -230,25 +233,34 @@ const Classroom = ({ userId: propUserId, topic: propTopic }) => {
              </div>
              
              {mode === "LEARNING" && (
-                <button 
-                  onClick={() => isVideo ? fetchNextSection({ triggerQuiz: true }) : fetchNextSection()}
-                  disabled={isTeaching || loadingTopics || !resolvedTopic}
-                  className={`px-6 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 ${
-                    isTeaching || loadingTopics || !resolvedTopic
-                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200' 
-                    : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200'
-                  }`}
-                >
-                  {isTeaching ? (
-                      <><Loader2 className="w-4 h-4 animate-spin" /> Agent thinking...</>
-                  ) : isVideo ? (
-                      <>Take Quiz Assessment <MoveRight className="w-4 h-4" /></>
-                  ) : explanation.length > 0 ? (
-                      <>Continue Explaining <MoveRight className="w-4 h-4" /></>
-                  ) : (
-                      <><Sparkles className="w-4 h-4" /> Start Lesson</>
-                  )}
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setIsToolsOpen(true)}
+                    className="px-4 py-2.5 border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-700 font-bold rounded-xl transition-all flex items-center gap-2 shadow-sm"
+                  >
+                    <Calculator className="w-4 h-4 text-indigo-600" />
+                    Educational Tools
+                  </button>
+                  <button 
+                    onClick={() => isVideo ? fetchNextSection({ triggerQuiz: true }) : fetchNextSection()}
+                    disabled={isTeaching || loadingTopics || !resolvedTopic}
+                    className={`px-6 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 ${
+                      isTeaching || loadingTopics || !resolvedTopic
+                      ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200' 
+                      : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200'
+                    }`}
+                  >
+                    {isTeaching ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Agent thinking...</>
+                    ) : isVideo ? (
+                        <>Take Quiz Assessment <MoveRight className="w-4 h-4" /></>
+                    ) : explanation.length > 0 ? (
+                        <>Continue Explaining <MoveRight className="w-4 h-4" /></>
+                    ) : (
+                        <><Sparkles className="w-4 h-4" /> Start Lesson</>
+                    )}
+                  </button>
+                </div>
              )}
         </div>
 
@@ -300,10 +312,8 @@ const Classroom = ({ userId: propUserId, topic: propTopic }) => {
                     className="flex-grow bg-white border border-slate-200 shadow-sm rounded-3xl p-8 overflow-y-auto leading-relaxed text-lg relative"
                   >
                     {explanation ? (
-                      <div className="prose prose-slate max-w-none prose-p:mb-6 prose-headings:text-slate-900 prose-strong:text-indigo-900 marker:text-indigo-500">
-                        {explanation.split('\n').map((line, i) => (
-                          <p key={i} className={`${line.startsWith('-') ? 'ml-4' : ''}`}>{line}</p>
-                        ))}
+                      <div className="prose prose-slate max-w-none marker:text-indigo-500">
+                        <MathMarkdown content={explanation} />
                       </div>
                     ) : (
                       <div className="h-full flex flex-col items-center justify-center text-slate-400">
@@ -357,6 +367,7 @@ const Classroom = ({ userId: propUserId, topic: propTopic }) => {
           </div>
         )}
       </div>
+      <EducationalTools isOpen={isToolsOpen} onClose={() => setIsToolsOpen(false)} />
     </div>
   );
 };

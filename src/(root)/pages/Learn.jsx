@@ -7,10 +7,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 
-import ReactMarkdown from "react-markdown";
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, MessageCircle, Loader, LoaderCircleIcon, BookOpen, ChevronRight, ChevronLeft, Award, Volume2, Square } from 'lucide-react';
+import { X, MessageCircle, Loader, LoaderCircleIcon, BookOpen, ChevronRight, ChevronLeft, Award, Volume2, Square, Calculator } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import MathMarkdown from '../../components/MathMarkdown';
+import { EducationalTools } from '../../components/EducationalTools';
 
 const Learn = () => {
     const [quizData, setQuizData] = useState(null);
@@ -22,6 +23,7 @@ const Learn = () => {
     const [loading, setLoading] = useState(true);
     const [loadingMessage, setLoadingMessage] = useState("Loading your customized lesson..."); // New state
     const [data, setData] = useState(null);
+    const [isToolsOpen, setIsToolsOpen] = useState(false);
     const user_id = localStorage.getItem('user_id');
     const wsRef = useRef(null);
     const fullContentRef = useRef({}); // Accumulate transcript content by section index
@@ -500,9 +502,18 @@ const Learn = () => {
                                       >
                                           {/* Header with speaker */}
                                           <div className="flex justify-between items-center mb-8 pb-6 border-b border-slate-100 shrink-0">
-                                              <span className="text-green-600 font-bold uppercase tracking-widest text-sm bg-green-50 px-4 py-2 rounded-xl">
-                                                  {isVideo ? "Video Lesson" : `${activeSection} ${sections.length > 0 && `of ${sections.length}`}`}
-                                              </span>
+                                              <div className="flex items-center gap-3">
+                                                  <span className="text-green-600 font-bold uppercase tracking-widest text-sm bg-green-50 px-4 py-2 rounded-xl">
+                                                      {isVideo ? "Video Lesson" : `${activeSection} ${sections.length > 0 && `of ${sections.length}`}`}
+                                                  </span>
+                                                  <button
+                                                    onClick={() => setIsToolsOpen(true)}
+                                                    className="px-4 py-2 border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-700 font-bold rounded-xl transition-all flex items-center gap-2 text-xs shadow-sm"
+                                                  >
+                                                    <Calculator className="w-3.5 h-3.5 text-green-600" />
+                                                    Educational Tools
+                                                  </button>
+                                              </div>
                                               {!isVideo && (
                                                   <button 
                                                       onClick={isPlayingAudio ? stopAudio : playAudio}
@@ -552,8 +563,8 @@ const Learn = () => {
                                                       </div>
                                                   </div>
                                               ) : (
-                                                  <div className="prose prose-lg md:prose-xl prose-slate mx-auto text-slate-700 prose-headings:text-slate-900 marker:text-green-500 prose-a:text-green-600 prose-strong:text-green-800 tracking-tight leading-relaxed">
-                                                      {data ? <ReactMarkdown>{String(data).replace(/\n/g, '  \n')}</ReactMarkdown> : <div className="text-slate-400 italic mt-10 text-center">Waiting for Ms. Lexi...</div>}
+                                                  <div className="prose prose-lg md:prose-xl prose-slate mx-auto text-slate-700 prose-headings:text-slate-900 marker:text-green-500 prose-a:text-green-600 prose-strong:text-green-800 tracking-tight leading-relaxed w-full">
+                                                      {data ? <MathMarkdown content={String(data)} /> : <div className="text-slate-400 italic mt-10 text-center">Waiting for Ms. Lexi...</div>}
                                                   </div>
                                               )}
                                           </div>
@@ -586,6 +597,7 @@ const Learn = () => {
               </div>
           </div>
       </div>
+      <EducationalTools isOpen={isToolsOpen} onClose={() => setIsToolsOpen(false)} />
     </main>
   );
 }
