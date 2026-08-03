@@ -92,10 +92,17 @@ const userSlice = createSlice({
       localStorage.removeItem('studentSprints');
       localStorage.removeItem('managedCourseCodes');
     },
+    updateProfileName: (state, action) => {
+      state.firstName = action.payload.firstName;
+      state.lastName = action.payload.lastName;
+      localStorage.setItem('firstName', action.payload.firstName);
+      localStorage.setItem('lastName', action.payload.lastName);
+    },
   },
 });
 
 
-export const { setUser, logout, updateEnrollment, updateToken, setSprints } = userSlice.actions;
+export const { setUser, logout, updateEnrollment, updateToken, setSprints, updateProfileName } = userSlice.actions;
 
 export default userSlice.reducer;
+

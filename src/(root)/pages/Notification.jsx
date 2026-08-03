@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { FileText, Clock, MessageSquare, RefreshCw, CheckCircle2, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { apiClient } from '../../utils/api';
+import { useNotificationsQuery, useMarkNotificationsReadMutation } from '../../utils/queries';
 
 const getIcon = (type) => {
   switch (type) {
@@ -31,40 +31,14 @@ const getIconColor = (type) => {
 };
 
 function Notification() {
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const { data: notificationsData, isLoading: loading } = useNotificationsQuery();
+  const notifications = notificationsData?.notifications || [];
+  const unreadCount = notificationsData?.unread_count || 0;
 
-  const fetchNotifications = async () => {
-    try {
-      const response = await apiClient('/notifications');
-      if (response.ok) {
-        const data = await response.json();
-        setNotifications(data.notifications || []);
-        setUnreadCount(data.unread_count || 0);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const markAllReadMutation = useMarkNotificationsReadMutation();
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
-
-  const handleMarkAllRead = async () => {
-    try {
-      const res = await apiClient('/api/notifications/read', { method: 'POST' });
-      if (res.ok) {
-        const updated = notifications.map(n => ({ ...n, read: true }));
-        setNotifications(updated);
-        setUnreadCount(0);
-      }
-    } catch (err) {
-      console.error(err);
-    }
+  const handleMarkAllRead = () => {
+    markAllReadMutation.mutate();
   };
 
   return (

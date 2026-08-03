@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useTutorMetricsQuery, useTutorSprintsQuery } from '../../utils/queries';
+import { useTutorMetricsQuery, useTutorSprintsQuery, useStudentPerformanceStatsQuery } from '../../utils/queries';
 import { Link } from 'react-router-dom';
 import { Lightbulb, HelpCircle, CloudUpload, CheckCircle, Lock, Book, BookOpen, User, TriangleAlert, FileExclamationPoint, Calendar, Clock, Target, TrendingUp, ArrowRight, Zap, Play, ClipboardCheck, GraduationCap, Bot, BarChart2, Award, FileCheck, Video, Calendar1, Clock1, Clock4, TestTube, Calculator, PenTool, ChartLine, MonitorCheck, ChartColumnIncreasing } from 'lucide-react';
 import { motion, time } from 'framer-motion';
@@ -42,6 +42,7 @@ const Dashboard = () => {
     const isTutorOrAdmin = isTutor() || isAdmin();
     const { data: tutorMetrics, isLoading: loadingMetrics } = useTutorMetricsQuery(isTutorOrAdmin);
     const { data: tutorSprintsData, isLoading: loadingSprints } = useTutorSprintsQuery(!!token);
+    const { data: performanceStats } = useStudentPerformanceStatsQuery(!!token && !isTutorOrAdmin);
 
     const managedSprints = useSelector((state) => state.user?.managedSprints) || [];
 
@@ -370,7 +371,7 @@ const Dashboard = () => {
         </div>
 
         {/* my classes here */}
-        <div className='border-[#E1E7EF] border rounded-xl p-6 bg-white shadow-sm mt-8'>
+        {/* <div className='border-[#E1E7EF] border rounded-xl p-6 bg-white shadow-sm mt-8'>
             <h1 className='font-InterBold text-3xl'>My Classes</h1>
             <div className="overflow-x-auto mt-4">
                 <table className="w-full text-left">
@@ -411,7 +412,7 @@ const Dashboard = () => {
                     </tbody>
                 </table>
             </div>
-        </div>
+        </div> */}
         
          {/* Quick Actions */}
          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 mt-8">
@@ -564,30 +565,24 @@ const Dashboard = () => {
             <ChartColumnIncreasing className="w-6 h-6 text-blue-500" />
             <h1 className='mb-3 font-InterBold'>Performance Snapshot</h1>
             </div>
-            <div className='grid md:grid-cols-4 gap-4 mt-4'>    
+            <div className='grid md:grid-cols-3 gap-4 mt-4'>    
                 <StudentPerformanceSnapShot 
                     title="Average Score"
-                    score="82%"
+                    score={performanceStats?.average_score ? `${performanceStats.average_score}%` : "0%"}
                     icon={Award}
                     color="blue-500"
                 />
                 <StudentPerformanceSnapShot 
                     title="Tests Completed"
-                    score="14"
+                    score={performanceStats?.tests_completed !== undefined ? String(performanceStats.tests_completed) : "0"}
                     icon={MonitorCheck}
                     color="green-500"
                 />
                 <StudentPerformanceSnapShot 
                     title="Improvement"
-                    score="+15%"
+                    score={performanceStats?.improvement !== undefined ? (performanceStats.improvement >= 0 ? `+${performanceStats.improvement}%` : `${performanceStats.improvement}%`) : "0%"}
                     icon={ChartLine}
                     color="green-500"
-                />
-                <StudentPerformanceSnapShot 
-                    title="Strength"
-                    score="Vocabulary"
-                    icon={BookOpen}
-                    color="blue-500"
                 />
             </div>
         </div>

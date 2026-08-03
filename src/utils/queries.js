@@ -234,6 +234,7 @@ export const useTutorMetricsQuery = (isTutorOrAdmin) => useQuery({
     queryKey: ['tutorMetrics'],
     queryFn: async () => {
         const res = await apiClient('/api/tutor/metrics');
+        console.log('Tutor Metrics Response:', res);
         if (!res.ok) throw new Error('Failed to fetch tutor metrics');
         return await res.json();
     },
@@ -250,4 +251,41 @@ export const useTutorSprintsQuery = (isTutorOrAdmin) => useQuery({
     },
     enabled: !!isTutorOrAdmin,
     refetchInterval: 5000, // Poll every 5 seconds
+});
+
+// --- NOTIFICATION QUERIES & MUTATIONS ---
+export const useNotificationsQuery = () => useQuery({
+    queryKey: ['notifications'],
+    queryFn: async () => {
+        const res = await apiClient('/notifications');
+        if (!res.ok) throw new Error('Failed to fetch notifications');
+        return await res.json();
+    },
+    refetchInterval: 5000, // Poll every 5 seconds
+});
+
+export const useMarkNotificationsReadMutation = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: async () => {
+            const res = await apiClient('/api/notifications/read', {
+                method: 'POST',
+            });
+            if (!res.ok) throw new Error('Failed to mark notifications as read');
+            return await res.json();
+        },
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['notifications'] });
+        },
+    });
+};
+
+export const useStudentPerformanceStatsQuery = (enabled) => useQuery({
+    queryKey: ['studentPerformanceStats'],
+    queryFn: async () => {
+        const res = await apiClient('/api/student/performance-stats');
+        if (!res.ok) throw new Error('Failed to fetch student performance stats');
+        return await res.json();
+    },
+    enabled: !!enabled,
 });

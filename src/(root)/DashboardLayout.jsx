@@ -5,30 +5,14 @@ import { Menu, Bell, ChevronDown } from 'lucide-react';
 import msLexi from '../assets/msLexi.png';
 import { useSelector } from 'react-redux';
 import { isAdmin, isTutor } from '../utils/auth';
-import { apiClient } from '../utils/api';
+import { useNotificationsQuery } from '../utils/queries';
 
 const DashboardLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const firstName = useSelector((state) => state.user?.firstName);
     const lastName = useSelector((state) => state.user?.lastName);
-    const [unreadCount, setUnreadCount] = React.useState(0);
-
-    React.useEffect(() => {
-        const fetchUnread = async () => {
-            try {
-                const response = await apiClient('/notifications');
-                if (response.ok) {
-                    const data = await response.json();
-                    setUnreadCount(data.unread_count || 0);
-                }
-            } catch (err) {
-                console.error("Failed to fetch unread notifications", err);
-            }
-        };
-        fetchUnread();
-        const interval = setInterval(fetchUnread, 60000);
-        return () => clearInterval(interval);
-    }, []);
+    const { data: notificationsData } = useNotificationsQuery();
+    const unreadCount = notificationsData?.unread_count || 0;
   
 
     return (
